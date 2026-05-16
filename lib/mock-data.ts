@@ -5,16 +5,18 @@ import type { Autor, Nota, Sujeto } from "./types";
    ========================================= */
 const AUTOR_PRINCIPAL: Autor = {
   id: "autor-1",
-  nombre: "Periodista River",
+  nombre: "Pablo Molina",
   rol: "admin",
   avatar_url:
-    "https://images.unsplash.com/photo-1580489944761-15a19d654956?w=200&h=200&fit=crop",
+    "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=200&h=200&fit=crop&crop=faces",
 };
 
 const AUTOR_COLAB: Autor = {
   id: "autor-2",
-  nombre: "Colaborador",
+  nombre: "Sofía Domínguez",
   rol: "editor",
+  avatar_url:
+    "https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=200&h=200&fit=crop&crop=faces",
 };
 
 /* =========================================
@@ -98,7 +100,7 @@ export const MOCK_NOTAS: Nota[] = [
     bajada:
       "Métodos de entrenamiento, departamento de scouting, vínculo con el primer equipo. Una mirada profunda al proceso.",
     fuente: "youtube",
-    youtube_id: "dQw4w9WgXcQ",
+    youtube_id: "",
     poster_url:
       "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=1280&h=720&fit=crop",
     duracion_seg: 847,
@@ -161,7 +163,7 @@ export const MOCK_NOTAS: Nota[] = [
     bajada:
       "Goles, reacciones y la arenga del DT en el vestuario después de levantar el trofeo.",
     fuente: "youtube",
-    youtube_id: "dQw4w9WgXcQ",
+    youtube_id: "",
     poster_url:
       "https://images.unsplash.com/photo-1551958219-acbc608c6377?w=1280&h=720&fit=crop",
     duracion_seg: 623,
@@ -229,5 +231,257 @@ La rutina la armó con el preparador de arqueros de Octava. Cada miércoles, al 
     sujetos: [S_JUGADOR_5],
     tags: ["femenino", "entrevista", "cantera"],
     publicada_en: "2026-04-02T18:00:00.000Z",
+  },
+  {
+    id: "n-9",
+    slug: "octava-campeon-cuyo",
+    formato: "articulo",
+    tipo: "cronica",
+    division: "octava",
+    titulo: "Octava: la final que se ganó con un córner ensayado",
+    bajada:
+      "Cómo se diseñó la jugada de pelota parada que destrabó el partido. El método del entrenador, el rol del scouting de juveniles.",
+    contenido: `
+La pizarra del vestuario llevaba tres semanas con la misma jugada dibujada. Un córner corto, dos cortinas, el remate en el segundo palo. Lo habían ensayado catorce veces. Catorce.
+
+"Es la primera vez que sale tal cual lo planeamos", dijo el técnico después del partido.
+
+Lo que casi nadie vio: el video que el cuerpo técnico hizo del último entrenamiento se lo mandaron al de Reserva, que llamó al de Primera. Tres días antes de la final, el club entero sabía que ese córner iba a aparecer.
+    `,
+    fuente: "propio",
+    poster_url:
+      "https://images.unsplash.com/photo-1577471488278-16eec37ffcc2?w=1600&h=2000&fit=crop",
+    autor: AUTOR_PRINCIPAL,
+    sujetos: [],
+    tags: ["octava", "campeón", "pelota parada"],
+    publicada_en: "2026-03-30T21:00:00.000Z",
+  },
+  {
+    id: "n-10",
+    slug: "reserva-doble-jornada",
+    formato: "short",
+    tipo: "cronica",
+    division: "reserva",
+    titulo: "El día que la Reserva jugó dos partidos en 24 horas",
+    bajada:
+      "Decisiones de rotación, el banco como protagonista y la frase del DT que se hizo viral.",
+    fuente: "propio",
+    video_url: "",
+    poster_url:
+      "https://images.unsplash.com/photo-1543351611-58f69d7c1781?w=800&h=1200&fit=crop",
+    duracion_seg: 78,
+    quote_overlay: "El que entra de suplente acá tiene que cambiar el partido.",
+    autor: AUTOR_PRINCIPAL,
+    sujetos: [S_TECNICO_1],
+    tags: ["reserva", "rotación", "doble jornada"],
+    publicada_en: "2026-03-27T15:30:00.000Z",
+  },
+  {
+    id: "n-11",
+    slug: "quinta-volante-zurdo",
+    formato: "short",
+    tipo: "perfil",
+    division: "quinta",
+    titulo: "El volante zurdo que dejó de ser apellido conocido",
+    bajada:
+      "Llegó al club por su hermano. Hoy es titular indiscutido en Quinta y lo miran desde Europa.",
+    fuente: "propio",
+    video_url: "",
+    poster_url:
+      "https://images.unsplash.com/photo-1552667466-07770ae110d0?w=800&h=1200&fit=crop",
+    duracion_seg: 112,
+    autor: AUTOR_PRINCIPAL,
+    sujetos: [],
+    tags: ["quinta", "volante", "perfil"],
+    publicada_en: "2026-03-24T19:45:00.000Z",
+  },
+  {
+    id: "n-12",
+    slug: "scouting-territorial-mendoza",
+    formato: "youtube",
+    tipo: "analisis",
+    division: "primera",
+    titulo: "Cómo es la red de scouting de River en el interior",
+    bajada:
+      "Tres operadores en Cuyo, dos en NEA. Cómo se decide a quién traer y a quién dejar pasar.",
+    fuente: "youtube",
+    youtube_id: "",
+    poster_url:
+      "https://images.unsplash.com/photo-1517021897933-0e0319cfbc28?w=1280&h=720&fit=crop",
+    duracion_seg: 1124,
+    autor: AUTOR_COLAB,
+    sujetos: [],
+    tags: ["scouting", "interior", "análisis"],
+    publicada_en: "2026-03-20T16:00:00.000Z",
+    capitulos: [
+      { tiempo: 0, titulo: "El mapa territorial" },
+      { tiempo: 215, titulo: "El operador de Cuyo" },
+      { tiempo: 540, titulo: "Tests de filtro" },
+      { tiempo: 870, titulo: "El que no traen" },
+    ],
+  },
+  {
+    id: "n-13",
+    slug: "septima-defensor-central",
+    formato: "articulo",
+    tipo: "entrevista",
+    division: "septima",
+    titulo: "«En River te enseñan a mirar antes de recibir»",
+    bajada:
+      "El central de Séptima, sobre el método del entrenador de defensa y el salto a Sexta que se viene.",
+    contenido: `
+"Antes de jugar acá yo recibía la pelota y recién después miraba", dice. "Acá no funciona. Acá tenés que tener la cabeza arriba ya. Si la bajás cinco centésimas, te llegan."
+
+Lo aprendió de un ejercicio que parece simple. Dos compañeros le gritan colores cuando la pelota está en camino. Tiene que decir cuál vio antes de tocarla. Si erra, paga con cinco abdominales. Lo erra mucho.
+
+"Pero ahora ya casi no fallo. Y eso te cambia la cabeza para todo."
+    `,
+    fuente: "propio",
+    poster_url:
+      "https://images.unsplash.com/photo-1502810365585-7d2f0c5d6e7d?w=1600&h=2000&fit=crop",
+    autor: AUTOR_PRINCIPAL,
+    sujetos: [],
+    tags: ["séptima", "entrevista", "defensa"],
+    publicada_en: "2026-03-17T12:30:00.000Z",
+  },
+  {
+    id: "n-14",
+    slug: "femenino-final-anticipo",
+    formato: "short",
+    tipo: "analisis",
+    division: "femenino",
+    titulo: "Femenino: lo que se viene en la final",
+    bajada:
+      "Las claves tácticas del partido. Cómo llega cada equipo, qué jugadora puede romper la paridad.",
+    fuente: "propio",
+    video_url: "",
+    poster_url:
+      "https://images.unsplash.com/photo-1571019613454-1cb2f99b2d8b?w=800&h=1200&fit=crop",
+    duracion_seg: 96,
+    autor: AUTOR_COLAB,
+    sujetos: [],
+    tags: ["femenino", "final", "análisis"],
+    publicada_en: "2026-03-13T20:00:00.000Z",
+  },
+
+  /* === NOTICIAS (actualidad breve) === */
+  {
+    id: "n-15",
+    slug: "mastantuono-subiabre-convocados-sub20",
+    formato: "articulo",
+    tipo: "noticia",
+    division: "primera",
+    titulo: "Mastantuono y Subiabre, convocados al Sub-20",
+    bajada:
+      "El cuerpo técnico de la Selección sumó dos jugadores de River a la próxima fecha FIFA.",
+    fuente: "propio",
+    poster_url:
+      "https://images.unsplash.com/photo-1551295022-de5522c94e08?w=1200&h=800&fit=crop",
+    autor: AUTOR_PRINCIPAL,
+    sujetos: [S_JUGADOR_1, S_JUGADOR_3],
+    tags: ["selección", "convocatoria"],
+    publicada_en: "2026-05-12T11:00:00.000Z",
+  },
+  {
+    id: "n-16",
+    slug: "reserva-gano-clasico-3-1",
+    formato: "articulo",
+    tipo: "noticia",
+    division: "reserva",
+    titulo: "Reserva ganó el clásico 3 a 1 en el Monumental",
+    bajada:
+      "Doblete del 9 y gol del lateral. Resumen, formaciones y la palabra del DT.",
+    fuente: "propio",
+    poster_url:
+      "https://images.unsplash.com/photo-1522778119026-d647f0596c20?w=1200&h=800&fit=crop",
+    autor: AUTOR_PRINCIPAL,
+    sujetos: [],
+    tags: ["reserva", "clásico"],
+    publicada_en: "2026-05-10T22:30:00.000Z",
+  },
+  {
+    id: "n-17",
+    slug: "cuarta-fichaje-cordoba",
+    formato: "articulo",
+    tipo: "noticia",
+    division: "cuarta",
+    titulo: "Llegó el delantero cordobés que venían siguiendo desde 2024",
+    bajada:
+      "Firmó contrato hasta 2028. Lo trae el scouting territorial de Cuyo a pedido del DT de Cuarta.",
+    fuente: "propio",
+    poster_url:
+      "https://images.unsplash.com/photo-1599058917212-d750089bc07e?w=1200&h=800&fit=crop",
+    autor: AUTOR_COLAB,
+    sujetos: [],
+    tags: ["cuarta", "fichaje", "scouting"],
+    publicada_en: "2026-05-08T16:00:00.000Z",
+  },
+  {
+    id: "n-18",
+    slug: "femenino-liga-debut-fecha",
+    formato: "articulo",
+    tipo: "noticia",
+    division: "femenino",
+    titulo: "Femenino debuta en la Liga el sábado a las 17",
+    bajada:
+      "Confirmado el horario y la sede. Una entrenada extra el viernes para terminar de cerrar la lista.",
+    fuente: "propio",
+    poster_url:
+      "https://images.unsplash.com/photo-1574629810360-7efbbe195018?w=1200&h=800&fit=crop",
+    autor: AUTOR_COLAB,
+    sujetos: [],
+    tags: ["femenino", "liga"],
+    publicada_en: "2026-05-06T13:30:00.000Z",
+  },
+  {
+    id: "n-19",
+    slug: "novena-cambia-dt",
+    formato: "articulo",
+    tipo: "noticia",
+    division: "novena",
+    titulo: "Novena: hay nuevo DT después del cierre del torneo",
+    bajada:
+      "Sale el técnico del último ciclo y asume un ex jugador del club con paso por Reserva en 2018.",
+    fuente: "propio",
+    poster_url:
+      "https://images.unsplash.com/photo-1518604666860-9ed391f76460?w=1200&h=800&fit=crop",
+    autor: AUTOR_PRINCIPAL,
+    sujetos: [],
+    tags: ["novena", "DT", "movimientos"],
+    publicada_en: "2026-05-04T10:00:00.000Z",
+  },
+  {
+    id: "n-20",
+    slug: "sexta-amistoso-internacional",
+    formato: "articulo",
+    tipo: "noticia",
+    division: "sexta",
+    titulo: "Sexta jugará un amistoso contra el Atlético de Madrid juvenil",
+    bajada:
+      "Será en el predio de Ezeiza, a puertas cerradas. La gira de los españoles cierra con este partido.",
+    fuente: "propio",
+    poster_url:
+      "https://images.unsplash.com/photo-1577471488278-16eec37ffcc2?w=1200&h=800&fit=crop",
+    autor: AUTOR_PRINCIPAL,
+    sujetos: [S_EQUIPO_6TA],
+    tags: ["sexta", "amistoso", "internacional"],
+    publicada_en: "2026-05-02T18:20:00.000Z",
+  },
+  {
+    id: "n-21",
+    slug: "primera-prestamo-segunda-division",
+    formato: "articulo",
+    tipo: "noticia",
+    division: "primera",
+    titulo: "Confirmado: el central va a préstamo a Segunda División de España",
+    bajada:
+      "Se va por un año, con opción de compra. Lo siguió un veedor durante toda la última fase del torneo local.",
+    fuente: "propio",
+    poster_url:
+      "https://images.unsplash.com/photo-1517466787929-bc90951d0974?w=1200&h=800&fit=crop",
+    autor: AUTOR_COLAB,
+    sujetos: [],
+    tags: ["primera", "préstamo", "europa"],
+    publicada_en: "2026-04-29T09:45:00.000Z",
   },
 ];

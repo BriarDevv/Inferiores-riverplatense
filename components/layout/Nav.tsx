@@ -1,14 +1,18 @@
 "use client";
 
+import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 
 const NAV_ITEMS = [
   { label: "Notas", href: "/" },
   { label: "Entrevistas", href: "/?tipo=entrevista" },
-  { label: "Sobre", href: "/sobre" },
-  { label: "Contacto", href: "/contacto" },
+  { label: "Noticias", href: "/?tipo=noticia" },
+  { label: "UI", href: "/ui" },
 ];
+
+/** Tipos que cuentan como "Notas" para resaltar el item del nav. */
+const NOTAS_TIPOS = new Set(["perfil", "cronica", "analisis", "columna"]);
 
 /**
  * Nav brutalist — simple de 4 items.
@@ -20,61 +24,74 @@ export default function Nav() {
   const tipo = searchParams.get("tipo");
 
   const isActive = (href: string): boolean => {
-    if (href === "/") return pathname === "/" && !tipo;
+    if (href === "/") {
+      return pathname === "/" && tipo !== null && NOTAS_TIPOS.has(tipo);
+    }
     if (href === "/?tipo=entrevista") {
       return pathname === "/" && tipo === "entrevista";
+    }
+    if (href === "/?tipo=noticia") {
+      return pathname === "/" && tipo === "noticia";
     }
     return pathname.startsWith(href);
   };
 
   return (
     <header
-      className="relative w-full"
+      className="sticky top-0 z-50 w-full"
       style={{
         background: "var(--color-paper-pure)",
         borderBottom: "4px solid var(--color-river-red)",
       }}
     >
-      <div className="mx-auto max-w-[1440px] px-6 lg:px-10 h-20 flex items-center justify-between gap-6">
-        {/* Logo */}
+      <div
+        className="mx-auto max-w-[1440px] px-6 lg:px-10 h-20 grid items-center gap-6"
+        style={{ gridTemplateColumns: "1fr auto 1fr" }}
+      >
+        {/* Logo (izquierda) */}
         <Link
           href="/"
-          className="flex items-center gap-3 shrink-0"
+          className="flex items-center gap-3 shrink-0 justify-self-start leading-none"
           aria-label="Inferiores Riverplatense · Portada"
         >
-          <span
-            className="inline-flex items-center justify-center w-10 h-10 font-display italic text-2xl leading-none shrink-0"
+          <Image
+            src="/logo.webp"
+            alt="Inferiores Riverplatense"
+            width={48}
+            height={48}
+            priority
+            className="shrink-0 block"
             style={{
-              background: "var(--color-river-red)",
-              color: "var(--color-paper-pure)",
-              border: "2px solid var(--color-ink)",
-              boxShadow: "4px 4px 0 var(--color-ink)",
+              background: "var(--color-paper-pure)",
+              borderRadius: "9999px",
             }}
-          >
-            I
-          </span>
+          />
           <span
-            className="font-display text-xl md:text-2xl leading-none"
+            className="hidden sm:flex font-display text-xl md:text-2xl items-center leading-none"
             style={{
               color: "var(--color-ink)",
               letterSpacing: "-0.02em",
+              height: "48px",
             }}
           >
-            Inferiores{" "}
-            <span
-              style={{
-                fontStyle: "italic",
-                color: "var(--color-river-red)",
-              }}
-            >
-              Riverplatense
+            <span className="inline-flex items-center">
+              Inferiores
+              <span
+                className="ml-2"
+                style={{
+                  fontStyle: "italic",
+                  color: "var(--color-river-red)",
+                }}
+              >
+                Riverplatense
+              </span>
             </span>
           </span>
         </Link>
 
-        {/* Nav items */}
+        {/* Nav items (centro real) */}
         <nav
-          className="hidden md:flex items-center gap-7"
+          className="hidden md:flex items-center gap-7 justify-self-center"
           aria-label="Navegación principal"
         >
           {NAV_ITEMS.map((item) => {
@@ -101,6 +118,21 @@ export default function Nav() {
             );
           })}
         </nav>
+
+        {/* Newsletter CTA (derecha) */}
+        <a
+          href="#newsletter"
+          className="hidden md:inline-flex font-sports items-center gap-2 shrink-0 justify-self-end brut-cta-red"
+          style={{
+            fontSize: "0.8rem",
+            letterSpacing: "0.12em",
+            padding: "0.6rem 1rem",
+            textDecoration: "none",
+          }}
+        >
+          Newsletter
+          <span aria-hidden>→</span>
+        </a>
       </div>
     </header>
   );

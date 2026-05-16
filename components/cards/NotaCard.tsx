@@ -1,7 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Nota } from "@/lib/types";
-import { formatearDuracion, formatearFecha, labelDivision, labelTipo } from "@/lib/constants";
+import { formatearDuracion, labelDivision, labelTipo } from "@/lib/constants";
+import CardAuthorMeta from "./CardAuthorMeta";
 
 interface Props {
   nota: Nota;
@@ -59,7 +60,7 @@ function FormatoTag({ label }: { label: string }) {
 function CardFooter({ nota }: { nota: Nota }) {
   return (
     <div
-      className="p-4 space-y-2"
+      className="p-5 flex flex-col gap-3"
       style={{ borderTop: "2px solid var(--color-ink)" }}
     >
       <p
@@ -78,12 +79,7 @@ function CardFooter({ nota }: { nota: Nota }) {
       >
         {nota.titulo}
       </h3>
-      <p
-        className="font-mono text-[0.65rem] uppercase tracking-[0.12em]"
-        style={{ color: "var(--color-neutral-500)" }}
-      >
-        {nota.autor.nombre} · {formatearFecha(nota.publicada_en)}
-      </p>
+      <CardAuthorMeta autor={nota.autor} publicada_en={nota.publicada_en} />
     </div>
   );
 }
@@ -94,7 +90,7 @@ function CardFooter({ nota }: { nota: Nota }) {
 function ShortCard({ nota }: { nota: Nota; size: "sm" | "md" | "lg" }) {
   return (
     <Link
-      href={`/nota/${nota.slug}`}
+      href="/"
       className="group block brut-hover-red"
       style={{ background: "var(--color-paper-pure)" }}
     >
@@ -131,7 +127,7 @@ function YouTubeCard({ nota, size }: { nota: Nota; size: "sm" | "md" | "lg" }) {
 
   return (
     <Link
-      href={`/nota/${nota.slug}`}
+      href="/"
       className="group block brut-hover"
       style={{ background: "var(--color-paper-pure)" }}
     >
@@ -154,7 +150,7 @@ function YouTubeCard({ nota, size }: { nota: Nota; size: "sm" | "md" | "lg" }) {
         {nota.duracion_seg && <DurationPill seconds={nota.duracion_seg} />}
       </div>
       <div
-        className="p-5 space-y-2"
+        className="p-5 flex flex-col gap-3"
         style={{ borderTop: "2px solid var(--color-ink)" }}
       >
         <p
@@ -172,12 +168,7 @@ function YouTubeCard({ nota, size }: { nota: Nota; size: "sm" | "md" | "lg" }) {
         >
           {nota.titulo}
         </h3>
-        <p
-          className="font-mono text-[0.65rem] uppercase tracking-[0.12em]"
-          style={{ color: "var(--color-neutral-500)" }}
-        >
-          {nota.autor.nombre} · {formatearFecha(nota.publicada_en)}
-        </p>
+        <CardAuthorMeta autor={nota.autor} publicada_en={nota.publicada_en} />
       </div>
     </Link>
   );
@@ -189,12 +180,12 @@ function YouTubeCard({ nota, size }: { nota: Nota; size: "sm" | "md" | "lg" }) {
 function ArticleCard({ nota, size }: { nota: Nota; size: "sm" | "md" | "lg" }) {
   return (
     <Link
-      href={`/nota/${nota.slug}`}
-      className="group block brut-hover"
+      href="/"
+      className="group brut-hover h-full flex flex-col"
       style={{ background: "var(--color-paper-pure)" }}
     >
       <div
-        className="relative overflow-hidden"
+        className="relative overflow-hidden shrink-0"
         style={{
           aspectRatio: "4 / 5",
           background: "var(--color-neutral-200)",
@@ -211,7 +202,7 @@ function ArticleCard({ nota, size }: { nota: Nota; size: "sm" | "md" | "lg" }) {
         <FormatoTag label="Nota" />
       </div>
       <div
-        className="p-5 space-y-2"
+        className="p-5 flex flex-col gap-3 flex-1"
         style={{ borderTop: "2px solid var(--color-ink)" }}
       >
         <p
@@ -235,12 +226,9 @@ function ArticleCard({ nota, size }: { nota: Nota; size: "sm" | "md" | "lg" }) {
         >
           {nota.bajada}
         </p>
-        <p
-          className="font-mono text-[0.65rem] uppercase tracking-[0.12em]"
-          style={{ color: "var(--color-neutral-500)" }}
-        >
-          {nota.autor.nombre} · {formatearFecha(nota.publicada_en)}
-        </p>
+        <div className="mt-auto">
+          <CardAuthorMeta autor={nota.autor} publicada_en={nota.publicada_en} />
+        </div>
       </div>
     </Link>
   );

@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import {
   Fraunces,
   Instrument_Serif,
@@ -12,6 +13,8 @@ import {
 import LenisProvider from "@/components/layout/LenisProvider";
 import Nav from "@/components/layout/Nav";
 import Footer from "@/components/layout/Footer";
+import ScrollToTop from "@/components/layout/ScrollToTop";
+import SocialRail from "@/components/layout/SocialRail";
 import "./globals.css";
 
 /* === CURRENT (candidato por defecto) === */
@@ -123,9 +126,13 @@ export default function RootLayout({
           }
         `}</style>
         <LenisProvider>
-          <Nav />
+          <Suspense fallback={null}>
+            <Nav />
+          </Suspense>
+          <SocialRail />
           <main className="pt-0">{children}</main>
           <Footer />
+          <ScrollToTop />
         </LenisProvider>
       </body>
     </html>

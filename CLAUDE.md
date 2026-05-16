@@ -68,7 +68,8 @@ Sitio de periodismo dedicado a las divisiones formativas del **Club Atlético Ri
 - `.brut-frame` / `.brut-frame-red` — borde 2px
 - `.brut-frame-shadow` / `.brut-frame-shadow-red` — borde + offset shadow
 - `.brut-hover` / `.brut-hover-red` — hover que revela offset shadow
-- `.brut-label` — etiqueta de sección con prefijo `§`
+- `.brut-label` — etiqueta de sección (overline mono + tracking).
+  ⚠️ **Antipattern: el símbolo `§` no se usa en el sitio.** Si ves "§ Sección" en algún lado, sacalo — fue una idea temprana que el usuario rechazó.
 - `.chip` — botón tipo chip (dropdown items, tags)
 - `.pull-quote` — cita con borde izquierdo rojo 3px
 - `.hairline` / `.hairline-dark` — separadores finos

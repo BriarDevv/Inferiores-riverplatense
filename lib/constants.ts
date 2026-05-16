@@ -18,6 +18,7 @@ export const TIPOS_NOTA: Array<{ value: TipoNota; label: string }> = [
   { value: "cronica", label: "Crónicas" },
   { value: "analisis", label: "Análisis" },
   { value: "columna", label: "Columnas" },
+  { value: "noticia", label: "Noticias" },
 ];
 
 export function labelDivision(d: Division): string {

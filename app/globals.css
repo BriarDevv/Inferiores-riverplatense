@@ -74,6 +74,47 @@ body {
 }
 
 /* =========================================
+   SCROLLBAR BRUTALIST
+   Track paper · thumb ink con borde paper · hover rojo.
+   ========================================= */
+::-webkit-scrollbar {
+  width: 14px;
+  height: 14px;
+}
+::-webkit-scrollbar-track {
+  background: var(--color-paper);
+  border-left: 2px solid var(--color-ink);
+}
+::-webkit-scrollbar-thumb {
+  background: var(--color-ink);
+  border: 3px solid var(--color-paper);
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--color-river-red);
+}
+::-webkit-scrollbar-thumb:active {
+  background: var(--color-river-red-deep);
+}
+::-webkit-scrollbar-corner {
+  background: var(--color-paper);
+}
+
+/* Firefox */
+html {
+  scrollbar-width: auto;
+  scrollbar-color: var(--color-ink) var(--color-paper);
+}
+
+/* Scrollers internos (ej: ul noticias) más compactos */
+.scrollbar-thin::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.scrollbar-thin::-webkit-scrollbar-thumb {
+  border-width: 2px;
+}
+
+/* =========================================
    UTILITIES
    ========================================= */
 .font-display {
@@ -230,7 +271,7 @@ body {
   transform: translate(-2px, -2px);
 }
 
-/* Etiqueta brutalist (código numerado de sección) */
+/* Etiqueta brutalist (overline mono + tracking) */
 .brut-label {
   display: inline-flex;
   align-items: center;
@@ -240,11 +281,6 @@ body {
   text-transform: uppercase;
   letter-spacing: 0.18em;
   color: var(--color-river-red);
-}
-.brut-label::before {
-  content: "§";
-  font-size: 0.9rem;
-  opacity: 0.7;
 }
 
 /* Chip */
@@ -271,4 +307,165 @@ body {
   background: var(--color-ink);
   color: var(--color-paper-pure);
   border-color: var(--color-ink);
+}
+
+/* =========================================
+   CTAs BRUTALIST — hover press
+   Al hover la sombra se aplasta y el botón se mueve.
+   ========================================= */
+.brut-cta-red {
+  background: var(--color-river-red);
+  color: var(--color-paper-pure);
+  border: 2px solid var(--color-ink);
+  box-shadow: 3px 3px 0 var(--color-ink);
+  transition: box-shadow 140ms ease-out, transform 140ms ease-out;
+}
+.brut-cta-red:hover {
+  box-shadow: 1px 1px 0 var(--color-ink);
+  transform: translate(2px, 2px);
+}
+
+.brut-cta-ink {
+  background: var(--color-ink);
+  color: var(--color-paper-pure);
+  border: 2px solid var(--color-ink);
+  box-shadow: 4px 4px 0 var(--color-river-red);
+  transition: box-shadow 140ms ease-out, transform 140ms ease-out;
+}
+.brut-cta-ink:hover {
+  box-shadow: 1px 1px 0 var(--color-river-red);
+  transform: translate(3px, 3px);
+}
+
+.brut-cta-red-lg {
+  background: var(--color-river-red);
+  color: var(--color-paper-pure);
+  border: 2px solid var(--color-ink);
+  box-shadow: 5px 5px 0 var(--color-ink);
+  transition: box-shadow 140ms ease-out, transform 140ms ease-out, opacity 200ms ease-out;
+}
+.brut-cta-red-lg:hover {
+  box-shadow: 2px 2px 0 var(--color-ink);
+  transform: translate(3px, 3px);
+}
+
+/* =========================================
+   BENTO HOME
+   Grid 3 cols × 2 rows.
+   - wide: cols 1-2 row 1
+   - notaA: col 1 row 2
+   - notaB: col 2 row 2
+   - noticias: col 3 rows 1-2 (full height)
+   ========================================= */
+.bento {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-rows: auto auto;
+  gap: 1.5rem;
+}
+@media (min-width: 1024px) {
+  .bento { gap: 2rem; }
+}
+.bento__wide     { grid-column: 1 / 3; grid-row: 1; }
+.bento__nota-a   { grid-column: 1;     grid-row: 2; }
+.bento__nota-b   { grid-column: 2;     grid-row: 2; }
+.bento__nota-c   { grid-column: 3;     grid-row: 2; }
+.bento__noticias {
+  grid-column: 3;
+  grid-row: 1;       /* solo row 1 — matchea altura con el wide entrevista */
+  min-height: 0;
+}
+
+/* Tablet: 2 cols, noticias debajo */
+@media (max-width: 1023px) {
+  .bento {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-template-rows: auto auto auto auto;
+  }
+  .bento__wide     { grid-column: 1 / 3; grid-row: 1; }
+  .bento__nota-a   { grid-column: 1;     grid-row: 2; }
+  .bento__nota-b   { grid-column: 2;     grid-row: 2; }
+  .bento__nota-c   { grid-column: 1 / 3; grid-row: 3; }
+  .bento__noticias { grid-column: 1 / 3; grid-row: 4; }
+}
+
+/* Mobile: stack todo */
+@media (max-width: 640px) {
+  .bento {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto;
+  }
+  .bento__wide,
+  .bento__nota-a,
+  .bento__nota-b,
+  .bento__nota-c,
+  .bento__noticias {
+    grid-column: 1;
+    grid-row: auto;
+  }
+}
+
+/* =========================================
+   ARTICLE PROSE
+   Cuerpo de notas. Serif (Newsreader), drop cap rojo,
+   pull quotes, h2/h3 brutalist editoriales.
+   ========================================= */
+.article-prose {
+  font-family: var(--font-display);
+  font-size: 1.1875rem;
+  line-height: 1.65;
+  color: var(--color-ink);
+  max-width: 68ch;
+  margin: 0 auto;
+}
+.article-prose p {
+  margin: 0 0 1.4rem;
+}
+.article-prose p:first-of-type::first-letter {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 4.5rem;
+  float: left;
+  line-height: 0.9;
+  margin: 0.35rem 0.6rem 0 0;
+  color: var(--color-river-red);
+}
+.article-prose h2 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 1.75rem;
+  letter-spacing: -0.02em;
+  margin: 2.2rem 0 0.9rem;
+  color: var(--color-ink);
+  line-height: 1.1;
+}
+.article-prose h3 {
+  font-family: var(--font-display);
+  font-weight: 500;
+  font-size: 1.4rem;
+  letter-spacing: -0.015em;
+  margin: 1.8rem 0 0.75rem;
+  color: var(--color-ink);
+}
+.article-prose blockquote {
+  border-left: 3px solid var(--color-river-red);
+  padding-left: 1.25rem;
+  margin: 1.8rem 0;
+  font-family: var(--font-display);
+  font-style: italic;
+  font-weight: 300;
+  font-size: 1.5rem;
+  line-height: 1.35;
+  color: var(--color-neutral-700);
+}
+
+@media (max-width: 720px) {
+  .article-prose {
+    font-size: 1.05rem;
+  }
+  .article-prose p:first-of-type::first-letter {
+    font-size: 3.25rem;
+  }
+  .article-prose h2 { font-size: 1.5rem; }
+  .article-prose blockquote { font-size: 1.3rem; padding-left: 1rem; }
 }

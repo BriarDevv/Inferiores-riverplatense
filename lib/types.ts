@@ -14,7 +14,8 @@ export type TipoNota =
   | "perfil"
   | "cronica"
   | "analisis"
-  | "columna";
+  | "columna"
+  | "noticia";
 
 export type FormatoNota = "short" | "youtube" | "articulo";
 
