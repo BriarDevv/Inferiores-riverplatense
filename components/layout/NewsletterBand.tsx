@@ -8,7 +8,8 @@ export default function NewsletterBand() {
 
   const onSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    if (!email.includes("@")) return;
+    // type="email" + required ya validan el formato a nivel browser.
+    if (!email.trim()) return;
     setSubmitted(true);
   };
 
@@ -68,7 +69,7 @@ export default function NewsletterBand() {
         >
           {!submitted ? (
             <>
-              <div className="flex flex-col sm:flex-row gap-0">
+              <div className="flex flex-col sm:flex-row gap-2">
                 <input
                   type="email"
                   required
@@ -83,22 +84,13 @@ export default function NewsletterBand() {
                     border: "2px solid var(--color-paper-pure)",
                   }}
                 />
-                <button
-                  type="submit"
-                  className="font-sports text-sm tracking-[0.14em] px-5 py-3.5 transition-all"
-                  style={{
-                    background: "var(--color-river-red)",
-                    color: "var(--color-paper-pure)",
-                    border: "2px solid var(--color-river-red)",
-                    cursor: "pointer",
-                  }}
-                >
+                <button type="submit" className="newsletter-btn shrink-0 justify-center">
                   Suscribirme →
                 </button>
               </div>
               <p
                 className="font-mono text-[0.6rem] uppercase tracking-[0.18em]"
-                style={{ color: "var(--color-neutral-500)" }}
+                style={{ color: "var(--color-neutral-300)" }}
               >
                 Sin spam. Te das de baja desde cualquier mail.
               </p>

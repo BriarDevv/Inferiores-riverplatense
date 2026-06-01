@@ -1,22 +1,13 @@
 import Image from "next/image";
 import Link from "next/link";
-
-const DIVISIONES = [
-  "Primera",
-  "Reserva",
-  "4ta",
-  "5ta",
-  "6ta",
-  "7ma",
-  "8va",
-  "9na",
-  "Femenino",
-];
+import { DIVISIONES } from "@/lib/constants";
 
 const SECCIONES = [
   { label: "Notas", href: "/" },
   { label: "Entrevistas", href: "/?tipo=entrevista" },
   { label: "Noticias", href: "/?tipo=noticia" },
+  { label: "Sobre", href: "/sobre" },
+  { label: "Contacto", href: "/contacto" },
   { label: "UI / Design system", href: "/ui" },
 ];
 
@@ -118,17 +109,18 @@ export default function Footer() {
             </p>
             <div className="grid grid-cols-3 gap-2">
               {DIVISIONES.map((d) => (
-                <span
-                  key={d}
-                  className="px-2 py-1.5 font-sports text-xs text-center"
+                <Link
+                  key={d.value}
+                  href={`/?division=${d.value}`}
+                  className="px-2 py-1.5 font-sports text-xs text-center transition-colors hover:bg-[var(--color-river-red)]"
                   style={{
                     border: "2px solid var(--color-ink-contrast)",
                     color: "var(--color-paper)",
                     letterSpacing: "0.06em",
                   }}
                 >
-                  {d}
-                </span>
+                  {d.short}
+                </Link>
               ))}
             </div>
           </div>
@@ -141,7 +133,7 @@ export default function Footer() {
         >
           <p
             className="font-mono text-[0.6rem] uppercase tracking-[0.22em]"
-            style={{ color: "var(--color-neutral-500)" }}
+            style={{ color: "var(--color-neutral-300)" }}
           >
             © 2026 · Sitio periodístico independiente · Buenos Aires, Argentina
           </p>
