@@ -3,7 +3,7 @@ import type { Autor, Nota, Sujeto } from "./types";
 /* =========================================
    AUTORES DEMO
    ========================================= */
-const AUTOR_PRINCIPAL: Autor = {
+export const AUTOR_PRINCIPAL: Autor = {
   id: "autor-1",
   nombre: "Pablo Molina",
   rol: "admin",
@@ -25,32 +25,42 @@ const AUTOR_COLAB: Autor = {
 const S_JUGADOR_1: Sujeto = {
   tipo: "jugador",
   id: "jug-1",
+  slug: "franco-mastantuono",
   nombre: "Franco Mastantuono",
   division: "primera",
+  bio: "Enganche zurdo. De la Octava al primer equipo: debutó con gol a los 17.",
 };
 const S_JUGADOR_2: Sujeto = {
   tipo: "jugador",
   id: "jug-2",
+  slug: "agustin-ruberto",
   nombre: "Agustín Ruberto",
   division: "reserva",
+  bio: "Centrodelantero goleador. Pasó del Sub-17 a hacerse fuerte en Reserva.",
 };
 const S_JUGADOR_3: Sujeto = {
   tipo: "jugador",
   id: "jug-3",
+  slug: "ian-subiabre",
   nombre: "Ian Subiabre",
   division: "reserva",
+  bio: "Extremo desequilibrante. Recorrió todas las formativas desde la Novena.",
 };
 const S_JUGADOR_4: Sujeto = {
   tipo: "jugador",
   id: "jug-4",
+  slug: "bautista-dadin",
   nombre: "Bautista Dadín",
   division: "cuarta",
+  bio: "Volante de Cuarta. El designado de los penales desde los once años.",
 };
 const S_JUGADOR_5: Sujeto = {
   tipo: "jugador",
   id: "jug-5",
+  slug: "candela-diaz",
   nombre: "Candela Díaz",
   division: "femenino",
+  bio: "Juvenil del Femenino. Parte de la camada que empuja para quedarse en Primera.",
 };
 const S_TECNICO_1: Sujeto = {
   tipo: "tecnico",
@@ -66,7 +76,7 @@ const S_EQUIPO_6TA: Sujeto = {
 };
 
 /* =========================================
-   NOTAS DEMO (8 con variedad de formatos y divisiones)
+   NOTAS DEMO (21 con variedad de formatos, tipos y divisiones)
    ========================================= */
 export const MOCK_NOTAS: Nota[] = [
   {
@@ -89,6 +99,7 @@ export const MOCK_NOTAS: Nota[] = [
     tags: ["debut", "exclusiva", "cantera"],
     publicada_en: "2026-04-17T19:00:00.000Z",
     destacada: true,
+    primicia: true,
   },
   {
     id: "n-2",
@@ -381,6 +392,7 @@ Lo aprendió de un ejercicio que parece simple. Dos compañeros le gritan colore
     sujetos: [S_JUGADOR_1, S_JUGADOR_3],
     tags: ["selección", "convocatoria"],
     publicada_en: "2026-05-12T11:00:00.000Z",
+    primicia: true,
   },
   {
     id: "n-16",
@@ -415,6 +427,7 @@ Lo aprendió de un ejercicio que parece simple. Dos compañeros le gritan colore
     sujetos: [],
     tags: ["cuarta", "fichaje", "scouting"],
     publicada_en: "2026-05-08T16:00:00.000Z",
+    primicia: true,
   },
   {
     id: "n-18",
@@ -483,5 +496,32 @@ Lo aprendió de un ejercicio que parece simple. Dos compañeros le gritan colore
     sujetos: [],
     tags: ["primera", "préstamo", "europa"],
     publicada_en: "2026-04-29T09:45:00.000Z",
+    primicia: true,
+  },
+  {
+    id: "n-22",
+    slug: "columna-paciencia-con-los-pibes",
+    formato: "articulo",
+    tipo: "columna",
+    division: "primera",
+    titulo: "Columna: la paciencia que las inferiores piden y el hincha no tiene",
+    bajada:
+      "Entre el apuro por ver debutar a la próxima joya y los tiempos reales de una formación, hay una grieta. Una mirada personal.",
+    contenido: `
+Cada vez que un pibe la rompe tres partidos seguidos en Reserva, el reloj del hincha se acelera. Lo quiere en Primera el domingo. Y el problema no es el deseo: es que el deseo se confunde con un plan.
+
+Una cantera no produce jugadores como una fábrica saca piezas. Produce procesos, y los procesos tienen mesetas, lesiones, partidos malos, semestres enteros en los que un chico parece haberse estancado y en realidad está cambiando de cuerpo.
+
+La paradoja es conocida: el club que mejor forma es el que más resiste la tentación de quemar etapas. Pero esa resistencia, puertas afuera, se lee como tibieza.
+
+Escribir de inferiores es, muchas veces, pedir paciencia. Y la paciencia, en el fútbol argentino, es la mercancía más escasa que hay.
+    `,
+    fuente: "propio",
+    poster_url:
+      "https://images.unsplash.com/photo-1508098682722-e99c43a406b2?w=1600&h=2000&fit=crop",
+    autor: AUTOR_PRINCIPAL,
+    sujetos: [],
+    tags: ["columna", "opinión", "formación"],
+    publicada_en: "2026-04-26T10:00:00.000Z",
   },
 ];
