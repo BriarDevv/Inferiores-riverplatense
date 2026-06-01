@@ -51,3 +51,34 @@ export function formatearDuracion(seg: number): string {
   const s = seg % 60;
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
+
+const MESES_LARGOS = [
+  "enero", "febrero", "marzo", "abril", "mayo", "junio",
+  "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre",
+];
+
+/** Fecha absoluta y determinística (no depende de "ahora") — para el detalle de nota. */
+export function formatearFechaLarga(iso: string): string {
+  const f = new Date(iso);
+  return `${f.getUTCDate()} de ${MESES_LARGOS[f.getUTCMonth()]} de ${f.getUTCFullYear()}`;
+}
+
+/** Normaliza texto para matching sin acentos / mayúsculas. */
+export function norm(s: string): string {
+  return s
+    .normalize("NFD")
+    .replace(/\p{Diacritic}/gu, "")
+    .toLowerCase();
+}
+
+/** Minutos de lectura estimados a partir del cuerpo (≈200 palabras/min). */
+export function tiempoLectura(contenido?: string): number {
+  if (!contenido) return 1;
+  const palabras = contenido.trim().split(/\s+/).filter(Boolean).length;
+  return Math.max(1, Math.round(palabras / 200));
+}
+
+/** Thumbnail de YouTube. `hqdefault` siempre existe; `maxresdefault` 404ea en muchos videos. */
+export function youtubeThumb(id: string): string {
+  return `https://i.ytimg.com/vi/${id}/hqdefault.jpg`;
+}
