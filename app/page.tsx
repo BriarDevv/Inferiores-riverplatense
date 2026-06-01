@@ -5,11 +5,112 @@ import WideFeatureCard from "@/components/cards/WideFeatureCard";
 import NoticiasList from "@/components/lists/NoticiasList";
 import NewsletterBand from "@/components/layout/NewsletterBand";
 import { getNotaDestacada, getNotas } from "@/lib/notas";
+import { labelDivision, labelTipo } from "@/lib/constants";
+import type { Division, Nota, TipoNota } from "@/lib/types";
 
-export default async function HomePage() {
+type SearchParams = { [key: string]: string | string[] | undefined };
+
+function first(v: string | string[] | undefined): string | undefined {
+  return Array.isArray(v) ? v[0] : v;
+}
+
+/**
+ * Temas editoriales: agrupan notas por tags reales.
+ * "Traspasos" junta fichajes, préstamos, scouting y movimientos de plantel.
+ * El matcheo real (sin acentos) vive en lib/notas.ts.
+ */
+const TEMAS: Record<string, { label: string; tags: string[] }> = {
+  traspasos: {
+    label: "Traspasos",
+    tags: ["fichaje", "préstamo", "prestamo", "scouting", "movimientos", "traspaso"],
+  },
+};
+
+export default async function HomePage({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}) {
+  const sp = await searchParams;
+  const tipo = first(sp.tipo) as TipoNota | undefined;
+  const division = first(sp.division) as Division | undefined;
+  const tema = first(sp.tema);
+  const q = first(sp.q)?.trim();
+
+  // ===== MODO FILTRADO (búsqueda / sección / división / tema) =====
+  const filtering = Boolean(tipo || division || tema || q);
+  if (filtering) {
+    const tags = tema && TEMAS[tema] ? TEMAS[tema].tags : undefined;
+    const resultados = await getNotas({ tipo, division, tags, q });
+
+    const descripcion = [
+      tipo ? labelTipo(tipo) : null,
+      division ? labelDivision(division) : null,
+      tema && TEMAS[tema] ? TEMAS[tema].label : null,
+      q ? `“${q}”` : null,
+    ]
+      .filter(Boolean)
+      .join(" · ");
+
+    return (
+      <main style={{ background: "var(--color-paper)" }}>
+        <div className="mx-auto max-w-[1440px] px-6 lg:px-10 py-12 lg:py-16">
+          <header className="mb-8 lg:mb-10">
+            <p
+              className="font-mono text-[0.65rem] uppercase tracking-[0.22em] mb-2"
+              style={{ color: "var(--color-river-red-deep)" }}
+            >
+              {q ? "Resultados de búsqueda" : "Filtro activo"}
+            </p>
+            <h1
+              className="font-display leading-none mb-4"
+              style={{
+                fontSize: "clamp(2rem, 4vw, 3.25rem)",
+                letterSpacing: "-0.03em",
+                color: "var(--color-ink)",
+              }}
+            >
+              {descripcion}
+            </h1>
+            <p
+              className="font-mono text-xs uppercase tracking-[0.14em]"
+              style={{ color: "var(--color-neutral-500)" }}
+            >
+              {resultados.length}{" "}
+              {resultados.length === 1 ? "resultado" : "resultados"}
+            </p>
+          </header>
+
+          {resultados.length > 0 ? (
+            <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 items-start">
+              {resultados.map((nota) => (
+                <TeaserCard key={nota.id} nota={nota} />
+              ))}
+            </section>
+          ) : (
+            <div
+              className="brut-frame p-10 text-center"
+              style={{ background: "var(--color-paper-pure)" }}
+            >
+              <p
+                className="font-display"
+                style={{ fontSize: "1.5rem", color: "var(--color-ink)" }}
+              >
+                No hay notas para este filtro.
+              </p>
+              <p className="mt-2" style={{ color: "var(--color-neutral-500)" }}>
+                Probá con otra búsqueda o volvé a la portada.
+              </p>
+            </div>
+          )}
+        </div>
+      </main>
+    );
+  }
+
+  // ===== PORTADA EDITORIAL (sin filtros) =====
+  const todas = await getNotas();
   const destacada = await getNotaDestacada();
-  const todas = await getNotas({ orden: "recientes" });
-
   const restantes = destacada
     ? todas.filter((n) => n.id !== destacada.id)
     : todas;
@@ -25,20 +126,21 @@ export default async function HomePage() {
       n.tipo !== "entrevista" &&
       n.formato !== "youtube",
   );
-  // Bento slots
-  const entrevistaWide = entrevistas[0] ?? notasLong[0];
-  const notaA =
-    notasLong.find((n) => n.tipo === "perfil") ??
-    notasLong[0] ??
-    entrevistas[1];
-  const notaB =
-    notasLong.find((n) => n.tipo !== "perfil" && n.id !== notaA?.id) ??
-    notasLong[1] ??
-    entrevistas[2];
-  const notaC =
-    notasLong.find(
-      (n) => n.id !== notaA?.id && n.id !== notaB?.id,
-    ) ?? entrevistas.find((n) => n.id !== entrevistaWide?.id);
+  // Bento slots — un Set incremental garantiza que ningún slot repita otro.
+  const usados = new Set<string>();
+  const tomar = (n?: Nota): Nota | undefined => {
+    if (n) usados.add(n.id);
+    return n;
+  };
+  const libre = (pool: Nota[], extra: (n: Nota) => boolean = () => true) =>
+    pool.find((n) => !usados.has(n.id) && extra(n));
+
+  const entrevistaWide = tomar(libre(entrevistas) ?? libre(notasLong));
+  const notaA = tomar(
+    libre(notasLong, (n) => n.tipo === "perfil") ?? libre(notasLong) ?? libre(entrevistas),
+  );
+  const notaB = tomar(libre(notasLong) ?? libre(entrevistas));
+  const notaC = tomar(libre(notasLong) ?? libre(entrevistas));
 
   // Teasers (3 cards bajo el hero) — agarra lo que no entra en bento
   const reserved = new Set(
@@ -81,7 +183,7 @@ export default async function HomePage() {
               <div>
                 <p
                   className="font-mono text-[0.65rem] uppercase tracking-[0.22em] mb-2"
-                  style={{ color: "var(--color-river-red)" }}
+                  style={{ color: "var(--color-river-red-deep)" }}
                 >
                   Esta semana
                 </p>
