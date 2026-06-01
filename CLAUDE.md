@@ -1,40 +1,54 @@
 # Inferiores Riverplatense
 
-Sitio de periodismo dedicado a las divisiones formativas del **Club Atlético River Plate**. Portfolio / publicación de un periodista que hace **notas y entrevistas** sobre las inferiores.
+Sitio de periodismo dedicado a las divisiones formativas del **Club Atlético River Plate**. Portfolio / publicación de un periodista que hace **notas, entrevistas y noticias** sobre las inferiores.
 
-> **Importante para futuras sesiones**: NO es un mega-site editorial con múltiples secciones. Es un **portfolio periodístico enfocado en notas y entrevistas**. Evitar sobre-diseñar (feeds tipo TikTok a pantalla completa, filtros de divisiones complejos en el nav, tickers en vivo, coordenadas arquitectónicas). Las cosas se ajustan al uso real.
+> **Importante para futuras sesiones**: NO es un mega-site editorial. Es un **portfolio periodístico enfocado en notas, entrevistas y noticias**. Evitar features de mega-portal (feeds tipo TikTok a pantalla completa, tickers de resultados en vivo, widgets de scores/fixtures, comentarios/cuentas públicas, multi-autor). Las cosas se ajustan al uso real.
+>
+> **⚠️ Nav (revertido 2026-05): el usuario CAMBIÓ de opinión sobre el "nav simple".** Ahora SÍ usa un **masthead de diario de 3 niveles** (barra roja con info + masthead negro con logo grande + barra de secciones sticky con dropdowns Divisiones/Notas + buscador), estilo Roca&Madre / Doble Amarilla, y lo aprobó. El buscador y los filtros por división/tipo/tema son features deseadas. **No restaurar el nav de 4 items.** (Memoria `feedback_nav_simple`, actualizada).
 
 ---
 
-## Estado actual
+## Estado actual (modo DEMO enriquecido)
 
-- Nav brutalist simple con 4 items (Notas / Entrevistas / Sobre / Contacto) ✓
-- Footer brutalist con 4px red top border, colofón editorial ✓
-- Portada mostrando placeholder "En construcción editorial" ✓
-- `/sobre` y `/contacto` con placeholders ✓
-- `/ui` con el sistema de diseño depurado (solo lo aplicado al sitio) ✓
-- **Pendiente**: contenido real de portada, detalle de nota, ABM, Supabase
+Sigue siendo material de demo para cliente, pero ya **no** está recortado a `/` + `/ui`: el 2026-05-31 se repusieron las páginas internas y se sumó SEO. Rutas vivas:
+
+- **Portada `/`** con contenido real: hero → 3 teasers → bento → newsletter. Tiene **modo filtrado** (`?tipo` / `?division` / `?tema` / `?q`) que alimenta el nav. ✓
+- **`/nota/[slug]`** (SSG, 22 páginas) — detalle de nota: `.article-prose`, byline con tiempo de lectura, badge **"Lo contamos primero"** (`primicia`), sujetos linkeados al hub, JSON-LD, OG por nota, ShareBar (WhatsApp/X/copiar), AuthorBio, relacionadas. ✓
+- **`/jugador/[slug]`** (SSG, 5 jugadores) — hub de seguimiento: bio + contador + **línea de tiempo** de toda la cobertura del jugador. El diferenciador de cantera. ✓
+- **`/sobre`** — página del periodista (Pablo Molina): bio + stats reales (notas/divisiones/jugadores) + CTAs. ✓
+- **`/contacto`** — métodos directos (mail/WhatsApp para datos y primicias) + form (fake submit, sin backend aún). ✓
+- **Nav masthead de diario** (3 niveles, responsive con hamburguesa). Sobre/Contacto viven en la barra roja superior + footer + panel mobile. Ver sección Nav. ✓
+- **Footer brutalist**, **SocialRail** (desktop), **ScrollToTop**, **NewsletterBand** (`#newsletter`). ✓
+- **`/ui`** = design system en lenguaje no técnico (visible para el cliente; `disallow` en robots). ✓
+- **SEO**: `sitemap.xml`, `robots.txt`, `feed.xml` (RSS), `not-found.tsx` (404 brutalist), `metadataBase` + iconos. ✓
+- **Cards/links internos** → ahora apuntan a `/nota/${slug}` reales. ✓
+
+### Pendiente (para que sea sitio real)
+
+- Reponer `/sobre` y `/contacto` (patrón placeholder: bloque con borde izquierdo rojo + título + descripción + mail/WhatsApp para datos y primicias).
+- Conectar Supabase (auth magic-link + DB + storage + ABM). Ver "Pendiente priorizado".
+- Handles reales en `SocialRail` (hoy placeholders a la raíz de cada red).
 
 ---
 
 ## Stack
 
-- **Next.js 16** (App Router, Turbopack)
+- **Next.js 16** (App Router, Turbopack) — corre en 16.2.4
 - **React 19.2**
 - **TypeScript 6** (`strict` true)
 - **Tailwind v4** (vía `@tailwindcss/postcss`)
-- **Lenis** (smooth scroll, cargado pero sin uso intenso aún)
+- **Lenis** (smooth scroll, vía `LenisProvider`)
 - **GSAP** (instalado, sin uso activo todavía)
 - **Supabase JS** (instalado, pendiente de conectar)
 
 ### Fuentes (Google Fonts, via `next/font/google`)
 
 - **Newsreader** → `--font-display` (titulares, pull quotes, logo)
-- **Anton** → `--font-sports` (scores, nav items, sports display)
+- **Anton** → `--font-sports` (scores/marcadores; también nav items y labels por ser condensed + uppercase)
 - **Inter** → `--font-body` (cuerpo)
-- **JetBrains Mono** → `--font-mono` (meta, datos, coordenadas)
+- **JetBrains Mono** → `--font-mono` (meta, datos, overlines)
 
-> Las variables `Fraunces`, `Instrument_Serif`, `Playfair_Display`, `Bebas_Neue` están importadas en `layout.tsx` por historial de A/B pero no se usan en runtime. Se pueden borrar cuando se quiera.
+> Las fuentes de A/B sin uso (`Fraunces`, `Instrument_Serif`, `Playfair_Display`, `Bebas_Neue`) **ya fueron borradas** de `layout.tsx` (2026-05). El `@theme` en `globals.css` y el `<style>` de `layout.tsx` ahora mapean ambos a las CSS vars de next/font (mantener en sync).
 
 ---
 
@@ -55,11 +69,23 @@ Sitio de periodismo dedicado a las divisiones formativas del **Club Atlético Ri
 ### Estética: Brutalist editorial
 
 - **Bordes 2px** siempre (ink o rojo según contexto).
-- **Offset shadows pixel-perfect** (ej: `5px 5px 0 var(--color-ink)`), sin blur.
-- **Sin rounded corners** anywhere.
+- **Offset shadows pixel-perfect** (ej: `5px 5px 0`, hero/wide/noticias usan `8px 8px 0`), sin blur.
+- **Sin rounded corners** anywhere (excepto avatares circulares y el logo badge).
 - **Sin blurs** (ni shadows difusos ni backdrop-blur decorativos).
 - **Hover snap** 120-160ms ease-out.
+- **Hover "press" en CTAs**: la sombra se aplasta (5px→2px) + el botón se traslada 3px. Usar las clases `.brut-cta-*` (ver abajo).
 - **Uppercase + tracking ancho** en labels de sección y nav (Anton).
+
+### Sistema de dos rojos (por contraste / a11y)
+
+- **`--color-river-red` (#EB192E)** — brillante. Para **superficies, bordes, fills de botones/badges, cuadritos decorativos, el borde 4px del nav, hovers y texto grande** (wordmark, números de stats, "404").
+- **`--color-river-red-deep` (#C21020)** — profundo. Para **texto rojo CHICO sobre fondo claro** (overlines, kickers, labels, meta) y para la **barra roja superior del nav** (texto blanco chico encima). Pasa contraste AA; el brillante no (queda ~4.46:1).
+
+### Accesibilidad (a11y) — estado
+
+Auditado con **axe-core (WCAG 2.1 AA)**: pasan headings, landmarks, labels, foco, alt. Implementado: skip link "Saltar al contenido" + `.sr-only`; `aria-haspopup`/`aria-controls` + retorno de foco en dropdowns y panel mobile; `aria-live` en form de contacto y "copiar link"; avatares/logo decorativos con `alt=""`.
+
+> **Excepción de marca DOCUMENTADA (decisión del usuario):** el texto **blanco sobre el rojo brillante `#EB192E`** (botón Newsletter, CTAs `.brut-cta-red`, format tags, badges, `.primicia-badge`) da **4.45:1**, a 0.05 del mínimo AA 4.5:1. **Se mantiene a propósito** porque #EB192E es el Pantone oficial del club y la brecha es imperceptible. **NO "arreglar" oscureciendo esos fondos** salvo pedido explícito.
 
 ### Utilidades CSS ya listas (en `app/globals.css`)
 
@@ -69,16 +95,41 @@ Sitio de periodismo dedicado a las divisiones formativas del **Club Atlético Ri
 - `.brut-frame-shadow` / `.brut-frame-shadow-red` — borde + offset shadow
 - `.brut-hover` / `.brut-hover-red` — hover que revela offset shadow
 - `.brut-label` — etiqueta de sección (overline mono + tracking).
-  ⚠️ **Antipattern: el símbolo `§` no se usa en el sitio.** Si ves "§ Sección" en algún lado, sacalo — fue una idea temprana que el usuario rechazó.
+- `.brut-cta-red` / `.brut-cta-ink` / `.brut-cta-red-lg` — **CTAs con hover press** (sombra se aplasta + translate). `-red`/`-ink` = color del fondo; `-lg` = variante grande (ScrollToTop).
 - `.chip` — botón tipo chip (dropdown items, tags)
 - `.pull-quote` — cita con borde izquierdo rojo 3px
 - `.hairline` / `.hairline-dark` — separadores finos
+- `.bento` — grid 3col × 2row del bloque "Esta semana" (ver Estructura).
+- `.article-prose` — tipografía de cuerpo de nota (drop cap rojo, h2/h3, blockquote). **En uso** en `/nota/[slug]`.
+- `.share-btn` / `.primicia-badge` / `.sujeto-chip` — utilidades del detalle de nota (compartir, badge "lo contamos primero", chip de jugador linkeable).
+- `.chips-scroller` — scroll horizontal de las secciones del nav **sin scrollbar visible**.
+- **Scrollbar custom** (14px, track con borde ink, thumb ink, hover rojo).
 
-### Componentes base
+> ⚠️ **Antipattern: el símbolo `§` no se usa en el sitio.** Si ves "§ Sección" en algún lado, sacalo — fue una idea temprana que el usuario rechazó.
 
-- `components/ui/BrutalistButton.tsx` — CTA primario. Borde 2px + offset shadow. Prop `onDark` adapta color del frame (ink sobre paper, paper sobre ink). Hover: shadow 5px→2px + traslada 3px.
+### Componentes base (UI)
+
+- `components/ui/BrutalistButton.tsx` — CTA primario. Borde 2px + offset shadow. Prop `onDark` adapta color del frame. Hover: shadow 5px→2px + traslada 3px.
 - `components/ui/Dropdown.tsx` — filtro con label + valor seleccionado. Menu abierto tiene offset shadow 5px. Cerrar con click afuera o Escape.
-- `components/cards/NotaCard.tsx` — 3 variantes según `nota.formato`: `short` (9:16), `youtube` (16:9), `articulo` (4:5). Frame 2px ink, hover revela offset shadow rojo (short) o ink (youtube/articulo).
+
+### Cards y listas
+
+- `components/cards/HeroFeature.tsx` — nota destacada. Split 50/50, borde 2px ink + shadow `8px 8px 0`, `minHeight 540px`. Meta empieza con avatar circular 32px. CTA "Leer la nota" usa `.brut-cta-ink`.
+- `components/cards/WideFeatureCard.tsx` — entrevista wide del bento. Imagen 16:9 arriba + footer. Borde 2px ink + shadow `8px 8px 0` (matchea el hero). Usa `CardAuthorMeta size="md"`.
+- `components/cards/NotaCard.tsx` — 3 variantes según `variant`/`formato`: `short` (9:16), `youtube` (16:9), `articulo` (4:5). Frame 2px ink, hover revela offset shadow. ArticleCard: `h-full flex flex-col`, footer `flex-1`, meta en `mt-auto`.
+- `components/cards/TeaserCard.tsx` — card de los 3 teasers bajo el hero. Imagen 4:3 + footer. `h-full flex flex-col`, footer `flex-1`, meta en `mt-auto` (para que el autor quede al pie aunque el título sea de 1 línea).
+- `components/cards/CardAuthorMeta.tsx` — bloque autor: avatar circular (24px `sm` / 28px `md`) con fallback de iniciales + nombre + punto rojo + fecha.
+- `components/lists/NoticiasList.tsx` — `aside` de la columna de noticias del bento. Header + items (número + thumb 72×72 + meta + título) + footer. `h-full flex flex-col`, `overflow:hidden`, `min-height:0`, shadow `8px 8px 0`.
+- `components/lists/UltimasList.tsx` — lista numerada (número Anton rojo + kicker + título + fecha). Disponible, no usada en la portada actual.
+
+### Layout
+
+- `components/layout/Nav.tsx` — **client component** (usa `useSearchParams`, por eso va envuelto en `<Suspense>` en `layout.tsx`). **Masthead de diario de 3 niveles** (ver sección Nav). La barra de secciones es `sticky top-0 z-50` con bottom border **4px red**. Responsive: en `<md` colapsa a una **hamburguesa** que abre un panel (buscador + secciones + chips). ⚠️ Las clases custom del nav (`.inline-search`, `.nav-burger`, `.nav-mobile-panel`) NO fijan `display` — eso lo controla Tailwind (`hidden`/`md:hidden`/`lg:flex`); si una clase custom fija `display`, pisa el responsive (bug ya corregido).
+- `components/layout/Footer.tsx` — logo 72×72, secciones (Notas/Entrevistas/Noticias/UI), 9 divisiones, copyright + CTA newsletter. Top border 4px red.
+- `components/layout/NewsletterBand.tsx` — client, `id="newsletter"` (target del CTA del nav). Fondo ink + shadow rojo `8px`. Disclaimer "Sin spam. Te das de baja desde cualquier mail.".
+- `components/layout/SocialRail.tsx` — server, fijo a la izquierda en desktop. Orden: X, Instagram, TikTok, YouTube, Facebook. Hrefs placeholder.
+- `components/layout/ScrollToTop.tsx` — client, fijo abajo a la derecha. Aparece con `scrollY > 400` (solo opacity, sin transform, para no chocar con el hover de `.brut-cta-red-lg`).
+- `components/layout/LenisProvider.tsx` — wrapper de smooth scroll.
 
 ---
 
@@ -86,33 +137,47 @@ Sitio de periodismo dedicado a las divisiones formativas del **Club Atlético Ri
 
 ```
 app/
-  layout.tsx              → root, fuentes, Lenis, Nav, Footer
-  page.tsx                → portada (placeholder)
-  sobre/page.tsx          → bio periodista (placeholder)
-  contacto/page.tsx       → contacto (placeholder)
+  layout.tsx              → root, fuentes, Lenis, Nav (en Suspense), SocialRail, Footer, ScrollToTop, metadata+viewport
+  page.tsx                → portada (hero + teasers + bento + newsletter) + modo filtrado (?tipo/?division/?tema/?q)
+  nota/[slug]/page.tsx    → detalle de nota (SSG, generateStaticParams + generateMetadata + JSON-LD)
+  jugador/[slug]/page.tsx → hub de jugador con línea de tiempo (SSG)
+  sobre/page.tsx          → página del periodista (bio + stats)
+  contacto/page.tsx       → contacto (mail/WhatsApp + form)
+  not-found.tsx           → 404 brutalist
+  sitemap.ts              → sitemap (home + notas + jugadores)
+  robots.ts               → robots (disallow /ui)
+  feed.xml/route.ts       → RSS 2.0
   ui/
-    page.tsx              → design system aplicado
-    _components/
-      UiDropdownDemo.tsx  → demo interactivo de dropdowns
-  globals.css             → tokens + utilidades brutalist
+    page.tsx              → design system aplicado, lenguaje no técnico
+    _components/UiDropdownDemo.tsx
+  globals.css             → tokens + utilidades brutalist + nav + .bento + .article-prose + scrollbar
 
 components/
-  layout/
-    Nav.tsx               → nav brutalist 4-item
-    Footer.tsx            → footer brutalist
-    LenisProvider.tsx     → smooth scroll wrapper
-  ui/
-    BrutalistButton.tsx   → CTA
-    Dropdown.tsx          → filtro
-  cards/
-    NotaCard.tsx          → 3 variantes de card
+  layout/   Nav.tsx (masthead 3 niveles + responsive), Footer, NewsletterBand, SocialRail, ScrollToTop, LenisProvider
+  ui/       BrutalistButton, Dropdown
+  cards/    HeroFeature, WideFeatureCard, NotaCard (short/youtube/articulo), TeaserCard, CardAuthorMeta
+  lists/    NoticiasList, UltimasList (sin usar en portada)
+  article/  ShareBar (client: WhatsApp/X/copiar), AuthorBio (bio al pie de la nota)
+  contacto/ ContactForm (client: form fake-submit)
 
 lib/
-  types.ts                → Nota, Sujeto, Autor, tipos afines
-  mock-data.ts            → 8 notas demo (para /ui y futuro seed)
-  notas.ts                → capa de acceso a datos (swap a Supabase)
-  constants.ts            → divisiones, tipos, formatters
+  types.ts      → Nota, Sujeto, Autor, FiltrosNota
+  mock-data.ts  → 22 notas (n-1..n-22; n-15..n-21 = "noticia", n-22 = "columna"). Sujetos jugador con slug+bio.
+  notas.ts      → capa de acceso: getNotas (con q/tags), getNotaPorSlug, getNotasRelacionadas, getSujetoPorSlug, getNotasPorSujeto, getSlugsDeJugadores
+  constants.ts  → divisiones, tipos, formatters, norm(), tiempoLectura(), formatearFechaLarga()
+
+public/
+  logo.webp               → badge circular del club (nav + footer)
 ```
+
+### Layout de la portada `/` (orden de secciones)
+
+1. **Hero** — `getNotaDestacada()` → `HeroFeature`.
+2. **Teasers** — 3 `TeaserCard` (lo que no entra en el bento, sin youtube ni noticia).
+3. **Bento "Esta semana"** — grid `.bento`: `WideFeatureCard` (cols 1-2, row 1) + 3 `NotaCard variant="articulo"` (nota-a col1·row2, nota-b col2·row2, nota-c col3·row2) + `NoticiasList` (col3·row1).
+4. **NewsletterBand**.
+
+> El slotting del bento elige por tipo/formato y usa un `Set` de reservados para que un teaser no duplique una nota del bento.
 
 ---
 
@@ -122,14 +187,15 @@ Definido en `lib/types.ts`:
 
 - **`Nota`** — pieza periodística. Campos clave:
   - `formato`: `short` | `youtube` | `articulo`
+  - `tipo`: `entrevista` | `perfil` | `cronica` | `analisis` | `columna` | `noticia`
   - `fuente`: `propio` | `youtube` | `instagram` | `tiktok`
   - `video_url`, `youtube_id`, `poster_url`, `duracion_seg`
   - `quote_overlay` (opcional, kinetic typography sobre short)
   - `autor`, `sujetos[]`, `tags[]`
-  - `publicada_en`, `destacada`, `capitulos[]`
-- **`Sujeto`** — polimórfico. `tipo`: `jugador` | `tecnico` | `equipo`. Una nota puede tener 0..N sujetos.
-- **`Autor`** — `rol`: `admin` | `editor`. Admin puede crear otros perfiles desde el ABM.
-- **`FiltrosNota`** — tipo, division, formato, sujeto_id, orden.
+  - `publicada_en`, `actualizada_en`, `destacada`, `primicia` ("lo contamos primero"), `capitulos[]`
+- **`Sujeto`** — polimórfico. `tipo`: `jugador` | `tecnico` | `equipo`. Campos `slug` + `bio` (para el hub `/jugador/[slug]`). Una nota puede tener 0..N sujetos.
+- **`Autor`** — `rol`: `admin` | `editor`. Autor principal del mock: **Pablo Molina**; colaboradora: Sofía Domínguez.
+- **`FiltrosNota`** — tipo, division, formato, sujeto_id, **`q`** (full-text), **`tags`** (match any), orden. La búsqueda full-text (sin acentos) vive en `lib/notas.ts`, NO inline en `page.tsx`.
 
 ### Divisiones soportadas
 
@@ -137,60 +203,29 @@ Definido en `lib/types.ts`:
 
 ### Tipos de nota
 
-`entrevista` · `perfil` · `cronica` · `analisis` · `columna`
+`entrevista` · `perfil` · `cronica` · `analisis` · `columna` · `noticia`
+
+> Nota mock: todos los `youtube_id` están vacíos (`""`) — se sacó el Rick Astley placeholder. Cargar IDs reales cuando haya videos.
 
 ---
 
-## Nav (definido)
+## Nav (masthead de diario — 3 niveles)
 
-1. **Notas** (`/`) — portada con todo el archivo
-2. **Entrevistas** (`/?tipo=entrevista`) — filtro a entrevistas
-3. **Sobre** (`/sobre`) — bio del periodista
-4. **Contacto** (`/contacto`) — email + redes
+> Revierte el "nav simple" anterior. El usuario lo pidió e iteró hasta aprobarlo ("el fondo negro eso esta impecable").
 
-**Sin "Suscribirse"** — se suma solo si el periodista va a mandar newsletter.
+**NIVEL 1 — barra roja**: fecha `es-AR` + Buenos Aires (izq) · kicker "De la Novena a la Primera" (centro) · redes Instagram/X/YouTube + "Nº 001" (der). Centro y derecha se ocultan en `<md`.
 
-Logo izquierda: monograma rojo **I** con borde ink 2px + offset shadow 4px, seguido del wordmark `Inferiores` + `*Riverplatense*` (italic rojo).
+**NIVEL 2 — masthead negro (ink)**: logo badge `logo.webp` + wordmark "Inferiores *Riverplatense*" centrado, escalable (`clamp`), envuelve en pantallas chicas.
 
-Bottom border del nav: **4px red**. Background paper-pure.
+**NIVEL 3 — barra de secciones (sticky, ink, border-bottom 4px red)**:
+- Dropdown **Divisiones▾** (9 divisiones) + dropdown **Notas▾** (perfil/cronica/analisis/columna) + **Entrevistas** (`?tipo=entrevista`) + **Noticias** (`?tipo=noticia`) + **Traspasos** (`?tema=traspasos`) + **Primera**/**Reserva** (`?division=`).
+- **Buscador** (`flex-1`, atajo ⌘K) → empuja a `/?q=`.
+- CTA **Newsletter** (ancla a `#newsletter`).
+- **Mobile (`<md`)**: las secciones + buscador colapsan en una **hamburguesa** que abre un panel (buscador full-width + links + chips de divisiones/notas + Newsletter).
 
----
+La portada (`app/page.tsx`) tiene **modo filtrado** que consume estos params (`?tipo`/`?division`/`?tema`/`?q`) y renderiza una grilla de resultados.
 
-## Pendiente priorizado
-
-### Corto plazo (para demo mostrable)
-1. **Reponer portada `/page.tsx`** — listado de notas con filtros (se borró todo el contenido antes de hacer el nuevo diseño).
-2. **Reponer detalle `/nota/[slug]/page.tsx`** — ya había uno pero se borró.
-3. **Reemplazar Hero** — decidir si va o no; si va, brutalist simple (no el de antes).
-
-### Medio plazo (ABM real)
-4. **Conectar Supabase** (auth + DB + storage).
-5. **Schema SQL**:
-   - `profiles` (extends `auth.users`, rol admin/editor)
-   - `jugadores` / `tecnicos` / `equipos` (tablas separadas)
-   - `notas` (tabla principal)
-   - `nota_sujetos` (pivote polimórfico: `nota_id`, `sujeto_tipo`, `sujeto_id`)
-6. **ABM protegido** — login magic-link, CRUD de notas, asociación a sujetos.
-7. **Upload de video vertical** — Supabase Storage directo, no Mux (costo).
-8. **Embed YouTube** — solo guardar ID, el player lazy-load.
-
-### Largo plazo (pulido)
-9. Página `/jugador/[slug]` (o `/tecnico/[slug]`, `/equipo/[slug]`) con feed filtrado.
-10. Newsletter (si se decide).
-11. SEO + OpenGraph + sitemap.
-
----
-
-## Historial de decisiones importantes (orden cronológico)
-
-1. Proyecto inicialmente pensado como mega-site editorial sobre inferiores de River → **restringido** a portfolio de notas/entrevistas.
-2. Paleta: primero `#D6001C` burgundy → migrado al oficial `#EB192E` (Pantone 1788 C).
-3. Tipografía: probamos Fraunces → Instrument Serif → Newsreader. Ganó **Newsreader** por feel periodístico.
-4. Sports font: Anton se reserva solo a **scores y marcadores numéricos**, no a nav items en el sitio final (aunque los nav items también usan Anton por ser condensed + uppercase).
-5. Botones: probamos Flat, Brutalist, Stadium, Pill, Underline → ganó **Brutalist** adaptive.
-6. Nav: probamos 5 variantes + 5 brutalist + variantes con botones → **ninguna cerró**. El usuario quería algo más simple orientado al portfolio. Nav actual: 4 items horizontales.
-7. Página: se borró todo el contenido (Hero, ShortsRail, FilterBar, BentoGrid, detalle de nota) para rearrancar desde cero con el enfoque portfolio simplificado. `/ui` quedó intacto.
-8. `/ui` depurado: borrados Lab de navbars, Lab de combos tipográficos, Lab de botones. Solo queda lo aplicado.
+⚠️ Cuidado con el responsive: las clases custom NO deben fijar `display` (lo controla Tailwind). El `z-index` del `.dropdown-backdrop` es **40** (debajo de la barra sticky `z-50`) para que dropdowns/panel queden por encima.
 
 ---
 
@@ -212,13 +247,74 @@ NEXT_PUBLIC_SUPABASE_ANON_KEY=
 SUPABASE_SERVICE_ROLE_KEY=
 ```
 
+### Imágenes remotas
+
+`next.config.mjs` tiene `remotePatterns` para Unsplash (mock). Ojo: algunas URLs de Unsplash dan 404 — verificar con `curl` antes de usar.
+
+---
+
+## Pendiente priorizado
+
+### Hecho (2026-05-31)
+- ✅ Detalle `/nota/[slug]` (con `.article-prose`, byline, primicia, share, bio, relacionadas, JSON-LD, OG).
+- ✅ Hub `/jugador/[slug]` con línea de tiempo.
+- ✅ `/sobre` (bio + stats) y `/contacto` (mail/WhatsApp + form fake). Linkeados desde nav (barra roja) + footer + panel mobile.
+- ✅ `href` de cards apuntando a la nota real.
+- ✅ SEO: sitemap, robots, RSS (`feed.xml`), 404, OG/Twitter por nota, `metadataBase`.
+
+### Para retomar desarrollo (post-demo)
+1. **Cablear el form de `/contacto` y el newsletter** a algo real (Supabase/email). Hoy ambos son fake (no persisten).
+2. **Handles reales en `SocialRail`** y mail/WhatsApp reales en `/contacto` (hoy placeholders).
+3. **OG dinámico por nota** (`opengraph-image.tsx` con `ImageResponse`) si se quiere algo más lindo que el `poster_url`.
+
+### Medio plazo (ABM real)
+4. **Conectar Supabase** (auth + DB + storage).
+5. **Schema SQL**:
+   - `profiles` (extends `auth.users`, rol admin/editor)
+   - **`sujetos` (UNA tabla con columna `tipo` jugador/tecnico/equipo)** — recomendado en vez de 3 tablas separadas: matchea el tipo `Sujeto` plano del código y permite FK real en el pivote. Incluir `slug`.
+   - `notas` (principal; con `slug` único, índice desc en `publicada_en`, y `tsvector` generado para búsqueda)
+   - `nota_sujetos` (pivote `nota_id` + `sujeto_id`, FK reales)
+   - tags como `text[]` + índice GIN (no sobre-normalizar) · `suscriptores` (newsletter)
+   - **RLS desde el día 1**: lectura pública de notas publicadas; escritura solo rol admin/editor.
+6. **ABM protegido** — login magic-link, CRUD de notas, asociación a sujetos.
+7. **Upload de video vertical** — Supabase Storage directo, no Mux (costo).
+8. **Embed YouTube** — solo guardar ID, el player lazy-load.
+
+### Largo plazo (pulido)
+9. ✅ Hub `/jugador/[slug]` (hecho, versión con timeline). Pendiente opcional: `/tecnico/[slug]`, `/equipo/[slug]`.
+10. Newsletter real (si se decide) — hoy el form es fake (no persiste).
+11. ✅ SEO base (sitemap/robots/RSS/OG/JSON-LD). Pendiente: dominio real + `NEXT_PUBLIC_SITE_URL` en prod (hoy cae a `localhost:3000`).
+
+---
+
+## Historial de decisiones importantes (orden cronológico)
+
+1. Proyecto inicialmente pensado como mega-site editorial → **restringido** a portfolio de notas/entrevistas/noticias.
+2. Paleta: primero `#D6001C` burgundy → migrado al oficial `#EB192E` (Pantone 1788 C).
+3. Tipografía: Fraunces → Instrument Serif → **Newsreader** (ganó por feel periodístico).
+4. Anton se reserva a scores/marcadores; los nav items lo usan por ser condensed + uppercase.
+5. Botones: Flat / Brutalist / Stadium / Pill / Underline → ganó **Brutalist** adaptive.
+6. Nav: primero se rechazaron las variantes con masthead/dropdowns/search (se quería simple). **Después (2026-05) el usuario REVIRTIÓ y adoptó el masthead de diario de 3 niveles** (con dropdowns + buscador), estilo Roca&Madre/Doble Amarilla, y lo aprobó. El "nav simple" quedó obsoleto. (Memoria `feedback_nav_simple`, actualizada).
+7. Se borró todo el contenido viejo de la portada (Hero/ShortsRail/FilterBar/BentoGrid/detalle) y se rearrancó con el enfoque portfolio. Después se construyó el contenido real actual (hero + teasers + bento + newsletter) "robando" estructura de un portal de referencia (RocaYMadre) pero adaptado a la UI brutalist.
+8. Se agregó el tipo de contenido **"noticia"** (notas cortas/breves) para dar variedad a la portada.
+9. Logo: se reemplazó el monograma "I" por un **badge circular** real (`logo.webp`); se le sacó el fondo brutalist que se había probado.
+10. Glifo `§` **vetado** en todo el sitio (era prefijo de overlines/labels). (Memoria: `feedback_no_section_mark`).
+11. **Modo demo**: se borraron `/sobre`, `/contacto`, `/nota/[slug]` y `components/article/*` para que el cliente solo vea portada + `/ui`. Todos los links internos van a `/`.
+12. `/ui` reescrito en **lenguaje no técnico** (sin nombres de clases CSS, sin aspect ratios, sin anglicismos) porque es para que el cliente entienda el sistema de diseño.
+13. CTAs con **hover "press"** (sombra se aplasta + translate), unificado vía clases `.brut-cta-*`.
+14. **Nav responsive (2026-05)**: el masthead colapsa a hamburguesa en `<md`. Bug clave corregido: clases custom que fijaban `display` pisaban el `hidden`/`md:hidden` de Tailwind → se sacó `display` de `.inline-search`/`.nav-burger`/`.nav-mobile-panel`.
+15. **Páginas internas + SEO repuestas (2026-05-31)**: tras un code-review + investigación de portales deportivos, se reconstruyó `/nota/[slug]`, `/jugador/[slug]` (hub con timeline, el diferenciador de cantera) y todo el SEO. Se movió la búsqueda a `lib/notas.ts`, se sumó `primicia` ("lo contamos primero") y se limpió código muerto (4 fuentes, dark-mode sin toggle, doble `<main>`). (Memoria: `project_paginas_internas_repuestas`).
+
 ---
 
 ## Reglas del juego (para futuras iteraciones)
 
 1. **Mantener brutalist en todo**: bordes 2px, offset shadows pixel-perfect, sin rounded, sin blur.
 2. **Respetar el stack tipográfico**: Newsreader + Anton + Inter + Mono. No meter fuentes nuevas sin motivo claro.
-3. **Pensar "portfolio periodístico"** antes de agregar features. Preguntar: ¿sirve a mostrar las notas/entrevistas? Si no, probablemente sobra.
-4. **Iteración con `/ui`**: cualquier componente nuevo se agrega primero al playground para verificar que encaja en el sistema.
-5. **Capa de datos desacoplada**: todo pasa por `lib/notas.ts`. Cuando se conecta Supabase, solo cambia ese archivo.
-6. **Placeholders**: si se arma una página nueva y el contenido real no está listo, usar el patrón de `/sobre` o `/contacto` (bloque con borde izquierdo rojo + título + descripción breve).
+3. **Pensar "portfolio periodístico"** antes de agregar features. ¿Sirve a mostrar las notas/entrevistas/noticias? Si no, probablemente sobra.
+4. **Nav = masthead de diario de 3 niveles** (barra roja + masthead + secciones sticky con dropdowns + buscador), responsive con hamburguesa. NO volver al nav de 4 items. Mantenerlo brutalist y cuidar que las clases custom no fijen `display` (rompe el responsive).
+5. **Sin `§`** en ningún lado.
+6. **`/ui` en lenguaje no técnico** mientras sea material de cliente.
+7. **Iteración con `/ui`**: cualquier componente nuevo se agrega primero al playground para verificar que encaja.
+8. **Capa de datos desacoplada**: todo pasa por `lib/notas.ts`. Cuando se conecta Supabase, solo cambia ese archivo.
+9. **CTAs con hover press**: usar las clases `.brut-cta-*`, no reinventar el efecto.
