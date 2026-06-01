@@ -26,8 +26,10 @@ export type SujetoTipo = "jugador" | "tecnico" | "equipo";
 export interface Sujeto {
   tipo: SujetoTipo;
   id: string;
+  slug?: string;          // para /jugador/[slug] (hub de seguimiento)
   nombre: string;
   division?: Division;
+  bio?: string;           // bio corta para el hub
 }
 
 export interface Autor {
@@ -56,7 +58,9 @@ export interface Nota {
   sujetos: Sujeto[];
   tags: string[];
   publicada_en: string;        // ISO date
+  actualizada_en?: string;     // ISO date (si hubo edición posterior)
   destacada?: boolean;
+  primicia?: boolean;          // "lo contamos primero"
   capitulos?: Array<{ tiempo: number; titulo: string }>;
 }
 
@@ -65,5 +69,7 @@ export interface FiltrosNota {
   division?: Division;
   formato?: FormatoNota;
   sujeto_id?: string;
-  orden?: "recientes" | "populares";
+  q?: string;              // búsqueda full-text (titulo/bajada/tags/sujetos/autor)
+  tags?: string[];         // matchea si la nota tiene CUALQUIERA de estos tags
+  orden?: "recientes";
 }
