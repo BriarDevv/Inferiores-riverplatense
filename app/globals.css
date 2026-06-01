@@ -23,10 +23,12 @@
   --color-neutral-200: #e4e4e7;
   --color-neutral-100: #f2f2ef;
 
-  /* === Tipografía === */
-  --font-display: "Fraunces", Georgia, serif;
-  --font-body: "Inter", system-ui, sans-serif;
-  --font-mono: "JetBrains Mono", ui-monospace, monospace;
+  /* === Tipografía (mapeada a las CSS vars de next/font; el <style> de layout.tsx
+     las reafirma en runtime — mantener ambos en sync) === */
+  --font-display: var(--font-newsreader), Georgia, serif;
+  --font-sports: var(--font-anton), Impact, "Arial Narrow", sans-serif;
+  --font-body: var(--font-body-local), system-ui, sans-serif;
+  --font-mono: var(--font-mono-local), ui-monospace, monospace;
 
   /* === Motion === */
   --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
@@ -139,13 +141,50 @@ html {
   line-height: 1;
 }
 
+/* Solo para lectores de pantalla */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* "Saltar al contenido" — oculto hasta recibir foco con Tab */
+.skip-link {
+  position: fixed;
+  top: 0.5rem;
+  left: 0.5rem;
+  z-index: 100;
+  transform: translateY(-160%);
+  background: var(--color-river-red-deep);
+  color: #ffffff;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.85rem;
+  letter-spacing: 0.04em;
+  padding: 0.7rem 1.1rem;
+  border: 2px solid var(--color-ink);
+  box-shadow: 3px 3px 0 var(--color-ink);
+  text-decoration: none;
+  transition: transform 150ms var(--ease-out-expo);
+}
+.skip-link:focus {
+  transform: translateY(0);
+}
+
 .overline {
   font-family: var(--font-body);
   font-size: 0.6875rem;
   font-weight: 600;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--color-river-red);
+  /* rojo PROFUNDO para texto chico: pasa contraste AA sobre paper/blanco */
+  color: var(--color-river-red-deep);
 }
 
 .text-hero {
@@ -280,7 +319,7 @@ html {
   font-size: 0.65rem;
   text-transform: uppercase;
   letter-spacing: 0.18em;
-  color: var(--color-river-red);
+  color: var(--color-river-red-deep);
 }
 
 /* Chip */
@@ -350,6 +389,302 @@ html {
 }
 
 /* =========================================
+   NAV — masthead de diario (estilo Roca&Madre)
+   ========================================= */
+/* Barra utilitaria: links chiquitos sobre franja ROJA */
+.util-link {
+  font-family: var(--font-mono);
+  font-size: 0.66rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: #ffffff;
+  text-decoration: none;
+  background: transparent;
+  border: 0;
+  cursor: pointer;
+  transition: color 130ms ease-out, opacity 130ms ease-out;
+}
+.util-link:hover {
+  color: #ffffff;
+}
+.util-link[data-active="true"] {
+  color: #ffffff;
+}
+
+/* Item de sección (Title Case, sans semibold, con divisor) */
+/* Item de sección — sobre barra NEGRA (brutalist) */
+.section-link {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.92rem;
+  letter-spacing: 0.01em;
+  color: #f4f4ef;
+  background: transparent;
+  border: 0;
+  border-top: 2px solid transparent;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+  text-decoration: none;
+  padding: 0.15rem 0;
+  white-space: nowrap;
+  transition: color 130ms ease-out, border-color 130ms ease-out;
+}
+.section-link:hover {
+  color: var(--color-river-red);
+}
+.section-link[data-active="true"] {
+  color: var(--color-river-red);
+  border-bottom-color: var(--color-river-red);
+}
+.section-link .caret {
+  font-size: 0.55rem;
+  transform: translateY(1px);
+  transition: transform 160ms ease-out;
+}
+.section-link[data-open="true"] .caret {
+  transform: translateY(1px) rotate(180deg);
+}
+
+/* Divisor vertical entre secciones (sobre negro) */
+.section-divider {
+  width: 1px;
+  height: 15px;
+  background: rgba(255, 255, 255, 0.2);
+  flex-shrink: 0;
+}
+
+/* Scroll horizontal de las secciones sin scrollbar visible (toca/trackpad ok) */
+.chips-scroller {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* Edge antiguo */
+}
+.chips-scroller::-webkit-scrollbar {
+  display: none; /* Chrome / Safari */
+}
+
+/* Dropdown de sección */
+.section-dropdown {
+  position: absolute;
+  top: calc(100% + 0.65rem);
+  left: -0.4rem;
+  z-index: 60;
+  min-width: 190px;
+  background: var(--color-paper-pure);
+  border: 2px solid var(--color-ink);
+  box-shadow: 5px 5px 0 var(--color-ink);
+  padding: 0.35rem;
+  animation: dropdown-in 140ms var(--ease-out-expo);
+}
+@keyframes dropdown-in {
+  from { opacity: 0; transform: translateY(-4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+.section-dropdown a {
+  display: block;
+  font-family: var(--font-body);
+  font-size: 0.85rem;
+  font-weight: 500;
+  color: var(--color-ink);
+  text-decoration: none;
+  padding: 0.4rem 0.6rem;
+  transition: background 120ms ease-out, color 120ms ease-out;
+}
+.section-dropdown a:hover {
+  background: var(--color-ink);
+  color: var(--color-paper-pure);
+}
+
+/* Buscador inline — sobre barra NEGRA (brutalist) */
+.inline-search {
+  /* display lo controla Tailwind (hidden lg:flex) para no pisar el responsive */
+  align-items: center;
+  gap: 0.5rem;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.32rem 0.55rem;
+  min-width: 320px;
+  transition: border-color 140ms ease-out, box-shadow 140ms ease-out;
+}
+.inline-search:focus-within {
+  border-color: var(--color-river-red);
+  box-shadow: 3px 3px 0 var(--color-river-red);
+}
+.inline-search input {
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  color: #f4f4ef;
+  width: 100%;
+}
+.inline-search input::placeholder {
+  color: rgba(255, 255, 255, 0.45);
+}
+/* Botón NEWSLETTER (ink) */
+.newsletter-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-body);
+  font-weight: 700;
+  font-size: 0.72rem;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: #ffffff;
+  background: var(--color-river-red);
+  border: 2px solid #ffffff;
+  box-shadow: 3px 3px 0 #ffffff;
+  padding: 0.5rem 1.1rem;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: background 140ms ease-out, box-shadow 140ms ease-out,
+    transform 140ms ease-out;
+}
+.newsletter-btn:hover {
+  background: var(--color-river-red-deep);
+  box-shadow: 1px 1px 0 #ffffff;
+  transform: translate(2px, 2px);
+}
+
+/* Backdrop invisible para cerrar dropdowns / menú con click afuera.
+   z-index < 50 para quedar DEBAJO de la barra sticky (y de su dropdown/panel). */
+.dropdown-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 40;
+}
+
+/* ── Hamburguesa (solo mobile) ── */
+.nav-burger {
+  /* display lo controla Tailwind (inline-flex md:hidden) para no pisar el responsive */
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 38px;
+  flex-shrink: 0;
+  color: #ffffff;
+  background: transparent;
+  border: 2px solid rgba(255, 255, 255, 0.35);
+  cursor: pointer;
+  transition: border-color 130ms ease-out, background 130ms ease-out;
+}
+.nav-burger:hover {
+  border-color: var(--color-river-red);
+}
+.nav-burger[data-open="true"] {
+  border-color: var(--color-river-red);
+  background: rgba(235, 25, 46, 0.14);
+}
+
+/* ── Panel desplegable mobile ── */
+.nav-mobile-panel {
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  z-index: 60;
+  /* display lo controla Tailwind (flex flex-col md:hidden) */
+  flex-direction: column;
+  gap: 1.1rem;
+  padding: 1.1rem;
+  background: var(--color-ink);
+  border-top: 2px solid rgba(255, 255, 255, 0.1);
+  border-bottom: 4px solid var(--color-river-red);
+  max-height: calc(100vh - 56px);
+  overflow-y: auto;
+  animation: dropdown-in 160ms var(--ease-out-expo);
+}
+
+.nav-mobile-search {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  width: 100%;
+  border: 2px solid rgba(255, 255, 255, 0.3);
+  background: rgba(255, 255, 255, 0.05);
+  padding: 0.6rem 0.7rem;
+  transition: border-color 140ms ease-out, box-shadow 140ms ease-out;
+}
+.nav-mobile-search:focus-within {
+  border-color: var(--color-river-red);
+  box-shadow: 3px 3px 0 var(--color-river-red);
+}
+.nav-mobile-search input {
+  border: 0;
+  outline: 0;
+  background: transparent;
+  font-family: var(--font-mono);
+  font-size: 0.82rem;
+  color: #f4f4ef;
+  width: 100%;
+}
+.nav-mobile-search input::placeholder {
+  color: rgba(255, 255, 255, 0.45);
+}
+
+.nav-mobile-group {
+  display: flex;
+  flex-direction: column;
+}
+.nav-mobile-link {
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 1.05rem;
+  color: #f4f4ef;
+  text-decoration: none;
+  padding: 0.7rem 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+  transition: color 120ms ease-out;
+}
+.nav-mobile-link:hover,
+.nav-mobile-link[data-active="true"] {
+  color: var(--color-river-red);
+}
+
+.nav-mobile-label {
+  font-family: var(--font-mono);
+  font-size: 0.62rem;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--color-river-red);
+  margin-bottom: 0.55rem;
+}
+.nav-mobile-chips {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+.nav-mobile-chip {
+  font-family: var(--font-body);
+  font-weight: 500;
+  font-size: 0.82rem;
+  color: #f4f4ef;
+  text-decoration: none;
+  padding: 0.4rem 0.7rem;
+  border: 2px solid rgba(255, 255, 255, 0.25);
+  background: transparent;
+  transition: border-color 120ms ease-out, color 120ms ease-out,
+    background 120ms ease-out;
+}
+.nav-mobile-chip:hover,
+.nav-mobile-chip[data-active="true"] {
+  color: #ffffff;
+  border-color: var(--color-river-red);
+  background: var(--color-river-red);
+}
+
+.nav-mobile-newsletter {
+  width: 100%;
+  justify-content: center;
+  margin-top: 0.2rem;
+}
+
+/* =========================================
    BENTO HOME
    Grid 3 cols × 2 rows.
    - wide: cols 1-2 row 1
@@ -403,6 +738,77 @@ html {
     grid-column: 1;
     grid-row: auto;
   }
+}
+
+/* =========================================
+   NOTA — detalle (/nota/[slug])
+   ========================================= */
+/* Botón de compartir cuadrado brutalist */
+.share-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  flex-shrink: 0;
+  color: var(--color-ink);
+  background: var(--color-paper-pure);
+  border: 2px solid var(--color-ink);
+  cursor: pointer;
+  transition: background 130ms ease-out, color 130ms ease-out,
+    transform 130ms ease-out;
+}
+.share-btn:hover {
+  background: var(--color-river-red);
+  color: var(--color-paper-pure);
+  border-color: var(--color-river-red);
+}
+
+/* Badge "lo contamos primero" */
+.primicia-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-sports);
+  font-size: 0.72rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--color-paper-pure);
+  background: var(--color-river-red);
+  border: 2px solid var(--color-ink);
+  box-shadow: 3px 3px 0 var(--color-ink);
+  padding: 0.3rem 0.7rem;
+}
+.primicia-badge::before {
+  content: "";
+  width: 0.45rem;
+  height: 0.45rem;
+  background: var(--color-paper-pure);
+}
+
+/* Chip de sujeto (jugador) linkeable dentro de la nota */
+.sujeto-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  font-family: var(--font-body);
+  font-weight: 600;
+  font-size: 0.85rem;
+  color: var(--color-ink);
+  text-decoration: none;
+  background: var(--color-paper-pure);
+  border: 2px solid var(--color-ink);
+  padding: 0.35rem 0.7rem;
+  transition: background 130ms ease-out, color 130ms ease-out;
+}
+.sujeto-chip:hover {
+  background: var(--color-ink);
+  color: var(--color-paper-pure);
+}
+.sujeto-chip::before {
+  content: "›";
+  color: var(--color-river-red);
+  font-weight: 700;
 }
 
 /* =========================================
