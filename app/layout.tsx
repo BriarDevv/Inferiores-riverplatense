@@ -1,12 +1,8 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Suspense } from "react";
 import {
-  Fraunces,
-  Instrument_Serif,
   Newsreader,
-  Playfair_Display,
   Anton,
-  Bebas_Neue,
   Inter,
   JetBrains_Mono,
 } from "next/font/google";
@@ -17,36 +13,12 @@ import ScrollToTop from "@/components/layout/ScrollToTop";
 import SocialRail from "@/components/layout/SocialRail";
 import "./globals.css";
 
-/* === CURRENT (candidato por defecto) === */
-const fraunces = Fraunces({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-display-local",
-  weight: ["400", "500", "700", "900"],
-});
-
-/* === CANDIDATOS PARA COMPARAR EN /ui === */
-const instrumentSerif = Instrument_Serif({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-instrument-serif",
-  weight: ["400"],
-  style: ["normal", "italic"],
-});
-
+/* === Combo final del proyecto: Newsreader + Anton + Inter + JetBrains Mono === */
 const newsreader = Newsreader({
   subsets: ["latin"],
   display: "swap",
   variable: "--font-newsreader",
   weight: ["400", "500", "700"],
-  style: ["normal", "italic"],
-});
-
-const playfair = Playfair_Display({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-playfair",
-  weight: ["400", "700", "900"],
   style: ["normal", "italic"],
 });
 
@@ -57,14 +29,7 @@ const anton = Anton({
   weight: ["400"],
 });
 
-const bebas = Bebas_Neue({
-  subsets: ["latin"],
-  display: "swap",
-  variable: "--font-bebas",
-  weight: ["400"],
-});
-
-/* === BODY & MONO (estables, sin cambios) === */
+/* === BODY & MONO === */
 const inter = Inter({
   subsets: ["latin"],
   display: "swap",
@@ -79,17 +44,35 @@ const jbMono = JetBrains_Mono({
   weight: ["400", "500"],
 });
 
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+
 export const metadata: Metadata = {
-  title: "Inferiores Riverplatense — Periodismo de la cantera de River",
+  metadataBase: new URL(SITE_URL),
+  title: {
+    default: "Inferiores Riverplatense — Periodismo de la cantera de River",
+    template: "%s · Inferiores Riverplatense",
+  },
   description:
     "Entrevistas, perfiles y crónicas de las divisiones formativas del Club Atlético River Plate.",
+  icons: { icon: "/logo.webp", apple: "/logo.webp" },
   openGraph: {
     title: "Inferiores Riverplatense",
     description:
       "Periodismo dedicado a las divisiones formativas de River Plate.",
     type: "website",
     locale: "es_AR",
+    siteName: "Inferiores Riverplatense",
   },
+  twitter: {
+    card: "summary_large_image",
+    title: "Inferiores Riverplatense",
+    description:
+      "Periodismo dedicado a las divisiones formativas de River Plate.",
+  },
+};
+
+export const viewport: Viewport = {
+  themeColor: "#0a0a0a",
 };
 
 export default function RootLayout({
@@ -101,12 +84,8 @@ export default function RootLayout({
     <html
       lang="es-AR"
       className={[
-        fraunces.variable,
-        instrumentSerif.variable,
         newsreader.variable,
-        playfair.variable,
         anton.variable,
-        bebas.variable,
         inter.variable,
         jbMono.variable,
       ].join(" ")}
@@ -126,11 +105,16 @@ export default function RootLayout({
           }
         `}</style>
         <LenisProvider>
+          <a href="#contenido" className="skip-link">
+            Saltar al contenido
+          </a>
           <Suspense fallback={null}>
             <Nav />
           </Suspense>
           <SocialRail />
-          <main className="pt-0">{children}</main>
+          <div id="contenido" tabIndex={-1}>
+            {children}
+          </div>
           <Footer />
           <ScrollToTop />
         </LenisProvider>
