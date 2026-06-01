@@ -2,83 +2,184 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname, useSearchParams } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
+import { useEffect, useRef, useState } from "react";
+import { DIVISIONES } from "@/lib/constants";
 
-const NAV_ITEMS = [
-  { label: "Notas", href: "/" },
-  { label: "Entrevistas", href: "/?tipo=entrevista" },
-  { label: "Noticias", href: "/?tipo=noticia" },
-  { label: "UI", href: "/ui" },
+/** Items del dropdown "Notas" (tipos editoriales). */
+const NOTAS_TIPOS = [
+  { label: "Perfiles", value: "perfil" },
+  { label: "Crónicas", value: "cronica" },
+  { label: "Análisis", value: "analisis" },
+  { label: "Columnas", value: "columna" },
 ];
-
-/** Tipos que cuentan como "Notas" para resaltar el item del nav. */
-const NOTAS_TIPOS = new Set(["perfil", "cronica", "analisis", "columna"]);
+const NOTAS_SET = new Set(NOTAS_TIPOS.map((t) => t.value));
 
 /**
- * Nav brutalist — simple de 4 items.
- * Portfolio periodístico: Notas, Entrevistas, Sobre, Contacto.
+ * Nav brutalist — masthead de diario, copiado de la estructura de Roca & Madre
+ * con nuestros textos y paleta:
+ *
+ *  ┌ utilitaria ─ links · EL PERIÓDICO DE LAS INFERIORES · Oscuro/Newsletter/ES·EN ┐
+ *  │                       Inferiores Riverplatense  (serif grande, centrado)       │
+ *  │                — CRÓNICA Y ENTREVISTAS DE LAS INFERIORES —                      │
+ *  ├ secciones (sticky) ─ Divisiones▾ · Notas▾ · Entrevistas · …   [⌕ buscar ⌘K] [NEWSLETTER]
+ *  └────────────────────────────────────────────────────────────────────────────────┘
  */
 export default function Nav() {
-  const pathname = usePathname();
+  const router = useRouter();
   const searchParams = useSearchParams();
-  const tipo = searchParams.get("tipo");
 
-  const isActive = (href: string): boolean => {
-    if (href === "/") {
-      return pathname === "/" && tipo !== null && NOTAS_TIPOS.has(tipo);
-    }
-    if (href === "/?tipo=entrevista") {
-      return pathname === "/" && tipo === "entrevista";
-    }
-    if (href === "/?tipo=noticia") {
-      return pathname === "/" && tipo === "noticia";
-    }
-    return pathname.startsWith(href);
+  const division = searchParams.get("division");
+  const tipo = searchParams.get("tipo");
+  const tema = searchParams.get("tema");
+
+  const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [mobileOpen, setMobileOpen] = useState(false);
+  const [q, setQ] = useState("");
+  const [fecha, setFecha] = useState("");
+  const searchRef = useRef<HTMLInputElement>(null);
+  const burgerRef = useRef<HTMLButtonElement>(null);
+  const divisionesBtnRef = useRef<HTMLButtonElement>(null);
+  const notasBtnRef = useRef<HTMLButtonElement>(null);
+  const mobileSearchRef = useRef<HTMLInputElement>(null);
+
+  // Fecha editorial — solo en cliente (evita mismatch de hidratación).
+  useEffect(() => {
+    setFecha(
+      new Date().toLocaleDateString("es-AR", {
+        weekday: "short",
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+      }),
+    );
+  }, []);
+
+  // ⌘K / Ctrl+K enfoca el buscador. Escape cierra y DEVUELVE el foco al disparador.
+  useEffect(() => {
+    const onKey = (e: KeyboardEvent) => {
+      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === "k") {
+        e.preventDefault();
+        searchRef.current?.focus();
+      }
+      if (e.key === "Escape") {
+        if (openDropdown === "divisiones") divisionesBtnRef.current?.focus();
+        else if (openDropdown === "notas") notasBtnRef.current?.focus();
+        else if (mobileOpen) burgerRef.current?.focus();
+        setOpenDropdown(null);
+        setMobileOpen(false);
+      }
+    };
+    document.addEventListener("keydown", onKey);
+    return () => document.removeEventListener("keydown", onKey);
+  }, [openDropdown, mobileOpen]);
+
+  // Al abrir el panel mobile, llevar el foco adentro (al buscador).
+  useEffect(() => {
+    if (mobileOpen) mobileSearchRef.current?.focus();
+  }, [mobileOpen]);
+
+  const submitSearch = (e: React.FormEvent) => {
+    e.preventDefault();
+    const term = q.trim();
+    router.push(term ? `/?q=${encodeURIComponent(term)}` : "/");
+    setOpenDropdown(null);
+    setMobileOpen(false);
   };
 
+  const toggleDropdown = (id: string) =>
+    setOpenDropdown((cur) => (cur === id ? null : id));
+
+  const divisionesActive = Boolean(division);
+  const notasActive = tipo ? NOTAS_SET.has(tipo) : false;
+
   return (
-    <header
-      className="sticky top-0 z-50 w-full"
-      style={{
-        background: "var(--color-paper-pure)",
-        borderBottom: "4px solid var(--color-river-red)",
-      }}
-    >
-      <div
-        className="mx-auto max-w-[1440px] px-6 lg:px-10 h-20 grid items-center gap-6"
-        style={{ gridTemplateColumns: "1fr auto 1fr" }}
-      >
-        {/* Logo (izquierda) */}
-        <Link
-          href="/"
-          className="flex items-center gap-3 shrink-0 justify-self-start leading-none"
-          aria-label="Inferiores Riverplatense · Portada"
+    <>
+      <header style={{ background: "var(--color-river-black)" }}>
+      {/* ============================================================
+          NIVEL 1 — barrita superior (fecha + meta)
+          Rojo PROFUNDO (#C21020) para que el texto blanco chico pase contraste AA.
+          ============================================================ */}
+      <div style={{ background: "var(--color-river-red-deep)" }}>
+        <div
+          className="mx-auto max-w-[1440px] px-4 lg:px-10 h-8 grid items-center gap-4"
+          style={{ gridTemplateColumns: "1fr auto 1fr" }}
         >
-          <Image
-            src="/logo.webp"
-            alt="Inferiores Riverplatense"
-            width={48}
-            height={48}
-            priority
-            className="shrink-0 block"
-            style={{
-              background: "var(--color-paper-pure)",
-              borderRadius: "9999px",
-            }}
-          />
+          {/* izquierda: fecha + lugar */}
           <span
-            className="hidden sm:flex font-display text-xl md:text-2xl items-center leading-none"
+            className="justify-self-start font-mono whitespace-nowrap"
             style={{
-              color: "var(--color-ink)",
-              letterSpacing: "-0.02em",
-              height: "48px",
+              fontSize: "0.62rem",
+              letterSpacing: "0.14em",
+              textTransform: "uppercase",
+              color: "rgba(255,255,255,0.92)",
+              minHeight: "0.8rem",
             }}
           >
-            <span className="inline-flex items-center">
-              Inferiores
+            {fecha ? `${fecha} · ` : ""}Buenos Aires
+          </span>
+
+          {/* centro: kicker editorial */}
+          <span
+            className="hidden md:inline-flex items-center gap-2.5 justify-self-center font-mono whitespace-nowrap"
+            style={{
+              fontSize: "0.62rem",
+              letterSpacing: "0.2em",
+              textTransform: "uppercase",
+              color: "#ffffff",
+            }}
+          >
+            <span aria-hidden style={{ width: "4px", height: "4px", borderRadius: "9999px", background: "#fff" }} />
+            De la Novena a la Primera
+            <span aria-hidden style={{ width: "4px", height: "4px", borderRadius: "9999px", background: "#fff" }} />
+          </span>
+
+          {/* derecha: navegación util + redes + edición */}
+          <span className="hidden md:flex items-center gap-4 justify-self-end whitespace-nowrap">
+            <Link href="/sobre" className="util-link">Sobre</Link>
+            <Link href="/contacto" className="util-link">Contacto</Link>
+            <span aria-hidden style={{ width: "1px", height: "12px", background: "rgba(255,255,255,0.32)" }} />
+            {["Instagram", "X", "YouTube"].map((r) => (
+              <a key={r} href="#" className="util-link">{r}</a>
+            ))}
+            <span className="util-link" style={{ cursor: "default", opacity: 0.95 }}>Nº 001</span>
+          </span>
+        </div>
+      </div>
+
+      {/* ============================================================
+          NIVEL 2 — masthead (marca · escudo · descriptor)
+          ============================================================ */}
+      <div
+        style={{
+          background: "var(--color-ink)",
+          borderBottom: "1px solid rgba(255,255,255,0.08)",
+        }}
+      >
+        <div className="mx-auto max-w-[1440px] px-4 lg:px-10 py-3 sm:py-4 lg:py-6 flex justify-center">
+          <Link
+            href="/"
+            aria-label="Inferiores Riverplatense · Portada"
+            className="flex items-center justify-center gap-3 sm:gap-4 lg:gap-5 group min-w-0 max-w-full"
+          >
+            <Image
+              src="/logo.webp"
+              alt=""
+              width={132}
+              height={132}
+              className="shrink-0 block h-auto w-14 sm:w-20 lg:w-[132px] transition-transform duration-200 group-hover:scale-[1.05]"
+              style={{ background: "var(--color-paper-pure)", borderRadius: "9999px" }}
+            />
+            <span
+              className="font-display text-center min-w-0"
+              style={{ letterSpacing: "-0.03em", lineHeight: 0.95 }}
+            >
+              <span style={{ fontSize: "clamp(1.3rem, 5.5vw, 4rem)", color: "var(--color-paper-pure)" }}>
+                Inferiores{" "}
+              </span>
               <span
-                className="ml-2"
                 style={{
+                  fontSize: "clamp(1.3rem, 5.5vw, 4rem)",
                   fontStyle: "italic",
                   color: "var(--color-river-red)",
                 }}
@@ -86,54 +187,252 @@ export default function Nav() {
                 Riverplatense
               </span>
             </span>
-          </span>
-        </Link>
-
-        {/* Nav items (centro real) */}
-        <nav
-          className="hidden md:flex items-center gap-7 justify-self-center"
-          aria-label="Navegación principal"
-        >
-          {NAV_ITEMS.map((item) => {
-            const active = isActive(item.href);
-            return (
-              <Link
-                key={item.href}
-                href={item.href}
-                className="font-sports text-sm"
-                style={{
-                  letterSpacing: "0.1em",
-                  color: active
-                    ? "var(--color-river-red)"
-                    : "var(--color-ink)",
-                  borderBottom: active
-                    ? "2px solid var(--color-river-red)"
-                    : "2px solid transparent",
-                  paddingBottom: "3px",
-                  transition: "color 120ms ease-out",
-                }}
-              >
-                {item.label}
-              </Link>
-            );
-          })}
-        </nav>
-
-        {/* Newsletter CTA (derecha) */}
-        <a
-          href="#newsletter"
-          className="hidden md:inline-flex font-sports items-center gap-2 shrink-0 justify-self-end brut-cta-red"
-          style={{
-            fontSize: "0.8rem",
-            letterSpacing: "0.12em",
-            padding: "0.6rem 1rem",
-            textDecoration: "none",
-          }}
-        >
-          Newsletter
-          <span aria-hidden>→</span>
-        </a>
+          </Link>
+        </div>
       </div>
-    </header>
+      </header>
+
+      {/* ============================================================
+          NIVEL 3 — barra de secciones (FIXED para toda la página)
+          ============================================================ */}
+      <div
+        className="sticky top-0 z-50 w-full"
+        style={{
+          background: "var(--color-ink)",
+          borderBottom: "4px solid var(--color-river-red)",
+        }}
+      >
+        <div className="mx-auto max-w-[1440px] px-4 lg:px-10 h-14 flex items-center gap-3 lg:gap-4">
+          {/* hamburguesa — solo mobile */}
+          <button
+            ref={burgerRef}
+            type="button"
+            className="nav-burger inline-flex md:hidden"
+            data-open={mobileOpen}
+            aria-expanded={mobileOpen}
+            aria-controls="nav-mobile-panel"
+            aria-label={mobileOpen ? "Cerrar menú" : "Abrir menú"}
+            onClick={() => setMobileOpen((v) => !v)}
+          >
+            {mobileOpen ? (
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
+                <path d="M5 5l14 14M19 5L5 19" strokeLinecap="square" />
+              </svg>
+            ) : (
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.4">
+                <path d="M3 6h18M3 12h18M3 18h18" strokeLinecap="square" />
+              </svg>
+            )}
+          </button>
+
+          {/* secciones — desktop / tablet */}
+          <nav
+            className="hidden md:flex items-center gap-4 chips-scroller overflow-x-auto min-w-0"
+            aria-label="Secciones"
+          >
+            {/* Divisiones ▾ */}
+            <div className="relative">
+              <button
+                ref={divisionesBtnRef}
+                type="button"
+                className="section-link"
+                data-active={divisionesActive}
+                data-open={openDropdown === "divisiones"}
+                onClick={() => toggleDropdown("divisiones")}
+                aria-expanded={openDropdown === "divisiones"}
+                aria-haspopup="true"
+                aria-controls="dropdown-divisiones"
+              >
+                Divisiones <span className="caret" aria-hidden>▾</span>
+              </button>
+              {openDropdown === "divisiones" && (
+                <div className="section-dropdown" id="dropdown-divisiones">
+                  {DIVISIONES.map((d) => (
+                    <Link
+                      key={d.value}
+                      href={`/?division=${d.value}`}
+                      onClick={() => setOpenDropdown(null)}
+                    >
+                      {d.label}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <span className="section-divider" aria-hidden />
+
+            {/* Notas ▾ */}
+            <div className="relative">
+              <button
+                ref={notasBtnRef}
+                type="button"
+                className="section-link"
+                data-active={notasActive}
+                data-open={openDropdown === "notas"}
+                onClick={() => toggleDropdown("notas")}
+                aria-expanded={openDropdown === "notas"}
+                aria-haspopup="true"
+                aria-controls="dropdown-notas"
+              >
+                Notas <span className="caret" aria-hidden>▾</span>
+              </button>
+              {openDropdown === "notas" && (
+                <div className="section-dropdown" id="dropdown-notas">
+                  {NOTAS_TIPOS.map((t) => (
+                    <Link
+                      key={t.value}
+                      href={`/?tipo=${t.value}`}
+                      onClick={() => setOpenDropdown(null)}
+                    >
+                      {t.label}
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+
+            <span className="section-divider" aria-hidden />
+            <Link href="/?tipo=entrevista" className="section-link" data-active={tipo === "entrevista"}>
+              Entrevistas
+            </Link>
+            <span className="section-divider" aria-hidden />
+            <Link href="/?tipo=noticia" className="section-link" data-active={tipo === "noticia"}>
+              Noticias
+            </Link>
+            <span className="section-divider" aria-hidden />
+            <Link href="/?tema=traspasos" className="section-link" data-active={tema === "traspasos"}>
+              Traspasos
+            </Link>
+            <span className="section-divider" aria-hidden />
+            <Link href="/?division=primera" className="section-link" data-active={division === "primera"}>
+              Primera
+            </Link>
+            <span className="section-divider" aria-hidden />
+            <Link href="/?division=reserva" className="section-link" data-active={division === "reserva"}>
+              Reserva
+            </Link>
+          </nav>
+
+          {/* buscador — completa el ancho disponible */}
+          <form onSubmit={submitSearch} role="search" className="inline-search hidden lg:flex flex-1">
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="2.4" className="shrink-0">
+              <circle cx="11" cy="11" r="7" />
+              <path d="M21 21l-4.3-4.3" strokeLinecap="square" />
+            </svg>
+            <input
+              ref={searchRef}
+              type="search"
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              placeholder="Buscar nota, jugador, división…"
+              aria-label="Buscar"
+            />
+          </form>
+
+          {/* newsletter */}
+          <a
+            href="#newsletter"
+            onClick={() => setMobileOpen(false)}
+            className="newsletter-btn shrink-0 ml-auto lg:ml-0"
+          >
+            Newsletter
+          </a>
+        </div>
+
+        {/* ── Panel mobile (hamburguesa) ── */}
+        {mobileOpen && (
+          <div className="nav-mobile-panel flex flex-col md:hidden" id="nav-mobile-panel">
+            {/* buscador */}
+            <form onSubmit={submitSearch} role="search" className="nav-mobile-search">
+              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="2.4" className="shrink-0">
+                <circle cx="11" cy="11" r="7" />
+                <path d="M21 21l-4.3-4.3" strokeLinecap="square" />
+              </svg>
+              <input
+                ref={mobileSearchRef}
+                type="search"
+                value={q}
+                onChange={(e) => setQ(e.target.value)}
+                placeholder="Buscar nota, jugador, división…"
+                aria-label="Buscar"
+              />
+            </form>
+
+            {/* secciones principales */}
+            <div className="nav-mobile-group">
+              <Link href="/?tipo=entrevista" className="nav-mobile-link" data-active={tipo === "entrevista"} onClick={() => setMobileOpen(false)}>
+                Entrevistas
+              </Link>
+              <Link href="/?tipo=noticia" className="nav-mobile-link" data-active={tipo === "noticia"} onClick={() => setMobileOpen(false)}>
+                Noticias
+              </Link>
+              <Link href="/?tema=traspasos" className="nav-mobile-link" data-active={tema === "traspasos"} onClick={() => setMobileOpen(false)}>
+                Traspasos
+              </Link>
+              <Link href="/sobre" className="nav-mobile-link" onClick={() => setMobileOpen(false)}>
+                Sobre
+              </Link>
+              <Link href="/contacto" className="nav-mobile-link" onClick={() => setMobileOpen(false)}>
+                Contacto
+              </Link>
+            </div>
+
+            {/* divisiones */}
+            <div>
+              <p className="nav-mobile-label">Divisiones</p>
+              <div className="nav-mobile-chips">
+                {DIVISIONES.map((d) => (
+                  <Link
+                    key={d.value}
+                    href={`/?division=${d.value}`}
+                    className="nav-mobile-chip"
+                    data-active={division === d.value}
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    {d.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            {/* tipos de nota */}
+            <div>
+              <p className="nav-mobile-label">Notas</p>
+              <div className="nav-mobile-chips">
+                {NOTAS_TIPOS.map((t) => (
+                  <Link
+                    key={t.value}
+                    href={`/?tipo=${t.value}`}
+                    className="nav-mobile-chip"
+                    data-active={tipo === t.value}
+                    onClick={() => setMobileOpen(false)}
+                  >
+                    {t.label}
+                  </Link>
+                ))}
+              </div>
+            </div>
+
+            <a href="#newsletter" className="newsletter-btn nav-mobile-newsletter" onClick={() => setMobileOpen(false)}>
+              Newsletter
+            </a>
+          </div>
+        )}
+      </div>
+
+      {/* click afuera para cerrar dropdowns / menú mobile */}
+      {(openDropdown || mobileOpen) && (
+        <div
+          className="dropdown-backdrop"
+          onClick={() => {
+            if (mobileOpen) burgerRef.current?.focus();
+            setOpenDropdown(null);
+            setMobileOpen(false);
+          }}
+          aria-hidden
+        />
+      )}
+    </>
   );
 }
