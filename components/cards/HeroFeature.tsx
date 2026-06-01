@@ -10,18 +10,17 @@ interface Props {
 export default function HeroFeature({ nota }: Props) {
   return (
     <article
-      className="grid"
+      className="grid grid-cols-1 lg:grid-cols-2"
       style={{
-        gridTemplateColumns: "1fr 1fr",
         border: "2px solid var(--color-ink)",
         boxShadow: "8px 8px 0 var(--color-ink)",
         background: "var(--color-paper-pure)",
       }}
     >
-      <div className="flex flex-col p-10 lg:p-12">
+      <div className="flex flex-col p-6 sm:p-10 lg:p-12">
         <p
           className="font-mono text-[0.7rem] uppercase tracking-[0.2em] mb-6 flex items-center gap-2"
-          style={{ color: "var(--color-river-red)" }}
+          style={{ color: "var(--color-river-red-deep)" }}
         >
           <span
             aria-hidden
@@ -43,7 +42,7 @@ export default function HeroFeature({ nota }: Props) {
           }}
         >
           <Link
-            href="/"
+            href={`/nota/${nota.slug}`}
             style={{
               color: "var(--color-ink)",
               textDecoration: "none",
@@ -77,7 +76,7 @@ export default function HeroFeature({ nota }: Props) {
             >
               <Image
                 src={nota.autor.avatar_url}
-                alt={nota.autor.nombre}
+                alt=""
                 fill
                 sizes="32px"
                 style={{ objectFit: "cover" }}
@@ -91,7 +90,7 @@ export default function HeroFeature({ nota }: Props) {
           {nota.formato !== "articulo" && (
             <>
               <span aria-hidden>·</span>
-              <span style={{ color: "var(--color-river-red)" }}>
+              <span style={{ color: "var(--color-river-red-deep)" }}>
                 {nota.formato === "short" ? "Video corto" : "Video"}
               </span>
             </>
@@ -100,7 +99,7 @@ export default function HeroFeature({ nota }: Props) {
 
         <div className="mt-auto">
           <Link
-            href="/"
+            href={`/nota/${nota.slug}`}
             className="font-sports inline-flex items-center gap-2 brut-cta-ink"
             style={{
               fontSize: "0.85rem",
@@ -118,11 +117,10 @@ export default function HeroFeature({ nota }: Props) {
       </div>
 
       <Link
-        href="/"
-        className="relative overflow-hidden group"
+        href={`/nota/${nota.slug}`}
+        className="relative overflow-hidden group order-first lg:order-none min-h-[300px] lg:min-h-[540px] border-b-2 lg:border-b-0 lg:border-l-2"
         style={{
-          borderLeft: "2px solid var(--color-ink)",
-          minHeight: "540px",
+          borderColor: "var(--color-ink)",
           background: "var(--color-ink)",
         }}
         aria-label={`Leer: ${nota.titulo}`}

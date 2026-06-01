@@ -27,7 +27,7 @@ export default function CardAuthorMeta({ autor, publicada_en, size = "sm" }: Pro
         >
           <Image
             src={autor.avatar_url}
-            alt={autor.nombre}
+            alt=""
             fill
             sizes={`${avatarSize}px`}
             style={{ objectFit: "cover" }}
@@ -64,7 +64,7 @@ export default function CardAuthorMeta({ autor, publicada_en, size = "sm" }: Pro
       <span
         aria-hidden
         className="font-mono text-[0.65rem]"
-        style={{ color: "var(--color-river-red)" }}
+        style={{ color: "var(--color-river-red-deep)" }}
       >
         ·
       </span>

@@ -62,7 +62,7 @@ export default function NoticiasList({ notas, title = "Noticias" }: Props) {
             }}
           >
             <Link
-              href="/"
+              href={`/nota/${nota.slug}`}
               className="group grid items-center gap-3 px-4 py-3"
               style={{
                 gridTemplateColumns: "auto 72px 1fr",
@@ -74,7 +74,7 @@ export default function NoticiasList({ notas, title = "Noticias" }: Props) {
                 className="font-sports tabular-nums leading-none"
                 style={{
                   fontSize: "0.95rem",
-                  color: "var(--color-river-red)",
+                  color: "var(--color-river-red-deep)",
                   letterSpacing: "0.02em",
                 }}
               >
@@ -144,7 +144,7 @@ export default function NoticiasList({ notas, title = "Noticias" }: Props) {
           style={{ color: "var(--color-ink)" }}
         >
           Todas las noticias
-          <span aria-hidden style={{ color: "var(--color-river-red)" }}>
+          <span aria-hidden style={{ color: "var(--color-river-red-deep)" }}>
             →
           </span>
         </Link>

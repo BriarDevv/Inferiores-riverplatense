@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Nota } from "@/lib/types";
-import { formatearDuracion, labelDivision, labelTipo } from "@/lib/constants";
+import { formatearDuracion, labelDivision, labelTipo, youtubeThumb } from "@/lib/constants";
 import CardAuthorMeta from "./CardAuthorMeta";
 
 interface Props {
@@ -13,7 +13,7 @@ interface Props {
 export default function NotaCard({ nota, variant = "auto", size = "md" }: Props) {
   const resolved = variant === "auto" ? nota.formato : variant;
 
-  if (resolved === "short") return <ShortCard nota={nota} size={size} />;
+  if (resolved === "short") return <ShortCard nota={nota} />;
   if (resolved === "youtube") return <YouTubeCard nota={nota} size={size} />;
   return <ArticleCard nota={nota} size={size} />;
 }
@@ -65,7 +65,7 @@ function CardFooter({ nota }: { nota: Nota }) {
     >
       <p
         className="text-[0.65rem] font-mono uppercase tracking-[0.14em]"
-        style={{ color: "var(--color-river-red)" }}
+        style={{ color: "var(--color-river-red-deep)" }}
       >
         {labelTipo(nota.tipo)} · {labelDivision(nota.division)}
       </p>
@@ -87,10 +87,10 @@ function CardFooter({ nota }: { nota: Nota }) {
 /* =========================================
    SHORT CARD (9:16)
    ========================================= */
-function ShortCard({ nota }: { nota: Nota; size: "sm" | "md" | "lg" }) {
+function ShortCard({ nota }: { nota: Nota }) {
   return (
     <Link
-      href="/"
+      href={`/nota/${nota.slug}`}
       className="group block brut-hover-red"
       style={{ background: "var(--color-paper-pure)" }}
     >
@@ -121,13 +121,11 @@ function ShortCard({ nota }: { nota: Nota; size: "sm" | "md" | "lg" }) {
    YOUTUBE CARD (16:9)
    ========================================= */
 function YouTubeCard({ nota, size }: { nota: Nota; size: "sm" | "md" | "lg" }) {
-  const thumb = nota.youtube_id
-    ? `https://i.ytimg.com/vi/${nota.youtube_id}/maxresdefault.jpg`
-    : nota.poster_url;
+  const thumb = nota.youtube_id ? youtubeThumb(nota.youtube_id) : nota.poster_url;
 
   return (
     <Link
-      href="/"
+      href={`/nota/${nota.slug}`}
       className="group block brut-hover"
       style={{ background: "var(--color-paper-pure)" }}
     >
@@ -155,7 +153,7 @@ function YouTubeCard({ nota, size }: { nota: Nota; size: "sm" | "md" | "lg" }) {
       >
         <p
           className="text-[0.65rem] font-mono uppercase tracking-[0.14em]"
-          style={{ color: "var(--color-river-red)" }}
+          style={{ color: "var(--color-river-red-deep)" }}
         >
           {labelTipo(nota.tipo)} · {labelDivision(nota.division)}
         </p>
@@ -180,7 +178,7 @@ function YouTubeCard({ nota, size }: { nota: Nota; size: "sm" | "md" | "lg" }) {
 function ArticleCard({ nota, size }: { nota: Nota; size: "sm" | "md" | "lg" }) {
   return (
     <Link
-      href="/"
+      href={`/nota/${nota.slug}`}
       className="group brut-hover h-full flex flex-col"
       style={{ background: "var(--color-paper-pure)" }}
     >
@@ -207,7 +205,7 @@ function ArticleCard({ nota, size }: { nota: Nota; size: "sm" | "md" | "lg" }) {
       >
         <p
           className="text-[0.65rem] font-mono uppercase tracking-[0.14em]"
-          style={{ color: "var(--color-river-red)" }}
+          style={{ color: "var(--color-river-red-deep)" }}
         >
           {labelTipo(nota.tipo)} · {labelDivision(nota.division)}
         </p>

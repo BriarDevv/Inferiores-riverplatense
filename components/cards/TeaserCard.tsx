@@ -5,6 +5,7 @@ import {
   formatearDuracion,
   labelDivision,
   labelTipo,
+  youtubeThumb,
 } from "@/lib/constants";
 import CardAuthorMeta from "./CardAuthorMeta";
 
@@ -21,12 +22,12 @@ const FORMATO_LABEL: Record<Nota["formato"], string> = {
 export default function TeaserCard({ nota }: Props) {
   const thumb =
     nota.formato === "youtube" && nota.youtube_id
-      ? `https://i.ytimg.com/vi/${nota.youtube_id}/maxresdefault.jpg`
+      ? youtubeThumb(nota.youtube_id)
       : nota.poster_url;
 
   return (
     <Link
-      href="/"
+      href={`/nota/${nota.slug}`}
       className="group brut-hover h-full flex flex-col"
       style={{ background: "var(--color-paper-pure)" }}
     >
@@ -82,7 +83,7 @@ export default function TeaserCard({ nota }: Props) {
       >
         <p
           className="text-[0.65rem] font-mono uppercase tracking-[0.14em]"
-          style={{ color: "var(--color-river-red)" }}
+          style={{ color: "var(--color-river-red-deep)" }}
         >
           {labelTipo(nota.tipo)} · {labelDivision(nota.division)}
         </p>

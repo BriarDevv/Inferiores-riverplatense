@@ -16,7 +16,7 @@ interface Props {
 export default function WideFeatureCard({ nota }: Props) {
   return (
     <Link
-      href="/"
+      href={`/nota/${nota.slug}`}
       className="group block h-full"
       style={{
         background: "var(--color-paper-pure)",
@@ -59,7 +59,7 @@ export default function WideFeatureCard({ nota }: Props) {
       >
         <p
           className="text-[0.7rem] font-mono uppercase tracking-[0.18em]"
-          style={{ color: "var(--color-river-red)" }}
+          style={{ color: "var(--color-river-red-deep)" }}
         >
           {labelTipo(nota.tipo)} · {labelDivision(nota.division)}
         </p>
