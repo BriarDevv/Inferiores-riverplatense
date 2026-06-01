@@ -1,3 +1,4 @@
+import Image from "next/image";
 import HeroFeature from "@/components/cards/HeroFeature";
 import NotaCard from "@/components/cards/NotaCard";
 import TeaserCard from "@/components/cards/TeaserCard";
@@ -36,6 +37,7 @@ const SECCIONES = [
   { id: "ultimas", label: "Lista numerada" },
   { id: "newsletter", label: "Caja del newsletter" },
   { id: "social", label: "Botones de redes" },
+  { id: "nav-color", label: "Nav — variantes de color" },
 ];
 
 export default function UiPage() {
@@ -707,6 +709,52 @@ export default function UiPage() {
               izquierda y siguen el scroll.)
             </p>
           </Section>
+
+          {/* ===== NAV — VARIANTES DE COLOR ===== */}
+          <Section
+            id="nav-color"
+            overline="21"
+            titulo="Barra de navegación — variantes de color"
+            descripcion="Cinco esquemas para la parte de arriba, todos con la paleta del sitio. La barra de secciones (abajo) queda negra en todas; lo que cambia es la franja superior y el masthead del medio."
+          >
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-10 items-start">
+              <NavVariant
+                name="A · Capas de tinta (actual)"
+                desc="Rojo profundo → tinta elevada → tinta. Profundidad sutil."
+                barra="#C21020"
+                masthead="#141414"
+                seccion="#0A0A0A"
+              />
+              <NavVariant
+                name="B · Rojo arriba"
+                desc="Franja roja plena arriba, el resto negro."
+                barra="#EB192E"
+                masthead="#0A0A0A"
+                seccion="#0A0A0A"
+              />
+              <NavVariant
+                name="C · Monolito negro"
+                desc="Todo negro, el rojo solo como acento."
+                barra="#0A0A0A"
+                masthead="#0A0A0A"
+                seccion="#0A0A0A"
+              />
+              <NavVariant
+                name="D · Masthead claro"
+                desc="Franja roja, masthead blanco, secciones negras."
+                barra="#EB192E"
+                masthead="#FFFFFF"
+                seccion="#0A0A0A"
+              />
+              <NavVariant
+                name="E · Rojo dominante"
+                desc="Masthead rojo pleno entre dos negros."
+                barra="#0A0A0A"
+                masthead="#EB192E"
+                seccion="#0A0A0A"
+              />
+            </div>
+          </Section>
         </main>
       </div>
     </div>
@@ -917,6 +965,152 @@ function DurationPillDemo({ seconds }: { seconds: number }) {
       }}
     >
       {m}:{s.toString().padStart(2, "0")}
+    </div>
+  );
+}
+
+function isLight(hex: string): boolean {
+  return ["#FFFFFF", "#FAFAF7", "#FFF"].includes(hex.toUpperCase());
+}
+
+function NavVariant({
+  name,
+  desc,
+  barra,
+  masthead,
+  seccion,
+}: {
+  name: string;
+  desc: string;
+  barra: string;
+  masthead: string;
+  seccion: string;
+}) {
+  const fg = (bg: string) => (isLight(bg) ? "#0a0a0a" : "#ffffff");
+  const dim = (bg: string) =>
+    isLight(bg) ? "rgba(0,0,0,0.55)" : "rgba(255,255,255,0.62)";
+
+  return (
+    <div>
+      <p
+        className="font-mono text-[0.7rem] uppercase tracking-[0.14em] mb-1"
+        style={{ color: "var(--color-river-red)" }}
+      >
+        {name}
+      </p>
+      <p className="text-xs mb-3" style={{ color: "var(--color-neutral-500)" }}>
+        {desc}
+      </p>
+      <div style={{ border: "2px solid var(--color-ink)" }}>
+        {/* barrita */}
+        <div
+          className="flex items-center justify-between px-3"
+          style={{ background: barra, height: "24px" }}
+        >
+          <span
+            className="font-mono"
+            style={{
+              fontSize: "0.5rem",
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              color: dim(barra),
+            }}
+          >
+            Mar 27 May
+          </span>
+          <span
+            className="font-mono"
+            style={{
+              fontSize: "0.5rem",
+              letterSpacing: "0.12em",
+              textTransform: "uppercase",
+              color: dim(barra),
+            }}
+          >
+            Edición · Nº 001
+          </span>
+        </div>
+
+        {/* masthead */}
+        <div
+          className="grid items-center gap-2 px-3 py-3"
+          style={{ background: masthead, gridTemplateColumns: "1fr auto 1fr" }}
+        >
+          <span
+            className="justify-self-end text-right font-display"
+            style={{ fontSize: "0.85rem", lineHeight: 1, color: fg(masthead) }}
+          >
+            Inferiores{" "}
+            <span style={{ fontStyle: "italic", color: "var(--color-river-red)" }}>
+              R.
+            </span>
+          </span>
+          <span
+            className="justify-self-center inline-flex items-center justify-center shrink-0"
+            style={{
+              width: "38px",
+              height: "38px",
+              borderRadius: "9999px",
+              background: "#fff",
+              overflow: "hidden",
+            }}
+          >
+            <Image src="/logo.webp" alt="" width={38} height={38} />
+          </span>
+          <span
+            className="justify-self-start font-display italic"
+            style={{ fontSize: "0.75rem", lineHeight: 1, color: dim(masthead) }}
+          >
+            Notas
+          </span>
+        </div>
+
+        {/* barra de secciones */}
+        <div
+          className="flex items-center gap-2 px-3"
+          style={{
+            background: seccion,
+            height: "32px",
+            borderBottom: "3px solid var(--color-river-red)",
+          }}
+        >
+          <span className="font-sports" style={{ fontSize: "0.55rem", color: "#fff" }}>
+            Divisiones
+          </span>
+          <span
+            className="font-sports"
+            style={{ fontSize: "0.55rem", color: "rgba(255,255,255,0.7)" }}
+          >
+            Notas
+          </span>
+          <span
+            className="font-sports"
+            style={{ fontSize: "0.55rem", color: "rgba(255,255,255,0.7)" }}
+          >
+            Entrevistas
+          </span>
+          <span
+            className="ml-auto inline-block shrink-0"
+            style={{
+              border: "1px solid rgba(255,255,255,0.3)",
+              width: "60px",
+              height: "14px",
+            }}
+          />
+          <span
+            className="font-sports shrink-0"
+            style={{
+              fontSize: "0.5rem",
+              color: "#fff",
+              background: "var(--color-river-red)",
+              border: "1px solid #fff",
+              padding: "2px 6px",
+            }}
+          >
+            News
+          </span>
+        </div>
+      </div>
     </div>
   );
 }
