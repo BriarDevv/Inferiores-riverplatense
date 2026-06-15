@@ -15,7 +15,7 @@ export default function UltimasList({ notas }: Props) {
           style={{ borderBottom: "2px solid var(--color-ink)" }}
         >
           <Link
-            href="/"
+            href={`/nota/${nota.slug}`}
             className="group grid items-center gap-6 py-5 px-2 transition-colors"
             style={{
               gridTemplateColumns: "auto 1fr auto",
