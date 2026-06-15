@@ -167,19 +167,24 @@ export default function Nav() {
               alt=""
               width={132}
               height={132}
-              className="shrink-0 block h-auto w-14 sm:w-20 lg:w-[132px] transition-transform duration-200 group-hover:scale-[1.05]"
+              className="shrink-0 block h-auto w-12 sm:w-16 lg:w-28 transition-transform duration-200 group-hover:scale-[1.05]"
               style={{ background: "var(--color-paper-pure)", borderRadius: "9999px" }}
             />
             <span
               className="font-display text-center min-w-0"
-              style={{ letterSpacing: "-0.03em", lineHeight: 0.95 }}
+              style={{
+                fontSize: "clamp(1.3rem, 5.5vw, 4rem)",
+                letterSpacing: "-0.03em",
+                lineHeight: 0.95,
+                position: "relative",
+                top: "0.06em",
+              }}
             >
-              <span style={{ fontSize: "clamp(1.3rem, 5.5vw, 4rem)", color: "var(--color-paper-pure)" }}>
+              <span style={{ color: "var(--color-paper-pure)" }}>
                 Inferiores{" "}
               </span>
               <span
                 style={{
-                  fontSize: "clamp(1.3rem, 5.5vw, 4rem)",
                   fontStyle: "italic",
                   color: "var(--color-river-red)",
                 }}
