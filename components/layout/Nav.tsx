@@ -34,6 +34,7 @@ export default function Nav() {
   const tema = searchParams.get("tema");
 
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
+  const [coords, setCoords] = useState<{ top: number; left: number } | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [q, setQ] = useState("");
   const [fecha, setFecha] = useState("");
@@ -79,6 +80,30 @@ export default function Nav() {
     if (mobileOpen) mobileSearchRef.current?.focus();
   }, [mobileOpen]);
 
+  // Reposiciona el dropdown abierto si se scrollea / redimensiona.
+  // Va fixed para escapar del overflow-x del scroller de secciones (si no, lo recorta).
+  useEffect(() => {
+    if (!openDropdown) return;
+    const btn =
+      openDropdown === "divisiones"
+        ? divisionesBtnRef.current
+        : openDropdown === "notas"
+          ? notasBtnRef.current
+          : null;
+    if (!btn) return;
+    const update = () => {
+      const r = btn.getBoundingClientRect();
+      setCoords({ top: r.bottom + 8, left: r.left });
+    };
+    update();
+    window.addEventListener("scroll", update, true);
+    window.addEventListener("resize", update);
+    return () => {
+      window.removeEventListener("scroll", update, true);
+      window.removeEventListener("resize", update);
+    };
+  }, [openDropdown]);
+
   const submitSearch = (e: React.FormEvent) => {
     e.preventDefault();
     const term = q.trim();
@@ -87,8 +112,18 @@ export default function Nav() {
     setMobileOpen(false);
   };
 
-  const toggleDropdown = (id: string) =>
-    setOpenDropdown((cur) => (cur === id ? null : id));
+  // Abre/cierra y ancla el dropdown (position: fixed) a su botón disparador.
+  const openDropdownAt = (id: string, btn: HTMLButtonElement | null) => {
+    if (openDropdown === id) {
+      setOpenDropdown(null);
+      return;
+    }
+    if (btn) {
+      const r = btn.getBoundingClientRect();
+      setCoords({ top: r.bottom + 8, left: r.left });
+    }
+    setOpenDropdown(id);
+  };
 
   const divisionesActive = Boolean(division);
   const notasActive = tipo ? NOTAS_SET.has(tipo) : false;
@@ -243,15 +278,19 @@ export default function Nav() {
                 className="section-link"
                 data-active={divisionesActive}
                 data-open={openDropdown === "divisiones"}
-                onClick={() => toggleDropdown("divisiones")}
+                onClick={() => openDropdownAt("divisiones", divisionesBtnRef.current)}
                 aria-expanded={openDropdown === "divisiones"}
                 aria-haspopup="true"
                 aria-controls="dropdown-divisiones"
               >
                 Divisiones <span className="caret" aria-hidden>▾</span>
               </button>
-              {openDropdown === "divisiones" && (
-                <div className="section-dropdown" id="dropdown-divisiones">
+              {openDropdown === "divisiones" && coords && (
+                <div
+                  className="section-dropdown"
+                  id="dropdown-divisiones"
+                  style={{ position: "fixed", top: coords.top, left: coords.left }}
+                >
                   {DIVISIONES.map((d) => (
                     <Link
                       key={d.value}
@@ -275,15 +314,19 @@ export default function Nav() {
                 className="section-link"
                 data-active={notasActive}
                 data-open={openDropdown === "notas"}
-                onClick={() => toggleDropdown("notas")}
+                onClick={() => openDropdownAt("notas", notasBtnRef.current)}
                 aria-expanded={openDropdown === "notas"}
                 aria-haspopup="true"
                 aria-controls="dropdown-notas"
               >
                 Notas <span className="caret" aria-hidden>▾</span>
               </button>
-              {openDropdown === "notas" && (
-                <div className="section-dropdown" id="dropdown-notas">
+              {openDropdown === "notas" && coords && (
+                <div
+                  className="section-dropdown"
+                  id="dropdown-notas"
+                  style={{ position: "fixed", top: coords.top, left: coords.left }}
+                >
                   {NOTAS_TIPOS.map((t) => (
                     <Link
                       key={t.value}
