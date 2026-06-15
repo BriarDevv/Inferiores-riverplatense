@@ -2,11 +2,20 @@ import HeroFeature from "@/components/cards/HeroFeature";
 import NotaCard from "@/components/cards/NotaCard";
 import TeaserCard from "@/components/cards/TeaserCard";
 import WideFeatureCard from "@/components/cards/WideFeatureCard";
+import JugadorCard from "@/components/cards/JugadorCard";
 import NoticiasList from "@/components/lists/NoticiasList";
+import UltimasList from "@/components/lists/UltimasList";
 import NewsletterBand from "@/components/layout/NewsletterBand";
-import { getNotaDestacada, getNotas } from "@/lib/notas";
+import SobreAutorBand from "@/components/layout/SobreAutorBand";
+import {
+  getNotaDestacada,
+  getNotas,
+  getNotasPorSujeto,
+  getSlugsDeJugadores,
+  getSujetoPorSlug,
+} from "@/lib/notas";
 import { labelDivision, labelTipo } from "@/lib/constants";
-import type { Division, Nota, TipoNota } from "@/lib/types";
+import type { Division, Nota, Sujeto, TipoNota } from "@/lib/types";
 
 type SearchParams = { [key: string]: string | string[] | undefined };
 
@@ -135,6 +144,7 @@ export default async function HomePage({
   const libre = (pool: Nota[], extra: (n: Nota) => boolean = () => true) =>
     pool.find((n) => !usados.has(n.id) && extra(n));
 
+  // Bento: entrevista wide + columna de noticias + 3 notas + 3 teasers
   const entrevistaWide = tomar(libre(entrevistas) ?? libre(notasLong));
   const notaA = tomar(
     libre(notasLong, (n) => n.tipo === "perfil") ?? libre(notasLong) ?? libre(entrevistas),
@@ -142,77 +152,68 @@ export default async function HomePage({
   const notaB = tomar(libre(notasLong) ?? libre(entrevistas));
   const notaC = tomar(libre(notasLong) ?? libre(entrevistas));
 
-  // Teasers (3 cards bajo el hero) — agarra lo que no entra en bento
-  const reserved = new Set(
-    [entrevistaWide?.id, notaA?.id, notaB?.id, notaC?.id].filter(Boolean) as string[],
-  );
+  // Teasers (fila inferior del bento) — lo que no entró en los slots
   const teasers = restantes
     .filter(
       (n) =>
         n.formato !== "youtube" &&
         n.tipo !== "noticia" &&
-        !reserved.has(n.id),
+        !usados.has(n.id),
     )
     .slice(0, 3);
+
+  // ===== BLOQUES INFERIORES =====
+  // "En la mira" — jugadores con hub de seguimiento
+  const jugadorSlugs = await getSlugsDeJugadores();
+  const jugadores = (
+    await Promise.all(
+      jugadorSlugs.map(async (slug) => {
+        const sujeto = await getSujetoPorSlug(slug);
+        if (!sujeto) return null;
+        const notasJugador = await getNotasPorSujeto(sujeto.id);
+        return { sujeto, notas: notasJugador };
+      }),
+    )
+  ).filter((x): x is { sujeto: Sujeto; notas: Nota[] } => x !== null);
+
+  // "Lo último" — recientes que no se mostraron arriba
+  const mostradas = new Set<string>([
+    ...(destacada ? [destacada.id] : []),
+    ...noticias.map((n) => n.id),
+    ...usados,
+    ...teasers.map((n) => n.id),
+  ]);
+  const ultimas = todas.filter((n) => !mostradas.has(n.id)).slice(0, 6);
+
+  // Stats para la banda del periodista
+  const stats = {
+    notas: todas.length,
+    divisiones: new Set(todas.map((n) => n.division)).size,
+    jugadores: jugadorSlugs.length,
+  };
 
   return (
     <main style={{ background: "var(--color-paper)" }}>
       <div className="mx-auto max-w-[1440px] px-6 lg:px-10 py-12 lg:py-16">
-        {/* === HERO === */}
+        {/* === HERO full-width (nota destacada) === */}
         {destacada && (
-          <section className="mb-14 lg:mb-16">
+          <section className="mb-12 lg:mb-16">
             <HeroFeature nota={destacada} />
           </section>
         )}
 
-        {/* === TEASERS (3 cards bajo el hero) === */}
-        {teasers.length > 0 && (
+        {/* === BENTO: entrevista + noticias (derecha) + notas + teasers === */}
+        {(entrevistaWide || noticias.length > 0 || notaA || notaB || notaC || teasers.length > 0) && (
           <section className="mb-20 lg:mb-24">
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-6 lg:gap-8">
-              {teasers.map((nota) => (
-                <TeaserCard key={nota.id} nota={nota} />
-              ))}
-            </div>
-          </section>
-        )}
-
-        {/* === BENTO: entrevista wide + 2 notas + columna de noticias === */}
-        {(entrevistaWide || notaA || notaB || noticias.length > 0) && (
-          <section className="mb-20 lg:mb-24">
-            <header className="mb-8 flex items-end justify-between gap-4">
-              <div>
-                <p
-                  className="font-mono text-[0.65rem] uppercase tracking-[0.22em] mb-2"
-                  style={{ color: "var(--color-river-red-deep)" }}
-                >
-                  Esta semana
-                </p>
-                <h2
-                  className="font-display leading-none"
-                  style={{
-                    fontSize: "clamp(1.75rem, 2.6vw, 2.5rem)",
-                    letterSpacing: "-0.025em",
-                    color: "var(--color-ink)",
-                  }}
-                >
-                  Entrevistas, notas y noticias
-                </h2>
-              </div>
-              <div
-                aria-hidden
-                style={{
-                  flex: 1,
-                  height: "2px",
-                  background: "var(--color-ink)",
-                  marginBottom: "0.5rem",
-                }}
-              />
-            </header>
-
             <div className="bento">
               {entrevistaWide && (
                 <div className="bento__wide">
                   <WideFeatureCard nota={entrevistaWide} />
+                </div>
+              )}
+              {noticias.length > 0 && (
+                <div className="bento__noticias">
+                  <NoticiasList notas={noticias} />
                 </div>
               )}
               {notaA && (
@@ -230,14 +231,57 @@ export default async function HomePage({
                   <NotaCard nota={notaC} variant="articulo" />
                 </div>
               )}
-              {noticias.length > 0 && (
-                <div className="bento__noticias">
-                  <NoticiasList notas={noticias} />
+              {teasers[0] && (
+                <div className="bento__t1">
+                  <TeaserCard nota={teasers[0]} />
+                </div>
+              )}
+              {teasers[1] && (
+                <div className="bento__t2">
+                  <TeaserCard nota={teasers[1]} />
+                </div>
+              )}
+              {teasers[2] && (
+                <div className="bento__t3">
+                  <TeaserCard nota={teasers[2]} />
                 </div>
               )}
             </div>
           </section>
         )}
+
+        {/* === EN LA MIRA: jugadores en seguimiento === */}
+        {jugadores.length > 0 && (
+          <section className="mb-20 lg:mb-24">
+            <p
+              className="font-mono text-[0.65rem] uppercase tracking-[0.22em] mb-6"
+              style={{ color: "var(--color-river-red-deep)" }}
+            >
+              En la mira · jugadores que seguimos
+            </p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 lg:gap-6">
+              {jugadores.map(({ sujeto, notas }) => (
+                <JugadorCard key={sujeto.id} sujeto={sujeto} notas={notas} />
+              ))}
+            </div>
+          </section>
+        )}
+
+        {/* === LO ÚLTIMO === */}
+        {ultimas.length > 0 && (
+          <section className="mb-20 lg:mb-24">
+            <p
+              className="font-mono text-[0.65rem] uppercase tracking-[0.22em] mb-2"
+              style={{ color: "var(--color-river-red-deep)" }}
+            >
+              Lo último
+            </p>
+            <UltimasList notas={ultimas} />
+          </section>
+        )}
+
+        {/* === SOBRE EL PERIODISTA === */}
+        <SobreAutorBand stats={stats} />
 
         {/* === NEWSLETTER === */}
         <NewsletterBand />
