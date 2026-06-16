@@ -156,7 +156,7 @@ export default function Nav() {
 
           {/* centro: kicker editorial */}
           <span
-            className="hidden md:inline-flex items-center gap-2.5 justify-self-center font-mono whitespace-nowrap"
+            className="hidden lg:inline-flex items-center gap-2.5 justify-self-center font-mono whitespace-nowrap"
             style={{
               fontSize: "0.62rem",
               letterSpacing: "0.2em",

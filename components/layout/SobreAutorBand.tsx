@@ -80,13 +80,13 @@ export default function SobreAutorBand({ stats }: Props) {
 
           {/* stats */}
           <div
-            className="flex shrink-0 self-start lg:self-auto"
+            className="flex w-full lg:w-auto shrink-0 self-stretch lg:self-auto"
             style={{ border: "2px solid var(--color-ink)" }}
           >
             {items.map((s, i) => (
               <div
                 key={s.label}
-                className="px-5 py-3 text-center"
+                className="px-3 sm:px-5 py-3 text-center flex-1 lg:flex-none"
                 style={{
                   borderLeft: i > 0 ? "2px solid var(--color-ink)" : "none",
                 }}
