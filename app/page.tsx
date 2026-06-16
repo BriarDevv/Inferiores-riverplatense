@@ -176,12 +176,24 @@ export default async function HomePage({
     )
   ).filter((x): x is { sujeto: Sujeto; notas: Nota[] } => x !== null);
 
-  // "Lo último" — recientes que no se mostraron arriba
-  const mostradas = new Set<string>([
+  // "Más notas" — hilera de teasers típicos (notas que no entraron en el bento)
+  const yaArriba = new Set<string>([
     ...(destacada ? [destacada.id] : []),
     ...noticias.map((n) => n.id),
     ...usados,
     ...teasers.map((n) => n.id),
+  ]);
+  const masNotas = restantes
+    .filter(
+      (n) =>
+        n.formato !== "youtube" && n.tipo !== "noticia" && !yaArriba.has(n.id),
+    )
+    .slice(0, 3);
+
+  // "Lo último" — recientes que no se mostraron arriba (ni en "Más notas")
+  const mostradas = new Set<string>([
+    ...yaArriba,
+    ...masNotas.map((n) => n.id),
   ]);
   const ultimas = todas.filter((n) => !mostradas.has(n.id)).slice(0, 6);
 
@@ -246,6 +258,17 @@ export default async function HomePage({
                   <TeaserCard nota={teasers[2]} />
                 </div>
               )}
+            </div>
+          </section>
+        )}
+
+        {/* === HILERA DE TEASERS típicos (sin título) === */}
+        {masNotas.length > 0 && (
+          <section className="mb-20 lg:mb-24">
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 items-start">
+              {masNotas.map((nota) => (
+                <TeaserCard key={nota.id} nota={nota} />
+              ))}
             </div>
           </section>
         )}
