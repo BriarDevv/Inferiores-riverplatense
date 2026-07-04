@@ -101,7 +101,7 @@ export default async function AdminResumen() {
   ];
 
   return (
-    <div className="max-w-5xl">
+    <div className="max-w-5xl mx-auto">
       <PageHeader overline={`Hola, ${nombre}`} titulo="La mesa, hoy">
         <Link
           href="/admin/notas/nueva"

@@ -99,7 +99,7 @@ export default async function AdminEstadisticas({ searchParams }: PageProps) {
   const maxNota = Math.max(1, ...topNotas.map((x) => x.valor));
 
   return (
-    <div className="max-w-6xl">
+    <div className="max-w-6xl mx-auto">
       <PageHeader
         overline="Panel de redacción"
         titulo="Estadísticas"

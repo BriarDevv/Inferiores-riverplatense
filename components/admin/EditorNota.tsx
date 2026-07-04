@@ -313,7 +313,7 @@ export default function EditorNota({ nota, autores, sujetos }: EditorNotaProps) 
         onSalir={salir}
       />
 
-      <div className="grid gap-8 lg:grid-cols-[1fr_320px] items-start max-w-6xl">
+      <div className="grid gap-8 lg:grid-cols-[1fr_320px] items-start max-w-6xl mx-auto">
         {/* Columna principal */}
         <div className="min-w-0">
           {error && (

@@ -137,7 +137,7 @@ export default async function AdminNotas({ searchParams }: PageProps) {
   if (params.q) chips.push({ etiqueta: `Búsqueda: “${params.q}”`, quitar: "q" });
 
   return (
-    <div className="max-w-6xl">
+    <div className="max-w-6xl mx-auto">
       <PageHeader overline="Panel de redacción" titulo="Notas">
         <Link
           href="/admin/notas/nueva"

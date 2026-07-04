@@ -17,7 +17,7 @@ export default async function AdminEquipo() {
   const opcionesAutor = autores.map((a) => ({ id: a.id, nombre: a.nombre }));
 
   return (
-    <div className="max-w-5xl">
+    <div className="max-w-5xl mx-auto">
       <PageHeader
         overline="Panel de redacción"
         titulo="Equipo"

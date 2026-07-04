@@ -9,7 +9,7 @@ export default async function AdminAutores() {
   const esAdmin = perfil?.rol === "admin";
 
   return (
-    <div className="max-w-5xl">
+    <div className="max-w-5xl mx-auto">
       <PageHeader
         overline="Panel de redacción"
         titulo="Autores"
