@@ -49,7 +49,8 @@ export interface Nota {
   division: Division;
   titulo: string;
   bajada: string;
-  contenido?: string;          // markdown/HTML para articulos
+  contenido?: string;          // texto legacy del mock (párrafos separados por línea en blanco)
+  cuerpo?: unknown;            // JSON de Tiptap (editor visual del panel); tiene prioridad sobre contenido
   fuente: FuenteVideo;
   video_url?: string;          // propio → URL del MP4 en Supabase Storage
   youtube_id?: string;         // formato youtube → solo el ID (ej: "dQw4w9WgXcQ")

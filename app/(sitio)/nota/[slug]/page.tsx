@@ -6,8 +6,8 @@ import TeaserCard from "@/components/cards/TeaserCard";
 import ShareBar from "@/components/article/ShareBar";
 import AuthorBio from "@/components/article/AuthorBio";
 import BackToHome from "@/components/layout/BackToHome";
-import { getNotaPorSlug, getNotasRelacionadas } from "@/lib/notas";
-import { MOCK_NOTAS } from "@/lib/mock-data";
+import { getNotaPorSlug, getNotasRelacionadas, getTodasLasNotas } from "@/lib/notas";
+import { renderCuerpo } from "@/lib/render-cuerpo";
 import {
   formatearDuracion,
   formatearFechaLarga,
@@ -20,8 +20,9 @@ const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
 type Params = { slug: string };
 
-export function generateStaticParams(): Params[] {
-  return MOCK_NOTAS.map((n) => ({ slug: n.slug }));
+export async function generateStaticParams(): Promise<Params[]> {
+  const notas = await getTodasLasNotas();
+  return notas.map((n) => ({ slug: n.slug }));
 }
 
 export async function generateMetadata({
@@ -67,6 +68,7 @@ export default async function NotaPage({
   if (!nota) notFound();
 
   const relacionadas = await getNotasRelacionadas(nota, 3);
+  const cuerpoHtml = renderCuerpo(nota.cuerpo);
   const parrafos = (nota.contenido ?? "")
     .split(/\n\s*\n/)
     .map((p) => p.trim())
@@ -241,8 +243,13 @@ export default async function NotaPage({
           )}
         </figure>
 
-        {/* cuerpo */}
-        {parrafos.length > 0 ? (
+        {/* cuerpo: primero el del editor visual (Tiptap), después el legacy del mock */}
+        {cuerpoHtml ? (
+          <div
+            className="article-prose"
+            dangerouslySetInnerHTML={{ __html: cuerpoHtml }}
+          />
+        ) : parrafos.length > 0 ? (
           <div className="article-prose">
             {parrafos.map((p, i) => (
               <p key={i}>{p}</p>

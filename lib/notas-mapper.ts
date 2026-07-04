@@ -19,6 +19,7 @@ export interface NotaRow {
   titulo: string;
   bajada: string;
   contenido: string | null;
+  cuerpo?: unknown;
   fuente: FuenteVideo;
   video_url: string | null;
   youtube_id: string | null;
@@ -63,6 +64,7 @@ export function mapRowToNota(row: NotaRow): Nota {
     titulo: row.titulo,
     bajada: row.bajada,
     contenido: row.contenido ?? undefined,
+    cuerpo: row.cuerpo ?? undefined,
     fuente: row.fuente,
     video_url: row.video_url ?? undefined,
     youtube_id: row.youtube_id ?? undefined,

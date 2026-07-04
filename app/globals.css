@@ -976,3 +976,34 @@ html {
 select.admin-input {
   cursor: pointer;
 }
+
+/* Editor Tiptap del panel */
+.editor-cuerpo .ProseMirror {
+  min-height: 420px;
+  outline: none;
+}
+.editor-cuerpo .ProseMirror p.is-editor-empty:first-child::before {
+  content: attr(data-placeholder);
+  float: left;
+  height: 0;
+  pointer-events: none;
+  color: rgba(0, 0, 0, 0.35);
+}
+/* En el editor no queremos drop cap (solo en la nota publicada) */
+.editor-cuerpo.article-prose p:first-of-type::first-letter {
+  font-size: inherit;
+  float: none;
+  color: inherit;
+  font-family: inherit;
+  padding: 0;
+  font-weight: inherit;
+  line-height: inherit;
+}
+.editor-cuerpo .ProseMirror img {
+  max-width: 100%;
+  border: 2px solid var(--color-ink);
+}
+.editor-cuerpo .ProseMirror div[data-youtube-video] iframe {
+  max-width: 100%;
+  border: 2px solid var(--color-ink);
+}

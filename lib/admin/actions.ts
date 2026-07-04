@@ -101,9 +101,23 @@ export async function guardarNota(input: GuardarNotaInput): Promise<ResultadoAcc
 
   let notaId = input.id;
   if (notaId) {
-    // Al editar, solo pisamos publicada_en si el modo cambia la publicación.
+    // Al editar: "ahora" sobre una nota ya publicada CONSERVA su fecha original
+    // (no queremos que cada corrección la mande arriba de todo en la portada).
+    let fechaFinal = publicada_en;
+    if (input.modo === "ahora") {
+      const { data: actual } = await supabase
+        .from("notas")
+        .select("publicada_en, estado")
+        .eq("id", notaId)
+        .single();
+      if (actual?.estado === "publicada" && actual.publicada_en) {
+        fechaFinal = actual.publicada_en;
+      }
+    }
     const patch =
-      input.modo === "borrador" ? { ...fila, publicada_en: null } : { ...fila, publicada_en };
+      input.modo === "borrador"
+        ? { ...fila, publicada_en: null }
+        : { ...fila, publicada_en: fechaFinal };
     const { error: err } = await supabase.from("notas").update(patch).eq("id", notaId);
     if (err) return { ok: false, error: traducirError(err.message) };
   } else {
