@@ -165,6 +165,64 @@ export async function toggleDestacada(id: string, destacada: boolean): Promise<R
   return { ok: true };
 }
 
+/** Crea una copia de la nota como borrador (sin destacada ni primicia, sin fecha). */
+export async function duplicarNota(id: string): Promise<ResultadoAccion> {
+  const supabase = await createSupabaseServer();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: "Sesión vencida. Volvé a entrar." };
+
+  const { data: orig, error: errGet } = await supabase
+    .from("notas")
+    .select("*")
+    .eq("id", id)
+    .maybeSingle();
+  if (errGet || !orig) return { ok: false, error: "No se encontró la nota a duplicar." };
+
+  const { data: pivote } = await supabase
+    .from("nota_sujetos")
+    .select("sujeto_id")
+    .eq("nota_id", id);
+
+  const { id: _id, creado_en: _creado, ...resto } = orig as Record<string, unknown> & {
+    id: string;
+    creado_en?: string;
+  };
+  const base = {
+    ...resto,
+    titulo: `${orig.titulo} (copia)`,
+    primicia: false,
+    destacada: false,
+    estado: "borrador",
+    publicada_en: null,
+    actualizada_en: null,
+    creada_por: user.id,
+  };
+
+  // Primer intento con slug "-copia"; si ya existe, sufijo corto único.
+  let nuevoId = `n-${crypto.randomUUID().slice(0, 8)}`;
+  let { error: errIns } = await supabase
+    .from("notas")
+    .insert({ ...base, id: nuevoId, slug: `${orig.slug}-copia` });
+  if (errIns?.message.includes("duplicate key")) {
+    nuevoId = `n-${crypto.randomUUID().slice(0, 8)}`;
+    ({ error: errIns } = await supabase
+      .from("notas")
+      .insert({ ...base, id: nuevoId, slug: `${orig.slug}-copia-${nuevoId.slice(-4)}` }));
+  }
+  if (errIns) return { ok: false, error: traducirError(errIns.message) };
+
+  if (pivote && pivote.length > 0) {
+    await supabase
+      .from("nota_sujetos")
+      .insert(pivote.map((p) => ({ nota_id: nuevoId, sujeto_id: p.sujeto_id })));
+  }
+
+  revalidatePath("/admin/notas");
+  return { ok: true, id: nuevoId };
+}
+
 export async function borrarNota(id: string): Promise<ResultadoAccion> {
   const supabase = await createSupabaseServer();
   const { error } = await supabase.from("notas").delete().eq("id", id);
