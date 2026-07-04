@@ -1,4 +1,5 @@
 import EditorNota from "@/components/admin/EditorNota";
+import PageHeader from "@/components/admin/PageHeader";
 import { listAutoresAdmin, listSujetosAdmin } from "@/lib/admin/notas-admin";
 
 export const metadata = { title: "Nueva nota — Panel" };
@@ -8,10 +9,7 @@ export default async function NuevaNota() {
 
   return (
     <div className="max-w-6xl">
-      <header className="mb-8">
-        <p className="overline mb-1">Notas</p>
-        <h1 className="font-display text-3xl md:text-4xl font-bold">Nueva nota</h1>
-      </header>
+      <PageHeader overline="Notas" titulo="Nueva nota" />
       <EditorNota nota={null} autores={autores} sujetos={sujetos} />
     </div>
   );

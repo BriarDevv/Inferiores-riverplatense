@@ -1,15 +1,81 @@
 import Link from "next/link";
-import { listNotasAdmin, listAutoresAdmin } from "@/lib/admin/notas-admin";
-import { labelTipo, formatearFecha } from "@/lib/constants";
+import PageHeader from "@/components/admin/PageHeader";
+import { listNotasAdmin, listAutoresAdmin, getPerfilActual } from "@/lib/admin/notas-admin";
+import { labelTipo, labelDivision, formatearFecha } from "@/lib/constants";
+import type { NotaAdmin } from "@/lib/admin/notas-admin";
 
 export const metadata = { title: "Resumen — Panel" };
 
+function ListaNotas({
+  titulo,
+  vacio,
+  notas,
+  linkLabel,
+  linkHref,
+}: {
+  titulo: string;
+  vacio: string;
+  notas: NotaAdmin[];
+  linkLabel: string;
+  linkHref: string;
+}) {
+  return (
+    <section aria-label={titulo} className="brut-frame-shadow bg-[var(--color-paper-pure)] flex flex-col">
+      <header className="bg-[var(--color-ink)] text-white px-4 py-2.5 flex items-center justify-between">
+        <h2 className="font-sports uppercase tracking-[0.18em] text-xs">{titulo}</h2>
+        <Link
+          href={linkHref}
+          className="font-mono text-[10px] uppercase tracking-widest text-white/60 hover:text-[var(--color-river-red)] transition-colors"
+        >
+          {linkLabel}
+        </Link>
+      </header>
+      {notas.length === 0 ? (
+        <p className="px-4 py-8 font-body text-sm text-black/45">{vacio}</p>
+      ) : (
+        <ul>
+          {notas.map((n, i) => (
+            <li key={n.id} className="border-b last:border-b-0 border-black/10">
+              <Link
+                href={`/admin/notas/${n.id}`}
+                className="flex gap-3 px-4 py-3 hover:bg-[var(--color-river-red-soft)] transition-colors"
+              >
+                <span
+                  aria-hidden
+                  className="font-sports text-2xl leading-none text-[var(--color-river-red)] w-7 shrink-0 pt-0.5"
+                >
+                  {i + 1}
+                </span>
+                <span className="min-w-0">
+                  <span className="block font-display font-bold leading-snug">
+                    {n.destacada && <span className="text-[var(--color-river-red)]">★ </span>}
+                    {n.titulo}
+                  </span>
+                  <span className="font-mono text-[10px] uppercase tracking-[0.14em] text-black/45">
+                    {labelTipo(n.tipo)} · {labelDivision(n.division)} · {n.autor.nombre}
+                    {n.publicada_en ? ` · ${formatearFecha(n.publicada_en)}` : ""}
+                  </span>
+                </span>
+              </Link>
+            </li>
+          ))}
+        </ul>
+      )}
+    </section>
+  );
+}
+
 export default async function AdminResumen() {
-  const [notas, autores] = await Promise.all([listNotasAdmin(), listAutoresAdmin()]);
+  const [notas, autores, perfil] = await Promise.all([
+    listNotasAdmin(),
+    listAutoresAdmin(),
+    getPerfilActual(),
+  ]);
 
   const publicadas = notas.filter((n) => n.estado === "publicada");
   const borradores = notas.filter((n) => n.estado === "borrador");
   const programadas = notas.filter((n) => n.estado === "programada");
+  const nombre = perfil?.email.split("@")[0] ?? "";
 
   const stats = [
     { valor: publicadas.length, label: "Publicadas" },
@@ -20,80 +86,55 @@ export default async function AdminResumen() {
 
   return (
     <div className="max-w-5xl">
-      <header className="mb-8">
-        <p className="overline mb-1">Panel de redacción</p>
-        <h1 className="font-display text-3xl md:text-4xl font-bold">Resumen</h1>
-      </header>
+      <PageHeader overline={`Hola, ${nombre}`} titulo="La mesa, hoy">
+        <Link
+          href="/admin/notas/nueva"
+          className="brut-cta-red px-5 py-3 font-sports uppercase tracking-[0.15em] text-sm inline-block"
+        >
+          + Nueva nota
+        </Link>
+      </PageHeader>
 
-      {/* Scoreboard */}
-      <section aria-label="Números de la redacción" className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-10">
-        {stats.map((s) => (
-          <div key={s.label} className="brut-frame bg-[var(--color-paper-pure)] px-4 py-5">
-            <p className="font-sports text-4xl md:text-5xl leading-none text-[var(--color-river-red)]">
+      {/* Marcador: un solo frame dividido, como tablero de resultados */}
+      <section
+        aria-label="Números de la redacción"
+        className="brut-frame-shadow-red bg-[var(--color-ink)] text-white grid grid-cols-2 md:grid-cols-4 mb-10"
+      >
+        {stats.map((s, i) => {
+          const bordes = [
+            "",
+            "border-l border-white/15",
+            "border-t md:border-t-0 md:border-l border-white/15",
+            "border-t md:border-t-0 border-l border-white/15",
+          ][i];
+          return (
+          <div key={s.label} className={`px-5 py-6 ${bordes}`}>
+            <p className="font-sports text-5xl md:text-6xl leading-none text-[var(--color-river-red)]">
               {s.valor}
             </p>
-            <p className="font-mono text-[11px] uppercase tracking-[0.14em] mt-2 text-black/60">
+            <p className="font-mono text-[10px] uppercase tracking-[0.18em] mt-2.5 text-white/60">
               {s.label}
             </p>
           </div>
-        ))}
+          );
+        })}
       </section>
 
-      <div className="grid md:grid-cols-2 gap-8">
-        {/* Borradores para retomar */}
-        <section aria-labelledby="h-borradores">
-          <div className="flex items-baseline justify-between mb-3">
-            <h2 id="h-borradores" className="brut-label">Para retomar</h2>
-            <Link href="/admin/notas/nueva" className="font-mono text-xs text-[var(--color-river-red-deep)] hover:underline">
-              + Nueva nota
-            </Link>
-          </div>
-          <div className="brut-frame-shadow bg-[var(--color-paper-pure)]">
-            {borradores.length === 0 ? (
-              <p className="px-4 py-6 font-body text-sm text-black/50">
-                No hay borradores. Empezá una nota nueva cuando quieras.
-              </p>
-            ) : (
-              borradores.slice(0, 5).map((n) => (
-                <Link
-                  key={n.id}
-                  href={`/admin/notas/${n.id}`}
-                  className="block px-4 py-3 border-b last:border-b-0 border-black/10 hover:bg-[var(--color-river-red-soft)] transition-colors"
-                >
-                  <span className="block font-display font-bold leading-snug">{n.titulo}</span>
-                  <span className="font-mono text-[11px] uppercase tracking-widest text-black/50">
-                    {labelTipo(n.tipo)} · {n.autor.nombre}
-                  </span>
-                </Link>
-              ))
-            )}
-          </div>
-        </section>
-
-        {/* Últimas publicadas */}
-        <section aria-labelledby="h-publicadas">
-          <div className="flex items-baseline justify-between mb-3">
-            <h2 id="h-publicadas" className="brut-label">Últimas publicadas</h2>
-            <Link href="/admin/notas" className="font-mono text-xs text-[var(--color-river-red-deep)] hover:underline">
-              Ver todas
-            </Link>
-          </div>
-          <div className="brut-frame-shadow bg-[var(--color-paper-pure)]">
-            {publicadas.slice(0, 5).map((n) => (
-              <Link
-                key={n.id}
-                href={`/admin/notas/${n.id}`}
-                className="block px-4 py-3 border-b last:border-b-0 border-black/10 hover:bg-[var(--color-river-red-soft)] transition-colors"
-              >
-                <span className="block font-display font-bold leading-snug">{n.titulo}</span>
-                <span className="font-mono text-[11px] uppercase tracking-widest text-black/50">
-                  {formatearFecha(n.publicada_en)} · {n.autor.nombre}
-                  {n.destacada ? " · ★ destacada" : ""}
-                </span>
-              </Link>
-            ))}
-          </div>
-        </section>
+      <div className="grid lg:grid-cols-2 gap-8 items-start">
+        <ListaNotas
+          titulo="Para retomar"
+          vacio="No hay borradores pendientes. Cuando guardes uno, te espera acá."
+          notas={borradores.slice(0, 5)}
+          linkLabel="Ver borradores"
+          linkHref="/admin/notas?estado=borrador"
+        />
+        <ListaNotas
+          titulo="Últimas publicadas"
+          vacio="Todavía no hay notas publicadas."
+          notas={publicadas.slice(0, 5)}
+          linkLabel="Ver todas"
+          linkHref="/admin/notas"
+        />
       </div>
     </div>
   );

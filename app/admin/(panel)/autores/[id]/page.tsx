@@ -1,5 +1,6 @@
 import { notFound } from "next/navigation";
 import EditorAutor from "@/components/admin/EditorAutor";
+import PageHeader from "@/components/admin/PageHeader";
 import { getAutorAdmin, getPerfilActual } from "@/lib/admin/notas-admin";
 
 export const metadata = { title: "Editar firma — Panel" };
@@ -15,10 +16,7 @@ export default async function EditarFirma({ params }: PageProps) {
 
   return (
     <div className="max-w-4xl">
-      <header className="mb-8">
-        <p className="overline mb-1">Autores</p>
-        <h1 className="font-display text-3xl md:text-4xl font-bold">{autor.nombre}</h1>
-      </header>
+      <PageHeader overline="Autores" titulo={autor.nombre} />
       <EditorAutor autor={autor} esAdmin={perfil?.rol === "admin"} />
     </div>
   );

@@ -6,6 +6,7 @@ import {
   type FiltrosAdmin,
 } from "@/lib/admin/notas-admin";
 import NotaAcciones from "@/components/admin/NotaAcciones";
+import PageHeader from "@/components/admin/PageHeader";
 import { DIVISIONES, TIPOS_NOTA, labelDivision, labelTipo, formatearFecha } from "@/lib/constants";
 import type { EstadoNota } from "@/lib/types";
 
@@ -42,21 +43,20 @@ export default async function AdminNotas({ searchParams }: PageProps) {
 
   return (
     <div className="max-w-6xl">
-      <header className="mb-8 flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <p className="overline mb-1">Panel de redacción</p>
-          <h1 className="font-display text-3xl md:text-4xl font-bold">Notas</h1>
-        </div>
+      <PageHeader overline="Panel de redacción" titulo="Notas">
         <Link
           href="/admin/notas/nueva"
-          className="brut-cta-red px-5 py-3 font-sports uppercase tracking-[0.15em] text-sm"
+          className="brut-cta-red px-5 py-3 font-sports uppercase tracking-[0.15em] text-sm inline-block"
         >
           + Nueva nota
         </Link>
-      </header>
+      </PageHeader>
 
       {/* Filtros (GET, sin JS) */}
-      <form method="get" className="flex flex-wrap items-end gap-3 mb-6">
+      <form
+        method="get"
+        className="brut-frame bg-[var(--color-paper-pure)] px-4 py-4 flex flex-wrap items-end gap-3 mb-6"
+      >
         <label className="flex flex-col gap-1">
           <span className="brut-label">Estado</span>
           <select name="estado" defaultValue={params.estado ?? ""} className="admin-input">
