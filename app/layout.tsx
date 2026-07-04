@@ -1,16 +1,10 @@
 import type { Metadata, Viewport } from "next";
-import { Suspense } from "react";
 import {
   Newsreader,
   Anton,
   Inter,
   JetBrains_Mono,
 } from "next/font/google";
-import LenisProvider from "@/components/layout/LenisProvider";
-import Nav from "@/components/layout/Nav";
-import Footer from "@/components/layout/Footer";
-import ScrollToTop from "@/components/layout/ScrollToTop";
-import SocialRail from "@/components/layout/SocialRail";
 import "./globals.css";
 
 /* === Combo final del proyecto: Newsreader + Anton + Inter + JetBrains Mono === */
@@ -104,20 +98,7 @@ export default function RootLayout({
             --font-mono: var(--font-mono-local), ui-monospace, monospace;
           }
         `}</style>
-        <LenisProvider>
-          <a href="#contenido" className="skip-link">
-            Saltar al contenido
-          </a>
-          <Suspense fallback={null}>
-            <Nav />
-          </Suspense>
-          <SocialRail />
-          <div id="contenido" tabIndex={-1}>
-            {children}
-          </div>
-          <Footer />
-          <ScrollToTop />
-        </LenisProvider>
+        {children}
       </body>
     </html>
   );

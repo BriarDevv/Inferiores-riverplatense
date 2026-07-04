@@ -16,3 +16,5 @@ npm-debug.log*
 next-env.d.ts.bak
 
 .omc/
+.playwright-mcp/
+responsive-test/
