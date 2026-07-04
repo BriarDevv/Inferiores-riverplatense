@@ -1,5 +1,6 @@
 import { redirect } from "next/navigation";
 import AdminSidebar from "@/components/admin/AdminSidebar";
+import ToastProvider from "@/components/admin/Toasts";
 import { getPerfilActual } from "@/lib/admin/notas-admin";
 import { cerrarSesion } from "@/lib/admin/actions";
 
@@ -32,7 +33,9 @@ export default async function PanelLayout({ children }: { children: React.ReactN
           </span>
           <span className="font-mono text-[10px] tracking-[0.18em]">Nº 001</span>
         </div>
-        <main className="flex-1 px-5 py-7 md:px-10 md:py-9">{children}</main>
+        <ToastProvider>
+          <main className="flex-1 px-4 py-6 sm:px-5 sm:py-7 md:px-10 md:py-9">{children}</main>
+        </ToastProvider>
       </div>
     </div>
   );

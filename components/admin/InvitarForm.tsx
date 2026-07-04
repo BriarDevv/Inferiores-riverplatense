@@ -3,9 +3,11 @@
 import { useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import { invitarMiembro } from "@/lib/admin/equipo-actions";
+import { useToast } from "./Toasts";
 
 export default function InvitarForm() {
   const router = useRouter();
+  const toast = useToast();
   const [pendiente, startTransition] = useTransition();
   const [email, setEmail] = useState("");
   const [rol, setRol] = useState<"admin" | "editor">("editor");
@@ -17,12 +19,9 @@ export default function InvitarForm() {
     startTransition(async () => {
       const r = await invitarMiembro(email.trim(), rol);
       if (!r.ok) {
-        setMensaje({ tipo: "error", texto: r.error ?? "No se pudo invitar." });
+        setMensaje({ tipo: "error", texto: r.error ?? "No se pudo enviar la invitación." });
       } else {
-        setMensaje({
-          tipo: "ok",
-          texto: `Listo: le mandamos la invitación a ${email.trim()} con rol ${rol}.`,
-        });
+        toast({ texto: `Invitación enviada a ${email.trim()} con rol ${rol}.` });
         setEmail("");
         router.refresh();
       }

@@ -2,6 +2,7 @@ import { redirect } from "next/navigation";
 import PageHeader from "@/components/admin/PageHeader";
 import InvitarForm from "@/components/admin/InvitarForm";
 import EquipoAcciones from "@/components/admin/EquipoAcciones";
+import SelloEstado from "@/components/admin/SelloEstado";
 import { getPerfilActual, listAutoresAdmin } from "@/lib/admin/notas-admin";
 import { listEquipo } from "@/lib/admin/equipo";
 import { formatearFecha } from "@/lib/constants";
@@ -20,7 +21,7 @@ export default async function AdminEquipo() {
       <PageHeader
         overline="Panel de redacción"
         titulo="Equipo"
-        descripcion="Quiénes entran al panel y con qué permisos. Editor: carga y edita sus notas. Admin: todo, incluida esta pantalla."
+        descripcion="Los usuarios entran al panel; las firmas aparecen en el sitio. Una cuenta puede vincularse a una firma. Editor: carga y edita sus notas. Admin: todo, incluida esta pantalla."
       />
 
       <InvitarForm />
@@ -38,8 +39,8 @@ export default async function AdminEquipo() {
           <tbody>
             {equipo.map((m) => (
               <tr key={m.userId}>
-                <td>
-                  <span className="block font-body font-medium">
+                <td className="celda-principal">
+                  <span className="block font-body font-medium break-all">
                     {m.email}
                     {m.userId === perfil.userId && (
                       <span className="font-mono text-[10px] uppercase tracking-widest text-[var(--color-river-red-deep)]"> · vos</span>
@@ -49,19 +50,15 @@ export default async function AdminEquipo() {
                     Invitado {formatearFecha(m.invitadoEn)}
                   </span>
                 </td>
-                <td>
-                  {m.rol ? (
-                    <span className={`chip-estado ${m.rol === "admin" ? "chip-estado-publicada" : "chip-estado-programada"}`}>
-                      {m.rol}
-                    </span>
-                  ) : (
-                    <span className="chip-estado chip-estado-borrador">sin acceso</span>
-                  )}
+                <td data-label="Estado">
+                  <SelloEstado
+                    tipo={m.rol === null ? "sin-acceso" : m.ultimoAcceso === null ? "pendiente" : "activo"}
+                  />
                 </td>
-                <td className="font-mono text-xs whitespace-nowrap">
+                <td data-label="Último acceso" className="font-mono text-xs whitespace-nowrap">
                   {m.ultimoAcceso ? formatearFecha(m.ultimoAcceso) : "nunca entró"}
                 </td>
-                <td>
+                <td className="celda-acciones">
                   <EquipoAcciones
                     userId={m.userId}
                     email={m.email}
@@ -78,9 +75,8 @@ export default async function AdminEquipo() {
       </div>
 
       <p className="mt-4 font-body text-sm text-black/50 max-w-2xl">
-        La invitación llega por email con un link de acceso. Ojo: el plan gratis de
-        Supabase manda pocos emails por hora; si el envío falla, esperá un rato o
-        generá el acceso a mano con <code className="font-mono text-xs">scripts/gen-login-link.ts</code>.
+        La invitación llega por email con un link de acceso. El plan actual permite pocos
+        emails por hora: si un envío falla, esperá un rato y reintentá.
       </p>
     </div>
   );

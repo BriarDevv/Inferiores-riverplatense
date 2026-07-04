@@ -6,6 +6,8 @@ import Link from "next/link";
 import { guardarAutor, borrarAutor } from "@/lib/admin/actions";
 import { subirImagen } from "@/lib/admin/upload";
 import type { AutorAdmin } from "@/lib/admin/notas-admin";
+import ConfirmDialog from "./ConfirmDialog";
+import { useToast } from "./Toasts";
 
 interface EditorAutorProps {
   autor: AutorAdmin | null; // null = nueva firma
@@ -24,9 +26,11 @@ function slugificar(s: string): string {
 
 export default function EditorAutor({ autor, esAdmin }: EditorAutorProps) {
   const router = useRouter();
+  const toast = useToast();
   const [pendiente, startTransition] = useTransition();
   const [error, setError] = useState<string | null>(null);
   const [subiendo, setSubiendo] = useState(false);
+  const [confirmaBorrar, setConfirmaBorrar] = useState(false);
 
   const [nombre, setNombre] = useState(autor?.nombre ?? "");
   const [slug, setSlug] = useState(autor?.slug ?? "");
@@ -74,6 +78,9 @@ export default function EditorAutor({ autor, esAdmin }: EditorAutorProps) {
       });
       if (!r.ok) setError(r.error ?? "Algo falló al guardar.");
       else {
+        toast({
+          texto: autor ? `Firma de ${nombre} actualizada.` : `Firma de ${nombre} creada.`,
+        });
         router.push("/admin/autores");
         router.refresh();
       }
@@ -82,11 +89,12 @@ export default function EditorAutor({ autor, esAdmin }: EditorAutorProps) {
 
   function borrar() {
     if (!autor) return;
-    if (!window.confirm(`¿Borrar la firma de ${autor.nombre}?`)) return;
     startTransition(async () => {
       const r = await borrarAutor(autor.id);
+      setConfirmaBorrar(false);
       if (!r.ok) setError(r.error ?? "No se pudo borrar.");
       else {
+        toast({ texto: `Firma de ${autor.nombre} borrada.` });
         router.push("/admin/autores");
         router.refresh();
       }
@@ -217,7 +225,7 @@ export default function EditorAutor({ autor, esAdmin }: EditorAutorProps) {
             {autor && (
               <button
                 type="button"
-                onClick={borrar}
+                onClick={() => setConfirmaBorrar(true)}
                 className="ml-auto font-mono text-xs uppercase tracking-widest text-black/40 hover:text-[var(--color-river-red-deep)]"
               >
                 Borrar firma
@@ -226,6 +234,20 @@ export default function EditorAutor({ autor, esAdmin }: EditorAutorProps) {
           </div>
         )}
       </fieldset>
+
+      {autor && (
+        <ConfirmDialog
+          abierto={confirmaBorrar}
+          titulo="Borrar firma"
+          descripcion={`La firma de ${autor.nombre} deja de existir en el sitio (su perfil público incluido). Si tiene notas, primero hay que reasignarlas.`}
+          confirmarLabel="Borrar firma"
+          peligroso
+          pendiente={pendiente}
+          onConfirmar={borrar}
+          onCerrar={() => setConfirmaBorrar(false)}
+        />
+      )}
     </form>
   );
 }
+

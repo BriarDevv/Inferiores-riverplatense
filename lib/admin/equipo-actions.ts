@@ -45,7 +45,7 @@ export async function invitarMiembro(
       return {
         ok: false,
         error:
-          "El límite de emails por hora del plan gratis está agotado. Esperá un rato, o creale el acceso con: npx tsx scripts/gen-login-link.ts " + email,
+          "Se agotó el límite de emails por hora. Esperá un rato y volvé a intentar.",
       };
     }
     return { ok: false, error: `No se pudo invitar: ${error.message}` };
