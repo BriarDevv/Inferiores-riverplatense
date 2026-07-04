@@ -23,10 +23,24 @@ Sigue siendo material de demo para cliente, pero ya **no** está recortado a `/`
 - **SEO**: `sitemap.xml`, `robots.txt`, `feed.xml` (RSS), `not-found.tsx` (404 brutalist), `metadataBase` + iconos. ✓
 - **Cards/links internos** → ahora apuntan a `/nota/${slug}` reales. ✓
 
-### Pendiente (para que sea sitio real)
+### ✅ Fase 1 "Cimientos Supabase" COMPLETADA (2026-07-04)
 
-- Reponer `/sobre` y `/contacto` (patrón placeholder: bloque con borde izquierdo rojo + título + descripción + mail/WhatsApp para datos y primicias).
-- Conectar Supabase (auth magic-link + DB + storage + ABM). Ver "Pendiente priorizado".
+En camino al **dashboard admin** (spec: `docs/superpowers/specs/2026-07-04-admin-dashboard-design.md`, plan: `docs/superpowers/plans/2026-07-04-fase-1-cimientos-supabase.md`):
+
+- **Supabase conectado** (proyecto `mqsbbptkhkkjjrkdwgvf`, región us-west-2). Keys en `.env.local` (URL + anon/publishable + `SUPABASE_DB_URL` para scripts). NO hay service_role key; los scripts locales usan conexión directa Postgres.
+- **Schema en DB**: `autores` (firmas), `profiles` (cuentas, rol admin/editor), `sujetos`, `notas` (con `estado` borrador/programada/publicada), `nota_sujetos`, `nota_visitas` + bucket `imagenes`. Migraciones versionadas en `supabase/migrations/*.sql` — correr con `npx tsx scripts/run-migrations.ts`.
+- **RLS activa y verificada** (`scripts/check-rls.ts`): anon solo lee publicadas; escritura bloqueada sin sesión; `nota_visitas` invisible al cliente.
+- **Seed**: las 22 notas + 2 autores + 7 sujetos migrados (`npx tsx scripts/seed.ts`, idempotente). `lib/mock-data.ts` queda SOLO como fuente del seed.
+- **`lib/notas.ts` lee de Supabase** (misma interfaz; cliente anónimo sin cookies para que funcione en SSG/build). Mapper DB→`Nota` en `lib/notas-mapper.ts` con tests (`npm test`, vitest).
+- **Auth**: login magic-link (`/admin/login`, estética "acreditación de prensa"), callback `/auth/callback` (valida que exista `profile`, si no → sin acceso), **`proxy.ts`** (Next 16, ex-middleware) protege `/admin/*`. Placeholder `/admin` muestra sesión+rol.
+- **Route groups**: páginas públicas en `app/(sitio)/` con su layout (Nav/Footer/SocialRail/Lenis); root layout = solo fuentes/metadata; `/admin` tiene layout limpio propio.
+
+### Pendiente (siguientes fases del dashboard)
+
+- **Fase 2**: layout del panel + CRUD de notas (editor Tiptap) + CRUD de autores + upload de imágenes + estados/programación.
+- **Fase 3**: `/autor/[slug]` público + contador de visitas + resumen con stats.
+- **Fase 4**: pantalla de estadísticas + gestión de equipo/roles + pulido UX.
+- En Supabase Dashboard (manual, una vez): desactivar "Allow new users to sign up" + invitar al admin + crear su `profile` con rol admin.
 - Handles reales en `SocialRail` (hoy placeholders a la raíz de cada red).
 
 ---
