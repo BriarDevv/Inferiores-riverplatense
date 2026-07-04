@@ -1,20 +1,17 @@
 import Image from "next/image";
+import Link from "next/link";
 import type { Autor } from "@/lib/types";
+import { getAutorPorSlug } from "@/lib/autores";
 
 interface Props {
   autor: Autor;
 }
 
-const BIOS: Record<string, string> = {
-  "autor-1":
-    "Cubre las divisiones formativas de River desde adentro: notas, entrevistas y noticias de la cantera, de la Novena a la Primera.",
-  "autor-2":
-    "Colaboradora. Sigue de cerca el Femenino y las categorías menores del club.",
-};
-
-/** Bloque de autor al pie de la nota. Foto + nombre + bio + rol. */
-export default function AuthorBio({ autor }: Props) {
-  const bio = BIOS[autor.id] ?? "Periodista de Inferiores Riverplatense.";
+/** Bloque de autor al pie de la nota: foto + cargo + nombre + bio reales (DB), linkeado a /autor/[slug]. */
+export default async function AuthorBio({ autor }: Props) {
+  const ficha = autor.slug ? await getAutorPorSlug(autor.slug) : null;
+  const bio = ficha?.bio ?? "Periodista de Inferiores Riverplatense.";
+  const cargo = ficha?.rol_publico ?? "Redacción";
 
   return (
     <aside
@@ -50,7 +47,7 @@ export default function AuthorBio({ autor }: Props) {
           className="font-mono text-[0.6rem] uppercase tracking-[0.2em] mb-1"
           style={{ color: "var(--color-river-red-deep)" }}
         >
-          {autor.rol === "admin" ? "Periodista" : "Colaboradora"}
+          {cargo}
         </p>
         <p
           className="font-display mb-1.5"
@@ -60,7 +57,16 @@ export default function AuthorBio({ autor }: Props) {
             color: "var(--color-ink)",
           }}
         >
-          {autor.nombre}
+          {autor.slug ? (
+            <Link
+              href={`/autor/${autor.slug}`}
+              className="hover:text-[var(--color-river-red-deep)] transition-colors"
+            >
+              {autor.nombre}
+            </Link>
+          ) : (
+            autor.nombre
+          )}
         </p>
         <p
           className="text-sm leading-relaxed"
@@ -68,6 +74,15 @@ export default function AuthorBio({ autor }: Props) {
         >
           {bio}
         </p>
+        {autor.slug && (
+          <Link
+            href={`/autor/${autor.slug}`}
+            className="inline-block mt-2 font-mono text-[0.62rem] uppercase tracking-[0.16em] hover:underline"
+            style={{ color: "var(--color-river-red-deep)" }}
+          >
+            Ver toda su cobertura →
+          </Link>
+        )}
       </div>
     </aside>
   );

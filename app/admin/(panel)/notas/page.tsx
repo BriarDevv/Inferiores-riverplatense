@@ -7,6 +7,7 @@ import {
 } from "@/lib/admin/notas-admin";
 import NotaAcciones from "@/components/admin/NotaAcciones";
 import PageHeader from "@/components/admin/PageHeader";
+import { getVisitasPorNota } from "@/lib/admin/stats";
 import { DIVISIONES, TIPOS_NOTA, labelDivision, labelTipo, formatearFecha } from "@/lib/constants";
 import type { EstadoNota } from "@/lib/types";
 
@@ -32,10 +33,11 @@ export default async function AdminNotas({ searchParams }: PageProps) {
     q: params.q,
   };
 
-  const [notas, autores, perfil] = await Promise.all([
+  const [notas, autores, perfil, visitas] = await Promise.all([
     listNotasAdmin(filtros),
     listAutoresAdmin(),
     getPerfilActual(),
+    getVisitasPorNota(),
   ]);
   const hayFiltros = Boolean(
     params.estado || params.tipo || params.division || params.autor || params.q,
@@ -126,6 +128,7 @@ export default async function AdminNotas({ searchParams }: PageProps) {
               <th>Tipo</th>
               <th>División</th>
               <th>Firma</th>
+              <th className="text-right">Visitas</th>
               <th>Fecha</th>
               <th className="text-right">Acciones</th>
             </tr>
@@ -133,7 +136,7 @@ export default async function AdminNotas({ searchParams }: PageProps) {
           <tbody>
             {notas.length === 0 && (
               <tr>
-                <td colSpan={7} className="text-center py-10 font-body text-black/50">
+                <td colSpan={8} className="text-center py-10 font-body text-black/50">
                   {hayFiltros
                     ? "Ninguna nota coincide con esos filtros."
                     : "Todavía no hay notas. Creá la primera."}
@@ -155,6 +158,9 @@ export default async function AdminNotas({ searchParams }: PageProps) {
                 <td className="font-body text-sm">{labelTipo(n.tipo)}</td>
                 <td className="font-body text-sm">{labelDivision(n.division)}</td>
                 <td className="font-body text-sm whitespace-nowrap">{n.autor.nombre}</td>
+                <td className="font-mono text-xs text-right tabular-nums">
+                  {visitas.get(n.id)?.total ?? 0}
+                </td>
                 <td className="font-mono text-xs whitespace-nowrap">
                   {n.publicada_en ? formatearFecha(n.publicada_en) : "—"}
                 </td>

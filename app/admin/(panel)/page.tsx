@@ -1,6 +1,7 @@
 import Link from "next/link";
 import PageHeader from "@/components/admin/PageHeader";
 import { listNotasAdmin, listAutoresAdmin, getPerfilActual } from "@/lib/admin/notas-admin";
+import { getVisitasPorNota } from "@/lib/admin/stats";
 import { labelTipo, labelDivision, formatearFecha } from "@/lib/constants";
 import type { NotaAdmin } from "@/lib/admin/notas-admin";
 
@@ -12,12 +13,14 @@ function ListaNotas({
   notas,
   linkLabel,
   linkHref,
+  extra,
 }: {
   titulo: string;
   vacio: string;
   notas: NotaAdmin[];
   linkLabel: string;
   linkHref: string;
+  extra?: (n: NotaAdmin) => string | null;
 }) {
   return (
     <section aria-label={titulo} className="brut-frame-shadow bg-[var(--color-paper-pure)] flex flex-col">
@@ -46,7 +49,7 @@ function ListaNotas({
                 >
                   {i + 1}
                 </span>
-                <span className="min-w-0">
+                <span className="min-w-0 flex-1">
                   <span className="block font-display font-bold leading-snug">
                     {n.destacada && <span className="text-[var(--color-river-red)]">★ </span>}
                     {n.titulo}
@@ -56,6 +59,11 @@ function ListaNotas({
                     {n.publicada_en ? ` · ${formatearFecha(n.publicada_en)}` : ""}
                   </span>
                 </span>
+                {extra?.(n) && (
+                  <span className="shrink-0 font-mono text-xs text-[var(--color-river-red-deep)] pt-1">
+                    {extra(n)}
+                  </span>
+                )}
               </Link>
             </li>
           ))}
@@ -66,10 +74,11 @@ function ListaNotas({
 }
 
 export default async function AdminResumen() {
-  const [notas, autores, perfil] = await Promise.all([
+  const [notas, autores, perfil, visitas] = await Promise.all([
     listNotasAdmin(),
     listAutoresAdmin(),
     getPerfilActual(),
+    getVisitasPorNota(),
   ]);
 
   const publicadas = notas.filter((n) => n.estado === "publicada");
@@ -77,7 +86,14 @@ export default async function AdminResumen() {
   const programadas = notas.filter((n) => n.estado === "programada");
   const nombre = perfil?.email.split("@")[0] ?? "";
 
+  const visitas7d = [...visitas.values()].reduce((acc, v) => acc + v.ult_7d, 0);
+  const masLeidas = publicadas
+    .filter((n) => (visitas.get(n.id)?.total ?? 0) > 0)
+    .sort((a, b) => (visitas.get(b.id)?.total ?? 0) - (visitas.get(a.id)?.total ?? 0))
+    .slice(0, 5);
+
   const stats = [
+    { valor: visitas7d, label: "Visitas · 7 días" },
     { valor: publicadas.length, label: "Publicadas" },
     { valor: borradores.length, label: "Borradores" },
     { valor: programadas.length, label: "Programadas" },
@@ -98,7 +114,7 @@ export default async function AdminResumen() {
       {/* Marcador: un solo frame dividido, como tablero de resultados */}
       <section
         aria-label="Números de la redacción"
-        className="brut-frame-shadow-red bg-[var(--color-ink)] text-white grid grid-cols-2 md:grid-cols-4 mb-10"
+        className="brut-frame-shadow-red bg-[var(--color-ink)] text-white grid grid-cols-2 md:grid-cols-5 mb-10"
       >
         {stats.map((s, i) => {
           const bordes = [
@@ -106,6 +122,7 @@ export default async function AdminResumen() {
             "border-l border-white/15",
             "border-t md:border-t-0 md:border-l border-white/15",
             "border-t md:border-t-0 border-l border-white/15",
+            "border-t md:border-t-0 md:border-l border-white/15",
           ][i];
           return (
           <div key={s.label} className={`px-5 py-6 ${bordes}`}>
@@ -134,6 +151,17 @@ export default async function AdminResumen() {
           notas={publicadas.slice(0, 5)}
           linkLabel="Ver todas"
           linkHref="/admin/notas"
+        />
+        <ListaNotas
+          titulo="Más leídas"
+          vacio="Las visitas empiezan a contarse apenas alguien abre una nota. Volvé en un rato."
+          notas={masLeidas}
+          linkLabel="Ver notas"
+          linkHref="/admin/notas"
+          extra={(n) => {
+            const v = visitas.get(n.id);
+            return v ? `${v.total} visita${v.total === 1 ? "" : "s"}` : null;
+          }}
         />
       </div>
     </div>

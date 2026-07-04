@@ -4,6 +4,7 @@ import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import TeaserCard from "@/components/cards/TeaserCard";
 import ShareBar from "@/components/article/ShareBar";
+import RegistrarVisita from "@/components/article/RegistrarVisita";
 import AuthorBio from "@/components/article/AuthorBio";
 import BackToHome from "@/components/layout/BackToHome";
 import { getNotaPorSlug, getNotasRelacionadas, getTodasLasNotas } from "@/lib/notas";
@@ -96,6 +97,7 @@ export default async function NotaPage({
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
+      <RegistrarVisita slug={nota.slug} />
 
       <article className="mx-auto max-w-[760px] px-6 lg:px-8 py-10 lg:py-14">
         <BackToHome />
@@ -173,7 +175,16 @@ export default async function NotaPage({
                 className="font-mono text-[0.7rem] uppercase tracking-[0.12em]"
                 style={{ color: "var(--color-ink)" }}
               >
-                {nota.autor.nombre}
+                {nota.autor.slug ? (
+                  <Link
+                    href={`/autor/${nota.autor.slug}`}
+                    className="hover:text-[var(--color-river-red-deep)] transition-colors underline decoration-transparent hover:decoration-current underline-offset-2"
+                  >
+                    {nota.autor.nombre}
+                  </Link>
+                ) : (
+                  nota.autor.nombre
+                )}
               </p>
               <p
                 className="font-mono text-[0.62rem] uppercase tracking-[0.1em]"

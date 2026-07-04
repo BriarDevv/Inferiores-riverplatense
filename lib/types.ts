@@ -39,6 +39,7 @@ export interface Autor {
   nombre: string;
   rol: "admin" | "editor";
   avatar_url?: string;
+  slug?: string;               // para /autor/[slug] (perfil público de la firma)
 }
 
 export interface Nota {

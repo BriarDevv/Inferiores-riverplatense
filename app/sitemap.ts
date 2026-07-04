@@ -1,5 +1,6 @@
 import type { MetadataRoute } from "next";
 import { getSlugsDeJugadores, getTodasLasNotas } from "@/lib/notas";
+import { getSlugsDeAutores } from "@/lib/autores";
 
 const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
 
@@ -19,6 +20,13 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
+  const slugsAutores = await getSlugsDeAutores();
+  const autores: MetadataRoute.Sitemap = slugsAutores.map((slug) => ({
+    url: `${SITE_URL}/autor/${slug}`,
+    changeFrequency: "weekly",
+    priority: 0.6,
+  }));
+
   const ultima = todas.reduce(
     (max, n) => {
       const t = new Date(n.actualizada_en ?? n.publicada_en);
@@ -33,5 +41,6 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     { url: `${SITE_URL}/contacto`, changeFrequency: "yearly", priority: 0.5 },
     ...notas,
     ...jugadores,
+    ...autores,
   ];
 }

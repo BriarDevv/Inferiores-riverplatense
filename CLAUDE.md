@@ -50,9 +50,14 @@ Panel funcional en `/admin` (plan: `docs/superpowers/plans/2026-07-04-fase-2-pan
 - **Capa admin**: `lib/admin/notas-admin.ts` (list/get con sesión, RLS decide) + `lib/admin/actions.ts` (server actions con errores traducidos + revalidatePath).
 - Flujo verificado e2e con Playwright: crear → subir poster a Storage → borrador → publicar → visible en el sitio → borrar → 404.
 
-### Pendiente (siguientes fases del dashboard)
+### ✅ Fase 3 "Autor público + visitas" COMPLETADA (2026-07-04)
 
-- **Fase 3**: `/autor/[slug]` público + contador de visitas + resumen con stats reales.
+- **`/autor/[slug]`** (SSG) — perfil público de la firma: ficha con foto/cargo/bio/redes/contacto + grid de toda su cobertura. JSON-LD `ProfilePage`/`Person` (E-E-A-T). En sitemap. Bylines linkeados: byline del detalle de nota + `AuthorBio` (que ahora lee bio/cargo REALES de la DB vía `lib/autores.ts`, se borraron las bios hardcodeadas).
+- **Contador de visitas propio**: `POST /api/visita` (service role; valida slug publicado, hash sha256 de ip+ua+día, dedupe 30 min) + `RegistrarVisita` (ping client con sessionStorage) en el detalle de nota. Migración `004_visitas.sql`: policy de lectura staff + vista `nota_visitas_resumen` (total/7d/30d, `security_invoker`).
+- **Stats en el panel**: `lib/admin/stats.ts`; Resumen con celda "Visitas · 7 días" en el marcador + lista "Más leídas"; tabla de Notas con columna Visitas.
+- `Autor` ganó `slug?` (viene en los SELECT de notas público y admin).
+
+### Pendiente (siguientes fases del dashboard)
 - **Fase 4**: pantalla de estadísticas + gestión de equipo/roles + pulido UX.
 - En Supabase Dashboard (manual, una vez): desactivar "Allow new users to sign up" + invitar al admin + crear su `profile` con rol admin.
 - Handles reales en `SocialRail` (hoy placeholders a la raíz de cada red).

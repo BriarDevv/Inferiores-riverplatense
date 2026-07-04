@@ -31,7 +31,7 @@ interface NotaAdminRow extends NotaRow {
 }
 
 const SELECT_ADMIN =
-  "*, autor:autores(id, nombre, rol, foto_url), nota_sujetos(sujeto:sujetos(id, tipo, nombre, slug, division, bio))";
+  "*, autor:autores(id, nombre, rol, foto_url, slug), nota_sujetos(sujeto:sujetos(id, tipo, nombre, slug, division, bio))";
 
 /** Estado que ve el panel: deriva "programada" de la fecha futura. */
 function estadoDerivado(row: NotaAdminRow): EstadoNota {

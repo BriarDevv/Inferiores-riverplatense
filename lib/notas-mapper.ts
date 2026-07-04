@@ -32,7 +32,13 @@ export interface NotaRow {
   destacada: boolean;
   primicia: boolean;
   capitulos: Array<{ tiempo: number; titulo: string }> | null;
-  autor: { id: string; nombre: string; rol: Autor["rol"]; foto_url: string | null };
+  autor: {
+    id: string;
+    nombre: string;
+    rol: Autor["rol"];
+    foto_url: string | null;
+    slug?: string | null;
+  };
   nota_sujetos: Array<{
     sujeto: {
       id: string;
@@ -76,6 +82,7 @@ export function mapRowToNota(row: NotaRow): Nota {
       nombre: row.autor.nombre,
       rol: row.autor.rol,
       avatar_url: row.autor.foto_url ?? undefined,
+      slug: row.autor.slug ?? undefined,
     },
     sujetos,
     tags: row.tags,

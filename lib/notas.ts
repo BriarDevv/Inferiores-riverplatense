@@ -10,7 +10,7 @@ import { norm } from "./constants";
 import type { FiltrosNota, Nota, Sujeto } from "./types";
 
 const SELECT_NOTA =
-  "*, autor:autores(id, nombre, rol, foto_url), nota_sujetos(sujeto:sujetos(id, tipo, nombre, slug, division, bio))";
+  "*, autor:autores(id, nombre, rol, foto_url, slug), nota_sujetos(sujeto:sujetos(id, tipo, nombre, slug, division, bio))";
 
 /**
  * Todas las notas publicadas (RLS ya filtra estado y fecha), más recientes primero.
@@ -117,6 +117,12 @@ export async function getSujetoPorSlug(slug: string): Promise<Sujeto | null> {
 export async function getNotasPorSujeto(sujetoId: string): Promise<Nota[]> {
   const notas = await fetchNotasPublicadas();
   return notas.filter((n) => n.sujetos.some((s) => s.id === sujetoId));
+}
+
+/** Todas las notas firmadas por un autor (por id), más recientes primero. */
+export async function getNotasPorAutor(autorId: string): Promise<Nota[]> {
+  const notas = await fetchNotasPublicadas();
+  return notas.filter((n) => n.autor.id === autorId);
 }
 
 /** Slugs de jugadores con al menos una nota — para generateStaticParams / sitemap. */
