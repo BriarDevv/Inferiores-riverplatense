@@ -908,30 +908,6 @@ html {
   }
 }
 
-/* Chips de estado de nota */
-.chip-estado {
-  font-family: var(--font-mono);
-  font-size: 11px;
-  text-transform: uppercase;
-  letter-spacing: 0.1em;
-  padding: 3px 8px;
-  border: 2px solid var(--color-ink);
-  white-space: nowrap;
-}
-.chip-estado-publicada {
-  background: var(--color-river-red);
-  border-color: var(--color-river-red);
-  color: #fff;
-}
-.chip-estado-programada {
-  background: var(--color-ink);
-  color: #fff;
-}
-.chip-estado-borrador {
-  background: transparent;
-  color: var(--color-ink);
-}
-
 /* Tabla del panel */
 .admin-table {
   width: 100%;

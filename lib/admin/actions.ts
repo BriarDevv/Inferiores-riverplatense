@@ -30,16 +30,21 @@ export interface GuardarNotaInput {
   destacada: boolean;
   modo: ModoPublicacion;
   programada_para?: string; // ISO, requerido si modo=programada
+  /** true = autosave: no revalida rutas (un borrador no toca el sitio público). */
+  silencioso?: boolean;
 }
 
 function validar(input: GuardarNotaInput): string | null {
   if (!input.titulo.trim()) return "El título es obligatorio.";
-  if (!input.bajada.trim()) return "La bajada es obligatoria.";
   if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(input.slug)) {
     return "El slug solo puede tener minúsculas, números y guiones.";
   }
   if (!input.autor_id) return "Elegí una firma para la nota.";
-  if (!input.poster_url.trim()) return "La nota necesita una imagen principal.";
+  // Un borrador puede guardarse incompleto; para publicar se exige todo.
+  if (input.modo !== "borrador") {
+    if (!input.bajada.trim()) return "La bajada es obligatoria para publicar.";
+    if (!input.poster_url.trim()) return "Falta la imagen principal para publicar.";
+  }
   if (input.modo === "programada" && !input.programada_para) {
     return "Elegí fecha y hora de publicación.";
   }
@@ -138,7 +143,7 @@ export async function guardarNota(input: GuardarNotaInput): Promise<ResultadoAcc
     if (errPiv) return { ok: false, error: traducirError(errPiv.message) };
   }
 
-  revalidarPublico(input.slug);
+  if (!input.silencioso) revalidarPublico(input.slug);
   return { ok: true, id: notaId };
 }
 
