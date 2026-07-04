@@ -57,10 +57,20 @@ Panel funcional en `/admin` (plan: `docs/superpowers/plans/2026-07-04-fase-2-pan
 - **Stats en el panel**: `lib/admin/stats.ts`; Resumen con celda "Visitas · 7 días" en el marcador + lista "Más leídas"; tabla de Notas con columna Visitas.
 - `Autor` ganó `slug?` (viene en los SELECT de notas público y admin).
 
-### Pendiente (siguientes fases del dashboard)
-- **Fase 4**: pantalla de estadísticas + gestión de equipo/roles + pulido UX.
-- En Supabase Dashboard (manual, una vez): desactivar "Allow new users to sign up" + invitar al admin + crear su `profile` con rol admin.
-- Handles reales en `SocialRail` (hoy placeholders a la raíz de cada red).
+### ✅ Fase 4 "Estadísticas + Equipo" COMPLETADA (2026-07-04) — DASHBOARD TERMINADO
+
+- **`/admin/estadisticas`** — selector de período (7d/30d/histórico vía `?periodo`), top 10 notas con barras, rankings por división/tipo/firma. Todo del contador propio.
+- **`/admin/equipo`** (solo admin) — invitar por email con rol (crea el `profile` al invitar, `inviteUserByEmail`), cambiar rol, vincular cuenta↔firma, revocar acceso (borra el profile; el callback rechaza sin profile). Guardas: no podés sacarte admin ni revocarte a vos mismo; cada action re-verifica admin server-side.
+- `lib/admin/equipo.ts` es **server-only** (lee `auth.users` con service role); `lib/admin/equipo-actions.ts` = actions.
+- Sidebar con Estadísticas + Equipo (Equipo solo visible para admin).
+- Auth de Supabase ya configurado (signups OFF, admin invitado con profile). Rate limit SMTP gratis ~2 mails/hora: la pantalla Equipo lo avisa; fallback `scripts/gen-login-link.ts`.
+
+### Pendiente (post-dashboard)
+
+- SMTP propio (Resend u otro) para que invitaciones/logins no choquen el rate limit.
+- Cablear form de `/contacto` y newsletter a algo real.
+- Handles reales en `SocialRail` + mail/WhatsApp reales en `/contacto`.
+- Deploy a Vercel + dominio + `NEXT_PUBLIC_SITE_URL` + subdominio `admin.*` (rewrite).
 
 ---
 

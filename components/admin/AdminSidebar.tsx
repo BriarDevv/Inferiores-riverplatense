@@ -11,9 +11,11 @@ interface AdminSidebarProps {
 }
 
 const SECCIONES = [
-  { href: "/admin", label: "Resumen", exact: true },
-  { href: "/admin/notas", label: "Notas", exact: false },
-  { href: "/admin/autores", label: "Autores", exact: false },
+  { href: "/admin", label: "Resumen", exact: true, soloAdmin: false },
+  { href: "/admin/notas", label: "Notas", exact: false, soloAdmin: false },
+  { href: "/admin/autores", label: "Autores", exact: false, soloAdmin: false },
+  { href: "/admin/estadisticas", label: "Estadísticas", exact: false, soloAdmin: false },
+  { href: "/admin/equipo", label: "Equipo", exact: false, soloAdmin: true },
 ];
 
 export default function AdminSidebar({ email, rol, onCerrarSesion }: AdminSidebarProps) {
@@ -40,7 +42,7 @@ export default function AdminSidebar({ email, rol, onCerrarSesion }: AdminSideba
 
       {/* Navegación */}
       <nav aria-label="Panel" className="flex md:flex-col flex-1 md:py-4 overflow-x-auto">
-        {SECCIONES.map((s) => {
+        {SECCIONES.filter((s) => !s.soloAdmin || rol === "admin").map((s) => {
           const activa = s.exact ? pathname === s.href : pathname.startsWith(s.href);
           return (
             <Link
