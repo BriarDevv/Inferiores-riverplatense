@@ -5,10 +5,13 @@ import { createSupabaseServer } from "@/lib/supabase/server";
 export async function GET(request: Request) {
   const { searchParams, origin } = new URL(request.url);
   const code = searchParams.get("code");
+  const tokenHash = searchParams.get("token_hash");
 
-  if (code) {
+  if (code || tokenHash) {
     const supabase = await createSupabaseServer();
-    const { error } = await supabase.auth.exchangeCodeForSession(code);
+    const { error } = code
+      ? await supabase.auth.exchangeCodeForSession(code)
+      : await supabase.auth.verifyOtp({ type: "magiclink", token_hash: tokenHash! });
     if (!error) {
       const {
         data: { user },
