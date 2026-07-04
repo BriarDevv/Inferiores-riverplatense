@@ -21,7 +21,11 @@ export default function LoginForm() {
     const supabase = createSupabaseBrowser();
     const { error } = await supabase.auth.signInWithOtp({
       email,
-      options: { emailRedirectTo: `${window.location.origin}/auth/callback` },
+      options: {
+        emailRedirectTo: `${window.location.origin}/auth/callback`,
+        // Solo usuarios ya invitados: nunca crear cuentas desde el login.
+        shouldCreateUser: false,
+      },
     });
     setEstado(error ? "error" : "enviado");
   }
