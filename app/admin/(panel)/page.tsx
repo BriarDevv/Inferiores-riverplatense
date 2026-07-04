@@ -122,7 +122,7 @@ export default async function AdminResumen() {
             "border-l border-white/15",
             "border-t md:border-t-0 md:border-l border-white/15",
             "border-t md:border-t-0 border-l border-white/15",
-            "border-t md:border-t-0 md:border-l border-white/15",
+            "border-t md:border-t-0 md:border-l border-white/15 col-span-2 md:col-span-1",
           ][i];
           return (
           <div key={s.label} className={`px-5 py-6 ${bordes}`}>

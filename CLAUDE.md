@@ -65,8 +65,19 @@ Panel funcional en `/admin` (plan: `docs/superpowers/plans/2026-07-04-fase-2-pan
 - Sidebar con Estadísticas + Equipo (Equipo solo visible para admin).
 - Auth de Supabase ya configurado (signups OFF, admin invitado con profile). Rate limit SMTP gratis ~2 mails/hora: la pantalla Equipo lo avisa; fallback `scripts/gen-login-link.ts`.
 
+### ✅ Rediseño del panel v2 "Cierre de edición" — Fases 1–3 + responsive (2026-07-04)
+
+Propuesta completa en `docs/superpowers/specs/2026-07-04-admin-redesign-v2-propuesta.md` (fases 4–6 pendientes: sparklines/deltas, stats con referers+CSV, autores/equipo pro). Hecho:
+
+- **Feedback core**: `Toasts.tsx` (provider en el layout del panel, `useToast()`), `ConfirmDialog.tsx` (`<dialog>` nativo brutalist — NO queda ningún `window.confirm`), `SelloEstado.tsx` (sellos con tokens semánticos `--estado-*`: verde tinta publicada / azul programada / gris borrador / ámbar pendiente; **el rojo River queda reservado a identidad+acción**). Cambio de rol en Equipo ahora confirma con consecuencias.
+- **Notas pro**: filtros auto-aplicables (`FiltrosNotas.tsx`, GET client-side + debounce), chips de filtros activos que se quitan de a uno, orden por columna (`?orden=fecha|visitas|titulo&dir=`), paginación (25/pág), filas con poster thumb + avatar de firma + sello primicia, menú ⋯ (`MenuAccionesNota.tsx`, posicionado `fixed` para escapar del overflow de la tabla) con Duplicar (`duplicarNota` action). Tabla→cards en mobile vía CSS (`data-label` en celdas); columnas Tipo/División `hidden lg:table-cell` (en tablet viven en filtros/cards).
+- **Editor blindado** (`EditorNota` reescrito + `BarraEditor`/`ChecklistPublicacion`/`PreviewCardNota`): barra sticky con sello + estado de guardado + submit; **autosave cada 30s solo de borradores** (`silencioso: true` no revalida rutas); aviso al salir con cambios (beforeunload + ConfirmDialog); contador de palabras/lectura; **checklist que bloquea publicar incompleto** (borradores pueden guardarse incompletos — `validar()` solo exige bajada/poster al publicar); tab "Cómo se ve" con la TeaserCard real; metadata en `<details>` plegables. Las páginas nueva/[id] ya no usan PageHeader (la barra lo reemplaza).
+- **Responsive verificado** (Playwright, 45 combinaciones ruta×ancho sin overflow horizontal): sidebar mobile con "+ nueva" y Salir, `chips-scroller` en el nav, marcador 2 col en mobile. ⚠️ **`.admin-shell { position: relative; overflow-x: clip }` es load-bearing**: sin el `relative`, los `sr-only` (absolutos sin ancestro posicionado) anclan en `<html>` y le inflan el scroll horizontal a toda la página; `clip` no rompe los sticky.
+- `.chip-estado-*` fue reemplazado por `.sello-*`; `NotaAcciones.tsx` borrado (lo reemplaza `MenuAccionesNota`).
+
 ### Pendiente (post-dashboard)
 
+- Fases 4–6 del rediseño v2 del panel (ver propuesta): visitas por día + deltas en Resumen, estadísticas con evolución/referers/CSV, perfil-completo en Autores y estados de invitación en Equipo.
 - SMTP propio (Resend u otro) para que invitaciones/logins no choquen el rate limit.
 - Cablear form de `/contacto` y newsletter a algo real.
 - Handles reales en `SocialRail` + mail/WhatsApp reales en `/contacto`.

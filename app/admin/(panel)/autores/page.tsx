@@ -25,12 +25,12 @@ export default async function AdminAutores() {
         )}
       </PageHeader>
 
-      <div className="grid md:grid-cols-2 gap-6">
+      <div className="grid lg:grid-cols-2 gap-6">
         {autores.map((a) => (
           <Link
             key={a.id}
             href={`/admin/autores/${a.id}`}
-            className="brut-frame brut-hover-red bg-[var(--color-paper-pure)] p-6 flex items-center gap-5 group"
+            className="brut-frame brut-hover-red bg-[var(--color-paper-pure)] p-5 sm:p-6 flex items-center gap-4 sm:gap-5 group min-w-0"
           >
             {a.avatar_url ? (
               // eslint-disable-next-line @next/next/no-img-element
@@ -51,7 +51,7 @@ export default async function AdminAutores() {
               <span className="font-mono text-[10px] uppercase tracking-[0.16em] text-[var(--color-river-red-deep)]">
                 {a.rol_publico ?? "Colaborador"}
               </span>
-              <span className="block font-display text-2xl font-bold leading-tight mt-0.5 group-hover:text-[var(--color-river-red-deep)] transition-colors">
+              <span className="block font-display text-xl sm:text-2xl font-bold leading-tight mt-0.5 group-hover:text-[var(--color-river-red-deep)] transition-colors">
                 {a.nombre}
               </span>
               {a.bio && (

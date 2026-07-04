@@ -878,6 +878,15 @@ html {
 }
 
 /* === Panel admin (mesa de redacción) === */
+/* El documento del panel jamás scrollea horizontal: lo ancho (tablas) scrollea
+   en su propio contenedor. position:relative ancla los descendientes absolutos
+   (sr-only y compañía) DENTRO del shell para que el clip los alcance — sin él,
+   su containing block es <html> y le inflan el scroll a la página entera.
+   clip no crea scroll container: los sticky siguen funcionando. */
+.admin-shell {
+  position: relative;
+  overflow-x: clip;
+}
 .admin-sidebar {
   position: sticky;
   top: 0;

@@ -21,13 +21,14 @@ const SECCIONES = [
 export default function AdminSidebar({ email, rol, onCerrarSesion }: AdminSidebarProps) {
   const pathname = usePathname();
   const iniciales = email.slice(0, 2).toUpperCase();
+  const enEditor = pathname.startsWith("/admin/notas/");
 
   return (
-    <aside className="admin-sidebar bg-[var(--color-ink)] text-white flex md:flex-col shrink-0">
+    <aside className="admin-sidebar bg-[var(--color-ink)] text-white flex items-stretch md:items-start md:flex-col shrink-0">
       {/* Marca */}
       <Link
         href="/admin"
-        className="flex items-center gap-3 px-5 py-5 border-b border-white/10 shrink-0"
+        className="flex items-center gap-3 px-4 md:px-5 py-3.5 md:py-5 md:border-b border-white/10 shrink-0 md:w-full"
       >
         <Image src="/logo.webp" alt="" width={36} height={36} className="rounded-full" />
         <span className="hidden md:block">
@@ -40,8 +41,24 @@ export default function AdminSidebar({ email, rol, onCerrarSesion }: AdminSideba
         </span>
       </Link>
 
+      {/* Acción principal siempre a mano */}
+      {!enEditor && (
+        <Link
+          href="/admin/notas/nueva"
+          className="md:mx-4 md:mt-4 md:w-auto self-center md:self-stretch shrink-0 bg-[var(--color-river-red)] text-white font-sports uppercase tracking-[0.15em] text-sm text-center px-3 py-1.5 md:py-2.5 hover:bg-[var(--color-river-red-deep)] transition-colors"
+        >
+          <span className="md:hidden">
+            +<span className="sr-only"> Nueva nota</span>
+          </span>
+          <span className="hidden md:inline">+ Nueva nota</span>
+        </Link>
+      )}
+
       {/* Navegación */}
-      <nav aria-label="Panel" className="flex md:flex-col flex-1 md:py-4 overflow-x-auto">
+      <nav
+        aria-label="Panel"
+        className="chips-scroller flex md:flex-col flex-1 min-w-0 md:w-full md:py-4 overflow-x-auto"
+      >
         {SECCIONES.filter((s) => !s.soloAdmin || rol === "admin").map((s) => {
           const activa = s.exact ? pathname === s.href : pathname.startsWith(s.href);
           return (
@@ -49,7 +66,7 @@ export default function AdminSidebar({ email, rol, onCerrarSesion }: AdminSideba
               key={s.href}
               href={s.href}
               aria-current={activa ? "page" : undefined}
-              className={`admin-nav-item font-sports uppercase tracking-[0.15em] text-sm px-5 py-3 whitespace-nowrap ${
+              className={`admin-nav-item font-sports uppercase tracking-[0.15em] text-sm px-4 md:px-5 py-3 whitespace-nowrap ${
                 activa ? "admin-nav-activa" : "text-white/60 hover:text-white"
               }`}
             >
@@ -61,14 +78,14 @@ export default function AdminSidebar({ email, rol, onCerrarSesion }: AdminSideba
           href="/"
           target="_blank"
           rel="noreferrer"
-          className="admin-nav-item font-sports uppercase tracking-[0.15em] text-sm px-5 py-3 text-white/60 hover:text-white whitespace-nowrap md:mt-auto"
+          className="admin-nav-item font-sports uppercase tracking-[0.15em] text-sm px-4 md:px-5 py-3 text-white/60 hover:text-white whitespace-nowrap md:mt-auto"
         >
           Ver el sitio ↗
         </a>
       </nav>
 
-      {/* Usuario */}
-      <div className="hidden md:flex items-center gap-3 px-5 py-4 border-t border-white/10">
+      {/* Usuario (desktop) */}
+      <div className="hidden md:flex items-center gap-3 px-5 py-4 border-t border-white/10 w-full">
         <span
           aria-hidden
           className="w-9 h-9 shrink-0 rounded-full bg-[var(--color-river-red)] font-sports text-sm flex items-center justify-center"
@@ -93,6 +110,17 @@ export default function AdminSidebar({ email, rol, onCerrarSesion }: AdminSideba
           </button>
         </form>
       </div>
+
+      {/* Salir (mobile) */}
+      <form action={onCerrarSesion} className="md:hidden self-center px-3 shrink-0">
+        <button
+          type="submit"
+          title={`Cerrar sesión (${email})`}
+          className="font-mono text-[10px] uppercase tracking-widest text-white/50 hover:text-[var(--color-river-red)] transition-colors py-2"
+        >
+          Salir
+        </button>
+      </form>
     </aside>
   );
 }

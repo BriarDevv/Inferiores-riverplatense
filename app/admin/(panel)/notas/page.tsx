@@ -156,8 +156,9 @@ export default async function AdminNotas({ searchParams }: PageProps) {
             <tr>
               <ThOrdenable campo="titulo" label="Nota" params={params} />
               <th>Estado</th>
-              <th>Tipo</th>
-              <th>División</th>
+              {/* En tablet estas dos columnas se ocultan (viven en filtros y cards mobile) */}
+              <th className="hidden lg:table-cell">Tipo</th>
+              <th className="hidden lg:table-cell">División</th>
               <th>Firma</th>
               <ThOrdenable campo="visitas" label="Visitas" params={params} alineadoDerecha />
               <ThOrdenable campo="fecha" label="Fecha" params={params} />
@@ -222,8 +223,8 @@ export default async function AdminNotas({ searchParams }: PageProps) {
                     detalle={n.estado === "programada" && n.publicada_en ? formatearFecha(n.publicada_en) : undefined}
                   />
                 </td>
-                <td data-label="Tipo" className="font-body text-sm">{labelTipo(n.tipo)}</td>
-                <td data-label="División" className="font-body text-sm">{labelDivision(n.division)}</td>
+                <td data-label="Tipo" className="hidden lg:table-cell font-body text-sm">{labelTipo(n.tipo)}</td>
+                <td data-label="División" className="hidden lg:table-cell font-body text-sm">{labelDivision(n.division)}</td>
                 <td data-label="Firma" className="font-body text-sm whitespace-nowrap">
                   <span className="inline-flex items-center gap-2">
                     {n.autor.avatar_url ? (
