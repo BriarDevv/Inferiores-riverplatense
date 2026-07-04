@@ -35,10 +35,24 @@ En camino al **dashboard admin** (spec: `docs/superpowers/specs/2026-07-04-admin
 - **Auth**: login magic-link (`/admin/login`, estética "acreditación de prensa"), callback `/auth/callback` (valida que exista `profile`, si no → sin acceso), **`proxy.ts`** (Next 16, ex-middleware) protege `/admin/*`. Placeholder `/admin` muestra sesión+rol.
 - **Route groups**: páginas públicas en `app/(sitio)/` con su layout (Nav/Footer/SocialRail/Lenis); root layout = solo fuentes/metadata; `/admin` tiene layout limpio propio.
 
+### ✅ Fase 2 "El Panel" COMPLETADA (2026-07-04)
+
+Panel funcional en `/admin` (plan: `docs/superpowers/plans/2026-07-04-fase-2-panel.md`), estética "mesa de redacción" (sidebar ink + Anton, chips de estado, tablas brutalist):
+
+- **Layout**: `app/admin/(panel)/layout.tsx` (guard + `AdminSidebar`); login fuera del grupo. CSS del panel al final de `globals.css` (`.admin-*`, `.chip-estado-*`, `.editor-cuerpo`).
+- **Resumen `/admin`**: scoreboard (publicadas/borradores/programadas/firmas) + borradores para retomar + últimas publicadas.
+- **Notas `/admin/notas`**: tabla filtrable (estado/tipo/división/firma/búsqueda, GET sin JS) + acciones por fila (`NotaAcciones`: publicar/despublicar/destacar/borrar-solo-admin).
+- **Editor `/admin/notas/nueva|[id]`**: `EditorNota` + `TiptapEditor` (B/I/H2/H3/cita/listas/link/imagen-upload/YouTube; edita con `.article-prose` = WYSIWYG real). Sidebar metadata: firma/tipo/división/formato/sujetos/tags/primicia/destacada/poster-upload + publicación borrador|ahora|programada.
+- **⚠️ Estados**: en DB solo persisten `borrador`/`publicada`. "Programada" es DERIVADO (publicada con fecha futura; la RLS la oculta hasta que llegue — sin cron). Editar una publicada NO le pisa la fecha original.
+- **Autores `/admin/autores`**: grilla + `EditorAutor` (foto upload, bio, cargo, redes). Solo admin escribe; editor ve solo-lectura.
+- **Uploads**: `lib/admin/upload.ts` → bucket `imagenes` (`posters/`, `autores/`); host de Storage agregado a `next.config.mjs` remotePatterns.
+- **Render público**: `lib/render-cuerpo.ts` (`@tiptap/html`); la nota pública prioriza `cuerpo` Tiptap y cae a `contenido` legacy. `generateStaticParams` de notas ya NO usa MOCK_NOTAS.
+- **Capa admin**: `lib/admin/notas-admin.ts` (list/get con sesión, RLS decide) + `lib/admin/actions.ts` (server actions con errores traducidos + revalidatePath).
+- Flujo verificado e2e con Playwright: crear → subir poster a Storage → borrador → publicar → visible en el sitio → borrar → 404.
+
 ### Pendiente (siguientes fases del dashboard)
 
-- **Fase 2**: layout del panel + CRUD de notas (editor Tiptap) + CRUD de autores + upload de imágenes + estados/programación.
-- **Fase 3**: `/autor/[slug]` público + contador de visitas + resumen con stats.
+- **Fase 3**: `/autor/[slug]` público + contador de visitas + resumen con stats reales.
 - **Fase 4**: pantalla de estadísticas + gestión de equipo/roles + pulido UX.
 - En Supabase Dashboard (manual, una vez): desactivar "Allow new users to sign up" + invitar al admin + crear su `profile` con rol admin.
 - Handles reales en `SocialRail` (hoy placeholders a la raíz de cada red).
