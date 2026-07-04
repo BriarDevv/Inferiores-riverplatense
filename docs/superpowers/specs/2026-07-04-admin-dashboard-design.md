@@ -1,6 +1,17 @@
 # Spec: Dashboard Admin — Inferiores Riverplatense
 
-**Fecha:** 2026-07-04 · **Estado:** Aprobado por el usuario
+**Fecha:** 2026-07-04 · **Estado:** Aprobado por el usuario · **Fase 1 COMPLETADA** (2026-07-04, login verificado por el usuario)
+
+## Desvíos de implementación (Fase 1, ya aplicados)
+
+- **`proxy.ts`, no `middleware.ts`**: Next 16 deprecó middleware; la protección de `/admin/*` vive en `proxy.ts` (función `proxy`).
+- **Keys**: el proyecto usa la key publishable nueva (`sb_publishable_...`) como anon + la **service_role legacy** en `SUPABASE_SERVICE_ROLE_KEY` (solo servidor) + `SUPABASE_DB_URL` (Postgres directo para scripts locales: `run-migrations.ts`, `seed.ts`, `make-admin.ts`).
+- **Login**: `signInWithOtp` con `shouldCreateUser: false` (con signups cerrados, sin eso Supabase rechaza el envío). El callback `/auth/callback` acepta `?code=` (PKCE) **y** `?token_hash=` (links generados por admin).
+- **Rate limit SMTP**: el email integrado permite ~2 mails/hora. Workaround activo: `scripts/gen-login-link.ts` genera links de acceso por API admin sin email. Pendiente Fase 2+: SMTP propio (Resend) para invitaciones reales.
+- **Route group `(sitio)`**: se adelantó de Fase 2. Páginas públicas en `app/(sitio)/` con su layout (Nav/Footer/SocialRail/Lenis); root layout solo fuentes/metadata; `/admin` con layout limpio propio.
+- **`autores` tiene columna extra `rol` ('admin'|'editor')** para compatibilidad con el tipo `Autor` del código; `rol_publico` sigue siendo el cargo visible ("Editor", "Colaborador").
+- **`notas.contenido` es `text`** (markdown/HTML heredado del mock). El `cuerpo` jsonb de Tiptap se agrega en la migración de Fase 2 (003); convivirán durante la transición.
+- **Login con diseño "acreditación de prensa"** (cabecera ink + borde rojo + sello "Nº 001") — dirección visual aprobada para todo el panel.
 
 ## Objetivo
 
