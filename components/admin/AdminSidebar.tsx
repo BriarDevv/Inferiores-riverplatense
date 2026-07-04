@@ -7,6 +7,7 @@ import { usePathname } from "next/navigation";
 interface AdminSidebarProps {
   email: string;
   rol: "admin" | "editor";
+  firma?: string | null;
   onCerrarSesion: () => Promise<void>;
 }
 
@@ -18,7 +19,7 @@ const SECCIONES = [
   { href: "/admin/equipo", label: "Equipo", exact: false, soloAdmin: true },
 ];
 
-export default function AdminSidebar({ email, rol, onCerrarSesion }: AdminSidebarProps) {
+export default function AdminSidebar({ email, rol, firma, onCerrarSesion }: AdminSidebarProps) {
   const pathname = usePathname();
   const iniciales = email.slice(0, 2).toUpperCase();
   const enEditor = pathname.startsWith("/admin/notas/");
@@ -31,13 +32,8 @@ export default function AdminSidebar({ email, rol, onCerrarSesion }: AdminSideba
         className="flex items-center gap-3 px-4 md:px-5 py-3.5 md:py-5 md:border-b border-white/10 shrink-0 md:w-full"
       >
         <Image src="/logo.webp" alt="" width={36} height={36} className="rounded-full" />
-        <span className="hidden md:block">
-          <span className="block font-sports uppercase tracking-[0.2em] text-[10px] text-white/60">
-            Mesa de redacción
-          </span>
-          <span className="block font-display font-bold leading-tight">
-            Inferiores <em className="text-[var(--color-river-red)]">Rpl.</em>
-          </span>
+        <span className="hidden md:block font-display text-lg font-bold leading-tight">
+          Inferiores <em className="text-[var(--color-river-red)]">Rpl.</em>
         </span>
       </Link>
 
@@ -45,7 +41,7 @@ export default function AdminSidebar({ email, rol, onCerrarSesion }: AdminSideba
       {!enEditor && (
         <Link
           href="/admin/notas/nueva"
-          className="md:mx-4 md:mt-4 md:w-auto self-center md:self-stretch shrink-0 bg-[var(--color-river-red)] text-white font-sports uppercase tracking-[0.15em] text-sm text-center px-3 py-1.5 md:py-2.5 hover:bg-[var(--color-river-red-deep)] transition-colors"
+          className="brut-cta-red-dark md:mx-4 md:mt-4 md:w-auto self-center md:self-stretch shrink-0 font-sports uppercase tracking-[0.15em] text-sm text-center px-3 py-1.5 md:py-2.5"
         >
           <span className="md:hidden">
             +<span className="sr-only"> Nueva nota</span>
@@ -94,7 +90,7 @@ export default function AdminSidebar({ email, rol, onCerrarSesion }: AdminSideba
         </span>
         <span className="min-w-0 flex-1">
           <span className="block text-xs truncate" title={email}>
-            {email}
+            {firma ?? email}
           </span>
           <span className="block font-mono text-[10px] uppercase tracking-widest text-white/50">
             {rol}

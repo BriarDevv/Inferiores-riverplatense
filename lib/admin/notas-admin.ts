@@ -139,6 +139,8 @@ export interface PerfilActual {
   userId: string;
   email: string;
   rol: "admin" | "editor";
+  /** Nombre de la firma vinculada, si la cuenta tiene una. */
+  firma: string | null;
 }
 
 /** Usuario logueado + su rol. null si no hay sesión o no tiene profile. */
@@ -150,9 +152,11 @@ export async function getPerfilActual(): Promise<PerfilActual | null> {
   if (!user) return null;
   const { data: profile } = await supabase
     .from("profiles")
-    .select("rol")
+    .select("rol, autor:autores(nombre)")
     .eq("id", user.id)
     .single();
   if (!profile) return null;
-  return { userId: user.id, email: user.email ?? "", rol: profile.rol };
+  const autor = profile.autor as { nombre: string } | { nombre: string }[] | null;
+  const firma = Array.isArray(autor) ? (autor[0]?.nombre ?? null) : (autor?.nombre ?? null);
+  return { userId: user.id, email: user.email ?? "", rol: profile.rol, firma };
 }

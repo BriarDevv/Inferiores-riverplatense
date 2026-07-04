@@ -891,12 +891,34 @@ html {
   position: sticky;
   top: 0;
   z-index: 30;
+  /* Textura brutalist sutil + filo rojo: el sidebar como pieza con volumen */
+  background-image: repeating-linear-gradient(
+    135deg,
+    rgba(255, 255, 255, 0.028) 0 2px,
+    transparent 2px 14px
+  );
+  border-bottom: 4px solid var(--color-river-red);
 }
 @media (min-width: 768px) {
   .admin-sidebar {
     width: 232px;
     height: 100vh;
+    border-bottom: none;
+    border-right: 4px solid var(--color-river-red);
   }
+}
+
+/* CTA rojo para fondos oscuros: mismo press que .brut-cta-red, sombra en papel */
+.brut-cta-red-dark {
+  background: var(--color-river-red);
+  color: var(--color-paper-pure);
+  border: 2px solid var(--color-paper-pure);
+  box-shadow: 3px 3px 0 var(--color-paper-pure);
+  transition: box-shadow 140ms ease-out, transform 140ms ease-out;
+}
+.brut-cta-red-dark:hover {
+  box-shadow: 1px 1px 0 var(--color-paper-pure);
+  transform: translate(2px, 2px);
 }
 .admin-nav-item {
   position: relative;

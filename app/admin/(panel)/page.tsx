@@ -84,7 +84,7 @@ export default async function AdminResumen() {
   const publicadas = notas.filter((n) => n.estado === "publicada");
   const borradores = notas.filter((n) => n.estado === "borrador");
   const programadas = notas.filter((n) => n.estado === "programada");
-  const nombre = perfil?.email.split("@")[0] ?? "";
+  const nombre = perfil?.firma ?? perfil?.email.split("@")[0] ?? "";
 
   const visitas7d = [...visitas.values()].reduce((acc, v) => acc + v.ult_7d, 0);
   const masLeidas = publicadas
@@ -102,7 +102,7 @@ export default async function AdminResumen() {
 
   return (
     <div className="max-w-5xl mx-auto">
-      <PageHeader overline={`Hola, ${nombre}`} titulo="La mesa, hoy">
+      <PageHeader overline={`Hola, ${nombre}`} titulo="Resumen">
         <Link
           href="/admin/notas/nueva"
           className="brut-cta-red px-5 py-3 font-sports uppercase tracking-[0.15em] text-sm inline-block"

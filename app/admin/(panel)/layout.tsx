@@ -23,15 +23,11 @@ export default async function PanelLayout({ children }: { children: React.ReactN
 
   return (
     <div className="admin-shell min-h-screen bg-[var(--color-paper)] flex flex-col md:flex-row">
-      <AdminSidebar email={perfil.email} rol={perfil.rol} onCerrarSesion={cerrarSesion} />
+      <AdminSidebar email={perfil.email} rol={perfil.rol} firma={perfil.firma} onCerrarSesion={cerrarSesion} />
       <div className="flex-1 min-w-0 flex flex-col">
-        {/* Barra de cierre de edición: eco de la barra roja del diario */}
-        <div className="bg-[var(--color-river-red-deep)] text-white flex items-center justify-between gap-4 px-5 md:px-10 py-1.5">
+        {/* Franja roja superior: eco de la barra del diario, solo la fecha */}
+        <div className="bg-[var(--color-river-red-deep)] text-white px-5 md:px-10 py-1.5">
           <span className="font-mono text-[10px] tracking-[0.18em]">{fechaCierre()}</span>
-          <span className="hidden sm:block font-mono text-[10px] tracking-[0.18em]">
-            ● CIERRE DE EDICIÓN ●
-          </span>
-          <span className="font-mono text-[10px] tracking-[0.18em]">Nº 001</span>
         </div>
         <ToastProvider>
           <main className="flex-1 px-4 py-6 sm:px-5 sm:py-7 md:px-10 md:py-9">{children}</main>
