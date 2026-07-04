@@ -23,6 +23,8 @@ export type FuenteVideo = "propio" | "youtube" | "instagram" | "tiktok";
 
 export type SujetoTipo = "jugador" | "tecnico" | "equipo";
 
+export type EstadoNota = "borrador" | "programada" | "publicada";
+
 export interface Sujeto {
   tipo: SujetoTipo;
   id: string;
