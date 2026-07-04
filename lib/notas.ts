@@ -1,18 +1,36 @@
 /**
- * Capa de acceso a datos de notas.
- * Hoy: mock in-memory.
- * Mañana: Supabase (solo se cambia esta capa, el resto del código no se toca).
+ * Capa de acceso a datos de notas — contra Supabase.
+ * La interfaz pública NO cambia respecto de la versión mock:
+ * si mañana cambia la fuente de datos, solo se toca este archivo.
  */
-import { MOCK_NOTAS } from "./mock-data";
+import { cache } from "react";
+import { createClient } from "@supabase/supabase-js";
+import { mapRowToNota, type NotaRow } from "./notas-mapper";
 import { norm } from "./constants";
 import type { FiltrosNota, Nota, Sujeto } from "./types";
 
-function ordenar(notas: Nota[]): Nota[] {
-  return [...notas].sort(
-    (a, b) =>
-      new Date(b.publicada_en).getTime() - new Date(a.publicada_en).getTime(),
+const SELECT_NOTA =
+  "*, autor:autores(id, nombre, rol, foto_url), nota_sujetos(sujeto:sujetos(id, tipo, nombre, slug, division, bio))";
+
+/**
+ * Todas las notas publicadas (RLS ya filtra estado y fecha), más recientes primero.
+ * Cacheado por request: múltiples llamadas en un mismo render pegan UNA sola query.
+ */
+const fetchNotasPublicadas = cache(async (): Promise<Nota[]> => {
+  // Cliente anónimo sin cookies: la lectura pública solo ve notas publicadas (RLS)
+  // y así funciona también en build time (generateStaticParams / sitemap / RSS).
+  const supabase = createClient(
+    process.env.NEXT_PUBLIC_SUPABASE_URL!,
+    process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+    { auth: { persistSession: false } },
   );
-}
+  const { data, error } = await supabase
+    .from("notas")
+    .select(SELECT_NOTA)
+    .order("publicada_en", { ascending: false });
+  if (error) throw new Error(`Error leyendo notas: ${error.message}`);
+  return (data as unknown as NotaRow[]).map(mapRowToNota);
+});
 
 /** Texto buscable de una nota (titulo + bajada + tags + sujetos + autor). */
 function haystack(n: Nota): string {
@@ -28,7 +46,7 @@ function haystack(n: Nota): string {
 }
 
 export async function getNotas(filtros: FiltrosNota = {}): Promise<Nota[]> {
-  let resultado = [...MOCK_NOTAS];
+  let resultado = await fetchNotasPublicadas();
 
   if (filtros.tipo) {
     resultado = resultado.filter((n) => n.tipo === filtros.tipo);
@@ -53,37 +71,42 @@ export async function getNotas(filtros: FiltrosNota = {}): Promise<Nota[]> {
     resultado = resultado.filter((n) => haystack(n).includes(term));
   }
 
-  return ordenar(resultado);
+  return resultado;
 }
 
 export async function getNotaDestacada(): Promise<Nota | null> {
-  // Si no hay destacada, degradá a la MÁS RECIENTE (no a la primera insertada).
-  return MOCK_NOTAS.find((n) => n.destacada) ?? ordenar(MOCK_NOTAS)[0] ?? null;
+  const notas = await fetchNotasPublicadas();
+  // Si no hay destacada, degradá a la más reciente (ya vienen ordenadas).
+  return notas.find((n) => n.destacada) ?? notas[0] ?? null;
 }
 
 export async function getNotaPorSlug(slug: string): Promise<Nota | null> {
-  return MOCK_NOTAS.find((n) => n.slug === slug) ?? null;
+  const notas = await fetchNotasPublicadas();
+  return notas.find((n) => n.slug === slug) ?? null;
 }
 
-/** Todas las notas, ordenadas. Para sitemap / RSS sin tocar MOCK_NOTAS directo. */
+/** Todas las notas, ordenadas. Para sitemap / RSS. */
 export async function getTodasLasNotas(): Promise<Nota[]> {
-  return ordenar(MOCK_NOTAS);
+  return fetchNotasPublicadas();
 }
 
 export async function getNotasRelacionadas(nota: Nota, limit = 3): Promise<Nota[]> {
+  const notas = await fetchNotasPublicadas();
   const sujetoIds = new Set(nota.sujetos.map((s) => s.id));
-  const candidatas = MOCK_NOTAS.filter(
-    (n) =>
-      n.id !== nota.id &&
-      (n.division === nota.division ||
-        n.sujetos.some((s) => sujetoIds.has(s.id))),
-  );
-  return ordenar(candidatas).slice(0, limit);
+  return notas
+    .filter(
+      (n) =>
+        n.id !== nota.id &&
+        (n.division === nota.division ||
+          n.sujetos.some((s) => sujetoIds.has(s.id))),
+    )
+    .slice(0, limit);
 }
 
-/** Devuelve el sujeto (con su info) a partir de su slug, buscándolo en todas las notas. */
+/** Devuelve el sujeto (con su info) a partir de su slug. */
 export async function getSujetoPorSlug(slug: string): Promise<Sujeto | null> {
-  for (const n of MOCK_NOTAS) {
+  const notas = await fetchNotasPublicadas();
+  for (const n of notas) {
     const s = n.sujetos.find((x) => x.slug === slug);
     if (s) return s;
   }
@@ -92,15 +115,15 @@ export async function getSujetoPorSlug(slug: string): Promise<Sujeto | null> {
 
 /** Todas las notas en las que aparece un sujeto (por id), más recientes primero. */
 export async function getNotasPorSujeto(sujetoId: string): Promise<Nota[]> {
-  return ordenar(
-    MOCK_NOTAS.filter((n) => n.sujetos.some((s) => s.id === sujetoId)),
-  );
+  const notas = await fetchNotasPublicadas();
+  return notas.filter((n) => n.sujetos.some((s) => s.id === sujetoId));
 }
 
 /** Slugs de jugadores con al menos una nota — para generateStaticParams / sitemap. */
 export async function getSlugsDeJugadores(): Promise<string[]> {
+  const notas = await fetchNotasPublicadas();
   const slugs = new Set<string>();
-  for (const n of MOCK_NOTAS) {
+  for (const n of notas) {
     for (const s of n.sujetos) {
       if (s.tipo === "jugador" && s.slug) slugs.add(s.slug);
     }
