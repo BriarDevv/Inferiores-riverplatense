@@ -91,6 +91,16 @@ Spec: `docs/superpowers/specs/2026-07-05-editor-canvas-design.md`. El editor dej
 - `EditorNota`: `modo` dejó de ser estado UI — cada acción llama `guardar(modo, fecha?)`. Enter en el form = acción primaria del estado. Ficha reordenada: "¿Lista para salir?" (checklist) → Clasificación → Imagen → Extras (sin radios). Autosave gatillado por `estadoActual === "borrador"`.
 - ⚠️ Tailwind v4: `lg:grid-cols-[minmax(0,1fr)_320px]` NO genera la clase (la coma) — usar `lg:grid-cols-[1fr_320px]` + `min-w-0` en el hijo.
 
+### ✅ Estadísticas v2 "Historia en 3 actos" (2026-07-05)
+
+Spec: `docs/superpowers/specs/2026-07-05-estadisticas-v2-design.md`. `/admin/estadisticas` reescrita: un solo scroll con 3 secciones (separador = título Anton + regla 2px + detalle mono, sin overline con raya) y **el período afecta a TODA la página** (`?periodo=7d|30d|90d|total`, default 7d):
+
+- **Datos period-aware**: `getVisitasCrudas(desde)` en `lib/admin/stats.ts` lee `nota_visitas` cruda (RLS staff de 004; paginado de a 1000) — para el delta trae `2×período` y se parte con `partirPorCorte`. Agregaciones PURAS en `lib/admin/stats-periodo.ts` (serie diaria TZ Buenos Aires, `agruparPorSemana` si >60 puntos, porHora/porDispositivo/porFuente/porNota, `normalizarFuente` parsea el referer completo) con tests vitest. Las vistas SQL `visitas_por_*` quedan solo para el Resumen.
+- **La evolución**: módulo grande `[1fr_300px]` — gráfico diario/semanal (GraficoBarras `tono="claro"` alto 190) + insight; panel ink con total gigante Anton, `Delta` (ganó prop `contexto`), mejor día y promedio diario. En Histórico la serie arranca en la primera visita y no hay delta.
+- **Qué rinde**: ranking COMPLETO de notas del período (posición + barra + total histórico como columna secundaria, oculta en Histórico) + 3 rankings División/Tipo/Firma con `FilasBarra conPorcentaje` (nueva prop).
+- **Quién lee**: fuentes con %, `BarraDividida` mobile(rojo)/desktop(ink)/sin-dato(gris) y horario de 24 barras con la franja pico resaltada (GraficoBarras ganó prop `resaltados: number[]`) + "tu mejor ventana".
+- Verificado: 16 combinaciones período×ancho (375/768/1024/1440) sin overflow horizontal.
+
 ### ✅ Resumen v2 "Tablero de cierre" (2026-07-04)
 
 Spec: `docs/superpowers/specs/2026-07-04-resumen-tablero-design.md`. `/admin` rediseñado:
@@ -106,7 +116,7 @@ Spec: `docs/superpowers/specs/2026-07-04-resumen-tablero-design.md`. `/admin` re
 
 ### Pendiente (post-dashboard)
 
-- Fases 4–6 del rediseño v2 del panel (ver propuesta): visitas por día + deltas en Resumen, estadísticas con evolución/referers/CSV, perfil-completo en Autores y estados de invitación en Equipo.
+- Del rediseño v2 del panel queda: estados de invitación (pendiente/reenviar) en Equipo. CSV en Estadísticas se descartó a propósito (se agrega si aparece la necesidad).
 - SMTP propio (Resend u otro) para que invitaciones/logins no choquen el rate limit.
 - Cablear form de `/contacto` y newsletter a algo real.
 - Handles reales en `SocialRail` + mail/WhatsApp reales en `/contacto`.

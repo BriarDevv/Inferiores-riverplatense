@@ -3,6 +3,7 @@
  * `nota_visitas_resumen` con el cliente de sesión (RLS: solo staff).
  */
 import { createSupabaseServer } from "@/lib/supabase/server";
+import type { VisitaCruda } from "./stats-periodo";
 
 export interface VisitasNota {
   nota_id: string;
@@ -36,6 +37,31 @@ export async function getTotalesVisitas(): Promise<TotalesVisitas> {
     ult_30d += v.ult_30d;
   }
   return { total, ult_7d, ult_30d };
+}
+
+const PAGINA_CRUDAS = 1000;
+
+/**
+ * Visitas crudas para Estadísticas (RLS: solo staff). Con `desde` trae ese
+ * rango; sin `desde`, todo el histórico. Pagina de a 1000 para no chocar el
+ * límite por request de Supabase.
+ */
+export async function getVisitasCrudas(desde: Date | null): Promise<VisitaCruda[]> {
+  const supabase = await createSupabaseServer();
+  const filas: VisitaCruda[] = [];
+  for (let offset = 0; ; offset += PAGINA_CRUDAS) {
+    let query = supabase
+      .from("nota_visitas")
+      .select("nota_id, visto_en, referer, dispositivo")
+      .order("visto_en", { ascending: true })
+      .range(offset, offset + PAGINA_CRUDAS - 1);
+    if (desde) query = query.gte("visto_en", desde.toISOString());
+    const { data, error } = await query;
+    if (error) throw new Error(`Error leyendo visitas crudas: ${error.message}`);
+    filas.push(...(data as VisitaCruda[]));
+    if (!data || data.length < PAGINA_CRUDAS) break;
+  }
+  return filas;
 }
 
 /* === Agregados del tablero del Resumen (vistas de 005_resumen.sql) === */

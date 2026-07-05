@@ -12,6 +12,8 @@ interface GraficoBarrasProps {
   /** Etiquetas bajo la primera y la última barra. */
   ejeIzq?: string;
   ejeDer?: string;
+  /** Índices pintados en rojo además del pico (ej: la franja horaria pico). */
+  resaltados?: number[];
   ariaLabel: string;
 }
 
@@ -25,6 +27,7 @@ export default function GraficoBarras({
   tono = "oscuro",
   ejeIzq,
   ejeDer,
+  resaltados,
   ariaLabel,
 }: GraficoBarrasProps) {
   const max = Math.max(1, ...serie.map((p) => p.valor));
@@ -47,7 +50,8 @@ export default function GraficoBarras({
       >
         {serie.map((p, i) => {
           const h = p.valor === 0 ? 2 : Math.max(3, Math.round((p.valor / max) * (alto - 4)));
-          const esPico = p.valor === max && p.valor > 0;
+          const esPico =
+            (p.valor === max && p.valor > 0) || (resaltados?.includes(i) && p.valor > 0);
           return (
             <rect
               key={i}
