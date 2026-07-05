@@ -11,8 +11,13 @@ export default async function NuevaFirma() {
 
   return (
     <div className="max-w-6xl mx-auto">
-      <PageHeader overline="Autores" titulo="Nueva firma" />
-      <EditorAutor autor={null} esAdmin />
+      <PageHeader
+        titulo="Nueva firma"
+        descripcion="La identidad pública: así va a aparecer en las notas y en su perfil del sitio."
+      />
+      <div className="brut-frame-shadow bg-[var(--color-paper-pure)] p-5 sm:p-6 max-w-3xl">
+        <EditorAutor autor={null} esAdmin />
+      </div>
     </div>
   );
 }

@@ -75,6 +75,13 @@ Propuesta completa en `docs/superpowers/specs/2026-07-04-admin-redesign-v2-propu
 - **Responsive verificado** (Playwright, 45 combinaciones ruta×ancho sin overflow horizontal): sidebar mobile con "+ nueva" y Salir, `chips-scroller` en el nav, marcador 2 col en mobile. ⚠️ **`.admin-shell { position: relative; overflow-x: clip }` es load-bearing**: sin el `relative`, los `sr-only` (absolutos sin ancestro posicionado) anclan en `<html>` y le inflan el scroll horizontal a toda la página; `clip` no rompe los sticky.
 - `.chip-estado-*` fue reemplazado por `.sello-*`; `NotaAcciones.tsx` borrado (lo reemplaza `MenuAccionesNota`).
 
+### ✅ Autores v2 "Legajo de firmas" (2026-07-05)
+
+Spec: `docs/superpowers/specs/2026-07-05-autores-legajo-design.md`.
+- **Grilla**: cards de legajo con mini marcador (N notas · N visitas · última hace X), `PerfilCompleto` (barra 4 segmentos foto/cargo/bio/redes + "Perfil 3/4", `itemsPerfil()` exportado) y dos acciones: Editar legajo + Ver perfil público ↗ (la card ya no es un link entero).
+- **Detalle `[id]`** = legajo: PageHeader nombre+cargo+CTA perfil público, tira con foto + PerfilCompleto + marcador (Publicadas/Borradores/Visitas Anton), grid `[form enmarcado | NotasDeFirma]`. `NotasDeFirma` lista hasta 10 notas con sello+fecha+visitas y pie "Ver todas en Notas →" (`?autor=`).
+- Nueva firma: form enmarcado solo. Datos: `listNotasAdmin({autor_id})` + mapa de visitas (nada nuevo en server).
+
 ### ✅ Editor de notas v2 "La redacción" — canvas editorial (2026-07-05)
 
 Spec: `docs/superpowers/specs/2026-07-05-editor-canvas-design.md`. El editor dejó de ser formulario:
