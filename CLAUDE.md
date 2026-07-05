@@ -75,6 +75,15 @@ Propuesta completa en `docs/superpowers/specs/2026-07-04-admin-redesign-v2-propu
 - **Responsive verificado** (Playwright, 45 combinaciones ruta×ancho sin overflow horizontal): sidebar mobile con "+ nueva" y Salir, `chips-scroller` en el nav, marcador 2 col en mobile. ⚠️ **`.admin-shell { position: relative; overflow-x: clip }` es load-bearing**: sin el `relative`, los `sr-only` (absolutos sin ancestro posicionado) anclan en `<html>` y le inflan el scroll horizontal a toda la página; `clip` no rompe los sticky.
 - `.chip-estado-*` fue reemplazado por `.sello-*`; `NotaAcciones.tsx` borrado (lo reemplaza `MenuAccionesNota`).
 
+### ✅ Editor de notas v2 "La redacción" — canvas editorial (2026-07-05)
+
+Spec: `docs/superpowers/specs/2026-07-05-editor-canvas-design.md`. El editor dejó de ser formulario:
+
+- **Canvas**: hoja `brut-frame-shadow` de 760px donde se escribe SOBRE la nota como se publica — overline contextual (tipo · división + primicia-badge), título textarea auto-grow sin borde (`.canvas-titulo`, Newsreader clamp), bajada como copete (`.canvas-bajada`, contador solo con foco), **URL inline** ("/nota/slug ✎", click para editar), filete, y el cuerpo Tiptap **en modo canvas** (`enCanvas`: sin caja, toolbar flotante sticky `.toolbar-canvas`). Foco accesible: outline punteado rojo con offset (no desplaza texto).
+- **BarraEditor v2, sin radios**: borrador → `[Guardar borrador]` + `[Publicar ▾]` (Publicar ahora / Programar fecha… con panel datetime anclado; ítems deshabilitados muestran el motivo del checklist adentro del menú) · publicada → `[Guardar cambios]` + `▾ Despublicar` (ConfirmDialog; guarda cambios y baja a borrador = `guardarNota` modo borrador) · programada → `[Guardar]` + `▾` (Publicar ahora / Cambiar fecha… / Despublicar). Contexto a la izquierda: "Nueva nota"/"Editando" + sello.
+- `EditorNota`: `modo` dejó de ser estado UI — cada acción llama `guardar(modo, fecha?)`. Enter en el form = acción primaria del estado. Ficha reordenada: "¿Lista para salir?" (checklist) → Clasificación → Imagen → Extras (sin radios). Autosave gatillado por `estadoActual === "borrador"`.
+- ⚠️ Tailwind v4: `lg:grid-cols-[minmax(0,1fr)_320px]` NO genera la clase (la coma) — usar `lg:grid-cols-[1fr_320px]` + `min-w-0` en el hijo.
+
 ### ✅ Resumen v2 "Tablero de cierre" (2026-07-04)
 
 Spec: `docs/superpowers/specs/2026-07-04-resumen-tablero-design.md`. `/admin` rediseñado:

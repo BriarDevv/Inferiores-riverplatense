@@ -1003,6 +1003,9 @@ select.admin-input option {
   min-height: 420px;
   outline: none;
 }
+.editor-cuerpo.en-canvas .ProseMirror {
+  min-height: 55vh;
+}
 .editor-cuerpo .ProseMirror p.is-editor-empty:first-child::before {
   content: attr(data-placeholder);
   float: left;
@@ -1150,6 +1153,57 @@ select.admin-input option {
   background: var(--color-paper);
   border-bottom: 2px solid var(--color-ink);
   margin-bottom: 24px;
+}
+
+/* --- Canvas editorial: se escribe SOBRE la nota, sin cajas de formulario --- */
+.canvas-campo {
+  display: block;
+  width: 100%;
+  border: none;
+  background: transparent;
+  resize: none;
+  overflow: hidden;
+  padding: 0;
+}
+.canvas-campo:focus-visible {
+  /* Foco accesible que no desplaza el texto */
+  outline: 2px dashed rgba(235, 25, 46, 0.45);
+  outline-offset: 10px;
+}
+.canvas-titulo {
+  font-family: var(--font-display);
+  font-size: clamp(2rem, 4vw, 3.2rem);
+  font-weight: 700;
+  line-height: 0.98;
+  letter-spacing: -0.025em;
+  color: var(--color-ink);
+}
+.canvas-titulo::placeholder {
+  color: rgba(0, 0, 0, 0.22);
+}
+.canvas-bajada {
+  font-family: var(--font-body);
+  font-size: 1.125rem;
+  line-height: 1.6;
+  color: var(--color-neutral-700, #404040);
+}
+@media (min-width: 1024px) {
+  .canvas-bajada {
+    font-size: 1.25rem;
+  }
+}
+.canvas-bajada::placeholder {
+  color: rgba(0, 0, 0, 0.28);
+}
+
+/* Toolbar flotante del Tiptap en modo canvas */
+.toolbar-canvas {
+  position: sticky;
+  top: 68px;
+  z-index: 30;
+  background: var(--color-paper-pure);
+  border: 2px solid var(--color-ink);
+  box-shadow: 4px 4px 0 var(--color-ink);
 }
 
 /* --- Secciones plegables de metadata --- */

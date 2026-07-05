@@ -12,7 +12,7 @@ import ConfirmDialog from "./ConfirmDialog";
 import { useToast } from "./Toasts";
 import { guardarNota, type GuardarNotaInput, type ModoPublicacion } from "@/lib/admin/actions";
 import { subirImagen } from "@/lib/admin/upload";
-import { DIVISIONES, TIPOS_NOTA } from "@/lib/constants";
+import { DIVISIONES, TIPOS_NOTA, labelDivision, labelTipo } from "@/lib/constants";
 import type { AutorAdmin, NotaAdmin } from "@/lib/admin/notas-admin";
 import type { EstadoNota, Sujeto } from "@/lib/types";
 
@@ -69,6 +69,56 @@ function contarPalabras(nodo: JSONContent | null): number {
   return total;
 }
 
+/** Los textareas del canvas crecen con el contenido, sin scroll interno. */
+function autogrow(el: HTMLTextAreaElement | null) {
+  if (!el) return;
+  el.style.height = "auto";
+  el.style.height = `${el.scrollHeight}px`;
+}
+
+/* --- URL editable inline: no molesta hasta que la tocás --- */
+function SlugInline({
+  slug,
+  onCambiar,
+}: {
+  slug: string;
+  onCambiar: (v: string) => void;
+}) {
+  const [editando, setEditando] = useState(false);
+  if (!editando) {
+    return (
+      <button
+        type="button"
+        onClick={() => setEditando(true)}
+        title="Editar la URL de la nota"
+        className="font-mono text-xs text-black/40 hover:text-[var(--color-river-red-deep)] transition-colors"
+      >
+        /nota/{slug || "…"} <span aria-hidden>✎</span>
+        <span className="sr-only">(editar URL)</span>
+      </button>
+    );
+  }
+  return (
+    <span className="inline-flex items-center gap-1 font-mono text-xs">
+      <span className="text-black/40">/nota/</span>
+      <input
+        autoFocus
+        value={slug}
+        onChange={(e) => onCambiar(slugificar(e.target.value))}
+        onBlur={() => setEditando(false)}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === "Escape") {
+            e.preventDefault();
+            setEditando(false);
+          }
+        }}
+        className="bg-transparent border-0 border-b-2 border-[var(--color-ink)] outline-none min-w-64"
+        aria-label="URL de la nota"
+      />
+    </span>
+  );
+}
+
 export default function EditorNota({ nota, autores, sujetos }: EditorNotaProps) {
   const router = useRouter();
   const toast = useToast();
@@ -86,6 +136,7 @@ export default function EditorNota({ nota, autores, sujetos }: EditorNotaProps) 
 
   const [titulo, setTitulo] = useState(nota?.titulo ?? "");
   const [bajada, setBajada] = useState(nota?.bajada ?? "");
+  const [bajadaEnFoco, setBajadaEnFoco] = useState(false);
   const [slug, setSlug] = useState(nota?.slug ?? "");
   const slugEditado = useRef(Boolean(nota));
   const [tipo, setTipo] = useState<string>(nota?.tipo ?? "noticia");
@@ -102,15 +153,13 @@ export default function EditorNota({ nota, autores, sujetos }: EditorNotaProps) 
   );
   const [primicia, setPrimicia] = useState(nota?.primicia ?? false);
   const [destacada, setDestacada] = useState(nota?.destacada ?? false);
-  const [modo, setModo] = useState<ModoPublicacion>(
-    nota?.estado === "publicada" ? "ahora" : nota?.estado === "programada" ? "programada" : "borrador",
-  );
   const [programadaPara, setProgramadaPara] = useState(
     nota?.estado === "programada" ? isoALocal(nota.publicada_en) : "",
   );
   const cuerpoRef = useRef<JSONContent | null>((nota?.cuerpo as JSONContent | null) ?? null);
   const cuerpoHtmlRef = useRef<string>("");
   const [palabras, setPalabras] = useState(() => contarPalabras(cuerpoRef.current));
+  const bajadaRef = useRef<HTMLTextAreaElement>(null);
 
   const cuerpoInicial = useMemo(() => (nota?.cuerpo as JSONContent | null) ?? null, [nota]);
   // Notas viejas: el texto vive en `contenido` (legacy) y el sitio lo muestra igual.
@@ -149,7 +198,11 @@ export default function EditorNota({ nota, autores, sujetos }: EditorNotaProps) 
     }
   }
 
-  function armarPayload(modoElegido: ModoPublicacion, silencioso = false): GuardarNotaInput {
+  function armarPayload(
+    modo: ModoPublicacion,
+    fechaLocal?: string,
+    silencioso = false,
+  ): GuardarNotaInput {
     return {
       id: notaId,
       titulo,
@@ -168,8 +221,8 @@ export default function EditorNota({ nota, autores, sujetos }: EditorNotaProps) 
       cuerpo: cuerpoRef.current,
       primicia,
       destacada,
-      modo: modoElegido,
-      programada_para: programadaPara ? new Date(programadaPara).toISOString() : undefined,
+      modo,
+      programada_para: fechaLocal ? new Date(fechaLocal).toISOString() : undefined,
       silencioso,
     };
   }
@@ -178,10 +231,10 @@ export default function EditorNota({ nota, autores, sujetos }: EditorNotaProps) 
   const autoguardarRef = useRef<() => void>(() => {});
   autoguardarRef.current = () => {
     if (!sucio || pendiente || subiendoPoster) return;
-    if (modo !== "borrador") return; // nunca auto-publica
+    if (estadoActual !== "borrador") return; // nunca auto-publica
     if (!titulo.trim() || !slug || !autorId) return; // mínimo para persistir
     setGuardado("guardando");
-    void guardarNota(armarPayload("borrador", true)).then((r) => {
+    void guardarNota(armarPayload("borrador", undefined, true)).then((r) => {
       if (r.ok) {
         if (r.id) setNotaId(r.id);
         setGuardado("guardado");
@@ -243,23 +296,18 @@ export default function EditorNota({ nota, autores, sujetos }: EditorNotaProps) 
     { label: "Tags", ok: tags.trim().length > 0, obligatorio: false },
   ];
   const faltantes = checklist.filter((i) => i.obligatorio && !i.ok);
-  const faltaFecha = modo === "programada" && !programadaPara;
-  const bloqueado = modo !== "borrador" && (faltantes.length > 0 || faltaFecha);
-  const motivoBloqueo = bloqueado
-    ? faltantes.length > 0
-      ? `Para publicar falta: ${faltantes.map((f) => f.label.toLowerCase()).join(", ")}.`
-      : "Elegí fecha y hora de publicación."
-    : undefined;
+  const puedePublicar = faltantes.length === 0;
+  const motivoBloqueo = puedePublicar
+    ? undefined
+    : `Para publicar falta: ${faltantes.map((f) => f.label.toLowerCase()).join(", ")}.`;
 
-  function enviar(e: React.FormEvent) {
-    e.preventDefault();
-    if (bloqueado) return;
+  function guardar(modo: ModoPublicacion, fechaLocal?: string, esDespublicar = false) {
     setError(null);
     const eraNueva = !notaId;
     const estabaPublicada = estadoActual === "publicada";
     setGuardado("guardando");
     startTransition(async () => {
-      const r = await guardarNota(armarPayload(modo));
+      const r = await guardarNota(armarPayload(modo, fechaLocal));
       if (!r.ok) {
         setError(r.error ?? "Algo falló al guardar. Tus cambios siguen acá; probá de nuevo.");
         setGuardado("sucio");
@@ -272,11 +320,14 @@ export default function EditorNota({ nota, autores, sujetos }: EditorNotaProps) 
       const nuevoEstado: EstadoNota =
         modo === "borrador" ? "borrador" : modo === "programada" ? "programada" : "publicada";
       setEstadoActual(nuevoEstado);
+      if (modo === "programada" && fechaLocal) setProgramadaPara(fechaLocal);
 
-      if (modo === "borrador") {
+      if (esDespublicar) {
+        toast({ texto: "Despublicada. Quedó en borradores." });
+      } else if (modo === "borrador") {
         toast({ texto: "Borrador guardado." });
       } else if (modo === "programada") {
-        const cuando = new Date(programadaPara).toLocaleString("es-AR", {
+        const cuando = new Date(fechaLocal!).toLocaleString("es-AR", {
           day: "numeric",
           month: "short",
           hour: "2-digit",
@@ -296,36 +347,38 @@ export default function EditorNota({ nota, autores, sujetos }: EditorNotaProps) 
     });
   }
 
+  /** Enter en el form = la acción primaria del estado actual. */
+  function submitPrimario(e: React.FormEvent) {
+    e.preventDefault();
+    if (pendiente || subiendoPoster) return;
+    if (estadoActual === "borrador") guardar("borrador");
+    else if (estadoActual === "programada" && puedePublicar) guardar("programada", programadaPara);
+    else if (puedePublicar) guardar("ahora");
+  }
+
   const labelCls = "brut-label block mb-1.5";
   const grupo = "mb-5";
   const autorSel = autores.find((a) => a.id === autorId);
 
-  const submitLabel = pendiente
-    ? "Guardando…"
-    : modo === "borrador"
-      ? "Guardar borrador"
-      : modo === "programada"
-        ? "Programar"
-        : estadoActual === "publicada"
-          ? "Guardar cambios"
-          : "Publicar";
-
   return (
-    <form onSubmit={enviar}>
+    <form onSubmit={submitPrimario}>
       <BarraEditor
+        esNueva={!nota}
         estadoNota={estadoActual}
         guardado={guardado}
         ultimoGuardado={ultimoGuardado}
-        esNueva={!notaId}
-        submitLabel={submitLabel}
-        submitDeshabilitado={pendiente || subiendoPoster || bloqueado}
+        pendiente={pendiente || subiendoPoster}
+        puedePublicar={puedePublicar}
         motivoBloqueo={motivoBloqueo}
+        programadaPara={programadaPara || undefined}
         onSalir={salir}
         onVistaPrevia={() => setPreviewAbierto(true)}
+        onGuardar={(modo, fecha) => guardar(modo, fecha)}
+        onDespublicar={() => guardar("borrador", undefined, true)}
       />
 
       <div className="grid gap-8 lg:grid-cols-[1fr_320px] items-start max-w-6xl mx-auto">
-        {/* Columna principal */}
+        {/* La hoja: se escribe sobre la nota */}
         <div className="min-w-0">
           {error && (
             <p role="alert" className="mb-4 px-3 py-2 font-body text-sm text-[var(--color-river-red-deep)] bg-[var(--color-river-red-soft)] border-l-[3px] border-[var(--color-river-red)]">
@@ -333,54 +386,78 @@ export default function EditorNota({ nota, autores, sujetos }: EditorNotaProps) 
             </p>
           )}
 
-          <div className={grupo}>
-            <label htmlFor="titulo" className={labelCls}>Título</label>
-            <input
+          <div className="brut-frame-shadow bg-[var(--color-paper-pure)] px-5 py-7 sm:px-10 sm:py-10 max-w-[760px]">
+            {/* Overline contextual: como se ve publicado */}
+            <div className="flex items-center gap-3 flex-wrap mb-5">
+              <p
+                className="font-mono text-[0.7rem] uppercase tracking-[0.2em] flex items-center gap-2"
+                style={{ color: "var(--color-river-red-deep)" }}
+              >
+                <span
+                  aria-hidden
+                  className="inline-block w-[0.6rem] h-[0.6rem] bg-[var(--color-river-red)]"
+                />
+                {labelTipo(tipo as Parameters<typeof labelTipo>[0])} ·{" "}
+                {labelDivision(division as Parameters<typeof labelDivision>[0])}
+              </p>
+              {primicia && <span className="primicia-badge">Lo contamos primero</span>}
+            </div>
+
+            <label htmlFor="titulo" className="sr-only">Título</label>
+            <textarea
               id="titulo"
               required
+              rows={1}
               value={titulo}
+              ref={autogrow}
+              onInput={(e) => autogrow(e.currentTarget)}
               onChange={(e) => cambiarTitulo(e.target.value)}
-              placeholder="El título que va a ver el lector"
-              className="admin-input w-full font-display text-2xl font-bold"
+              onKeyDown={(e) => {
+                if (e.key === "Enter") {
+                  e.preventDefault();
+                  bajadaRef.current?.focus();
+                }
+              }}
+              placeholder="Título de la nota"
+              className="canvas-campo canvas-titulo mb-4"
             />
-          </div>
 
-          <div className={grupo}>
-            <label htmlFor="bajada" className={labelCls}>Bajada</label>
+            <label htmlFor="bajada" className="sr-only">Bajada</label>
             <textarea
               id="bajada"
               rows={2}
               value={bajada}
+              ref={(el) => {
+                bajadaRef.current = el;
+                autogrow(el);
+              }}
+              onInput={(e) => autogrow(e.currentTarget)}
               onChange={(e) => { setBajada(e.target.value); marcar(); }}
-              placeholder="Una o dos líneas que resumen la nota (aparece bajo el título y en Google)"
-              className="admin-input w-full font-body resize-y"
+              onFocus={() => setBajadaEnFoco(true)}
+              onBlur={() => setBajadaEnFoco(false)}
+              placeholder="El copete: una o dos líneas que venden la nota (aparece bajo el título y en Google)"
+              className="canvas-campo canvas-bajada"
             />
-            <p className="mt-1 font-mono text-[10px] uppercase tracking-widest text-black/35 text-right">
-              {bajada.trim().length} caracteres
-            </p>
-          </div>
-
-          <div className={grupo}>
-            <label htmlFor="slug" className={labelCls}>Slug (URL)</label>
-            <div className="flex items-center gap-2">
-              <span className="font-mono text-sm text-black/40 shrink-0">/nota/</span>
-              <input
-                id="slug"
-                required
-                value={slug}
-                onChange={(e) => {
+            <div className="flex items-center justify-between gap-4 mt-2 mb-5 min-h-4">
+              <SlugInline
+                slug={slug}
+                onCambiar={(v) => {
                   slugEditado.current = true;
-                  setSlug(slugificar(e.target.value));
+                  setSlug(v);
                   marcar();
                 }}
-                className="admin-input flex-1 font-mono text-sm"
               />
+              {bajadaEnFoco && (
+                <span className="font-mono text-[10px] uppercase tracking-widest text-black/35">
+                  {bajada.trim().length} caracteres
+                </span>
+              )}
             </div>
-          </div>
 
-          <div className={grupo}>
-            <span className={labelCls}>Cuerpo de la nota</span>
+            <hr className="border-0 border-b-2 border-[var(--color-ink)] mb-6" />
+
             <TiptapEditor
+              enCanvas
               contenidoInicial={cuerpoInicial}
               onListo={(html) => (cuerpoHtmlRef.current = html)}
               onChange={(json, html) => {
@@ -390,15 +467,14 @@ export default function EditorNota({ nota, autores, sujetos }: EditorNotaProps) 
                 marcar();
               }}
             />
-            <p className="mt-2 font-mono text-[10px] uppercase tracking-widest text-black/40 text-right">
+            <p className="mt-4 font-mono text-[10px] uppercase tracking-widest text-black/40 text-right">
               {palabras} palabra{palabras === 1 ? "" : "s"} · ~{Math.max(1, Math.round(palabras / PALABRAS_POR_MINUTO))} min de lectura
             </p>
           </div>
         </div>
 
-        {/* Sidebar */}
+        {/* La ficha */}
         <aside className="brut-frame-shadow bg-[var(--color-paper-pure)] lg:sticky lg:top-20">
-          {/* Tabs Ficha / Preview */}
           <div className="grid grid-cols-2 border-b-2 border-[var(--color-ink)]" role="tablist" aria-label="Vista del panel de la nota">
             {([
               { v: "ficha", label: "La ficha" },
@@ -439,36 +515,8 @@ export default function EditorNota({ nota, autores, sujetos }: EditorNotaProps) 
             </div>
           ) : (
             <div className="p-5">
-              <h2 className="brut-label mb-3">Publicación</h2>
+              <h2 className="brut-label mb-3">¿Lista para salir?</h2>
               <ChecklistPublicacion items={checklist} />
-
-              <div className="flex flex-col gap-2 mb-5">
-                {([
-                  { v: "borrador", label: "Guardar como borrador" },
-                  { v: "ahora", label: estadoActual === "publicada" ? "Mantener publicada" : "Publicar ahora" },
-                  { v: "programada", label: "Programar fecha" },
-                ] as Array<{ v: ModoPublicacion; label: string }>).map((o) => (
-                  <label key={o.v} className="flex items-center gap-2 font-body text-sm cursor-pointer">
-                    <input
-                      type="radio"
-                      name="modo"
-                      checked={modo === o.v}
-                      onChange={() => { setModo(o.v); marcar(); }}
-                      className="accent-[var(--color-river-red)]"
-                    />
-                    {o.label}
-                  </label>
-                ))}
-                {modo === "programada" && (
-                  <input
-                    type="datetime-local"
-                    required
-                    value={programadaPara}
-                    onChange={(e) => { setProgramadaPara(e.target.value); marcar(); }}
-                    className="admin-input w-full font-mono text-sm mt-1"
-                  />
-                )}
-              </div>
 
               <details className="admin-seccion" open>
                 <summary>

@@ -12,9 +12,16 @@ interface TiptapEditorProps {
   onChange: (json: JSONContent, html: string) => void;
   /** HTML inicial ya renderizado, apenas monta el editor (para la vista previa). */
   onListo?: (html: string) => void;
+  /** true = modo canvas: sin caja propia, toolbar flotante sticky. */
+  enCanvas?: boolean;
 }
 
-export default function TiptapEditor({ contenidoInicial, onChange, onListo }: TiptapEditorProps) {
+export default function TiptapEditor({
+  contenidoInicial,
+  onChange,
+  onListo,
+  enCanvas = false,
+}: TiptapEditorProps) {
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -79,12 +86,16 @@ export default function TiptapEditor({ contenidoInicial, onChange, onListo }: Ti
     }`;
 
   return (
-    <div className="brut-frame bg-[var(--color-paper-pure)]">
+    <div className={enCanvas ? "" : "brut-frame bg-[var(--color-paper-pure)]"}>
       {/* Toolbar */}
       <div
         role="toolbar"
         aria-label="Formato del texto"
-        className="flex flex-wrap items-center gap-0.5 px-2 py-1.5 border-b-2 border-[var(--color-ink)] sticky top-0 bg-[var(--color-paper-pure)] z-10"
+        className={
+          enCanvas
+            ? "toolbar-canvas flex flex-wrap items-center gap-0.5 px-2 py-1.5 mb-6"
+            : "flex flex-wrap items-center gap-0.5 px-2 py-1.5 border-b-2 border-[var(--color-ink)] sticky top-0 bg-[var(--color-paper-pure)] z-10"
+        }
       >
         <button type="button" title="Negrita" onClick={() => editor.chain().focus().toggleBold().run()} className={b(editor.isActive("bold"))}><strong>B</strong></button>
         <button type="button" title="Itálica" onClick={() => editor.chain().focus().toggleItalic().run()} className={b(editor.isActive("italic"))}><em>I</em></button>
@@ -105,7 +116,14 @@ export default function TiptapEditor({ contenidoInicial, onChange, onListo }: Ti
       </div>
 
       {/* El cuerpo se edita con la MISMA tipografía con la que se publica */}
-      <EditorContent editor={editor} className="editor-cuerpo article-prose px-6 py-5" />
+      <EditorContent
+        editor={editor}
+        className={
+          enCanvas
+            ? "editor-cuerpo en-canvas article-prose"
+            : "editor-cuerpo article-prose px-6 py-5"
+        }
+      />
     </div>
   );
 }
