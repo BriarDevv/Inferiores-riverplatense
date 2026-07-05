@@ -7,6 +7,7 @@ import TiptapEditor from "./TiptapEditor";
 import BarraEditor, { type EstadoGuardado } from "./BarraEditor";
 import ChecklistPublicacion, { type ItemChecklist } from "./ChecklistPublicacion";
 import PreviewCardNota from "./PreviewCardNota";
+import PreviewNota from "./PreviewNota";
 import ConfirmDialog from "./ConfirmDialog";
 import { useToast } from "./Toasts";
 import { guardarNota, type GuardarNotaInput, type ModoPublicacion } from "@/lib/admin/actions";
@@ -80,6 +81,7 @@ export default function EditorNota({ nota, autores, sujetos }: EditorNotaProps) 
   const [guardado, setGuardado] = useState<EstadoGuardado>("inicial");
   const [ultimoGuardado, setUltimoGuardado] = useState<Date | null>(null);
   const [confirmaSalir, setConfirmaSalir] = useState(false);
+  const [previewAbierto, setPreviewAbierto] = useState(false);
   const [tab, setTab] = useState<"ficha" | "preview">("ficha");
 
   const [titulo, setTitulo] = useState(nota?.titulo ?? "");
@@ -107,9 +109,15 @@ export default function EditorNota({ nota, autores, sujetos }: EditorNotaProps) 
     nota?.estado === "programada" ? isoALocal(nota.publicada_en) : "",
   );
   const cuerpoRef = useRef<JSONContent | null>((nota?.cuerpo as JSONContent | null) ?? null);
+  const cuerpoHtmlRef = useRef<string>("");
   const [palabras, setPalabras] = useState(() => contarPalabras(cuerpoRef.current));
 
   const cuerpoInicial = useMemo(() => (nota?.cuerpo as JSONContent | null) ?? null, [nota]);
+  // Notas viejas: el texto vive en `contenido` (legacy) y el sitio lo muestra igual.
+  const palabrasLegacy = useMemo(
+    () => (nota?.contenido ?? "").split(/\s+/).filter(Boolean).length,
+    [nota],
+  );
 
   const sucio = guardado === "sucio";
 
@@ -219,7 +227,9 @@ export default function EditorNota({ nota, autores, sujetos }: EditorNotaProps) 
     ...(formato === "articulo"
       ? [{
           label: `Cuerpo (${MIN_PALABRAS_ARTICULO}+ palabras)`,
-          ok: palabras >= MIN_PALABRAS_ARTICULO,
+          ok:
+            palabras >= MIN_PALABRAS_ARTICULO ||
+            (palabras === 0 && palabrasLegacy >= MIN_PALABRAS_ARTICULO),
           obligatorio: true,
         }]
       : []),
@@ -311,6 +321,7 @@ export default function EditorNota({ nota, autores, sujetos }: EditorNotaProps) 
         submitDeshabilitado={pendiente || subiendoPoster || bloqueado}
         motivoBloqueo={motivoBloqueo}
         onSalir={salir}
+        onVistaPrevia={() => setPreviewAbierto(true)}
       />
 
       <div className="grid gap-8 lg:grid-cols-[1fr_320px] items-start max-w-6xl mx-auto">
@@ -371,8 +382,10 @@ export default function EditorNota({ nota, autores, sujetos }: EditorNotaProps) 
             <span className={labelCls}>Cuerpo de la nota</span>
             <TiptapEditor
               contenidoInicial={cuerpoInicial}
-              onChange={(json) => {
+              onListo={(html) => (cuerpoHtmlRef.current = html)}
+              onChange={(json, html) => {
                 cuerpoRef.current = json;
+                cuerpoHtmlRef.current = html;
                 setPalabras(contarPalabras(json));
                 marcar();
               }}
@@ -611,6 +624,22 @@ export default function EditorNota({ nota, autores, sujetos }: EditorNotaProps) 
           )}
         </aside>
       </div>
+
+      <PreviewNota
+        abierto={previewAbierto}
+        onCerrar={() => setPreviewAbierto(false)}
+        titulo={titulo}
+        bajada={bajada}
+        tipo={tipo}
+        division={division}
+        formato={formato}
+        posterUrl={posterUrl}
+        primicia={primicia}
+        autor={autorSel ? { nombre: autorSel.nombre, avatar_url: autorSel.avatar_url } : undefined}
+        palabras={palabras}
+        cuerpoHtml={cuerpoHtmlRef.current}
+        contenidoLegacy={nota?.contenido}
+      />
 
       <ConfirmDialog
         abierto={confirmaSalir}

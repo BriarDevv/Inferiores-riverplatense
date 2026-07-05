@@ -9,10 +9,12 @@ import { subirImagen } from "@/lib/admin/upload";
 
 interface TiptapEditorProps {
   contenidoInicial: JSONContent | null;
-  onChange: (json: JSONContent) => void;
+  onChange: (json: JSONContent, html: string) => void;
+  /** HTML inicial ya renderizado, apenas monta el editor (para la vista previa). */
+  onListo?: (html: string) => void;
 }
 
-export default function TiptapEditor({ contenidoInicial, onChange }: TiptapEditorProps) {
+export default function TiptapEditor({ contenidoInicial, onChange, onListo }: TiptapEditorProps) {
   const editor = useEditor({
     immediatelyRender: false,
     extensions: [
@@ -27,7 +29,8 @@ export default function TiptapEditor({ contenidoInicial, onChange }: TiptapEdito
       }),
     ],
     content: contenidoInicial ?? "",
-    onUpdate: ({ editor: e }) => onChange(e.getJSON()),
+    onCreate: ({ editor: e }) => onListo?.(e.getHTML()),
+    onUpdate: ({ editor: e }) => onChange(e.getJSON(), e.getHTML()),
   });
 
   if (!editor) {

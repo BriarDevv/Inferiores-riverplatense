@@ -15,6 +15,7 @@ interface BarraEditorProps {
   /** Motivo visible cuando el submit está bloqueado (ej: falta el poster). */
   motivoBloqueo?: string;
   onSalir: () => void;
+  onVistaPrevia: () => void;
 }
 
 function hora(d: Date): string {
@@ -31,6 +32,7 @@ export default function BarraEditor({
   submitDeshabilitado,
   motivoBloqueo,
   onSalir,
+  onVistaPrevia,
 }: BarraEditorProps) {
   const indicador =
     guardado === "guardando"
@@ -64,6 +66,13 @@ export default function BarraEditor({
             {motivoBloqueo}
           </span>
         )}
+        <button
+          type="button"
+          onClick={onVistaPrevia}
+          className="brut-cta-ink px-4 py-2.5 font-sports uppercase tracking-[0.15em] text-sm"
+        >
+          Vista previa
+        </button>
         <button
           type="submit"
           disabled={submitDeshabilitado}
