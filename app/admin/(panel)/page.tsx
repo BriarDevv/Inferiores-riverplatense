@@ -5,7 +5,7 @@ import GraficoBarras from "@/components/admin/GraficoBarras";
 import FilasBarra from "@/components/admin/FilasBarra";
 import NotaDelMomento from "@/components/admin/NotaDelMomento";
 import ProximasProgramadas from "@/components/admin/ProximasProgramadas";
-import { listNotasAdmin, listAutoresAdmin, getPerfilActual } from "@/lib/admin/notas-admin";
+import { listNotasAdmin, listAutoresAdmin } from "@/lib/admin/notas-admin";
 import {
   getVisitasPorNota,
   getSerieDiaria,
@@ -125,11 +125,10 @@ function ritmoDePublicacion(publicadas: NotaAdmin[]): React.ReactNode {
 /* --- Página --- */
 
 export default async function AdminResumen() {
-  const [notas, autores, perfil, visitas, serie14, horas, dispositivos, fuentes] =
+  const [notas, autores, visitas, serie14, horas, dispositivos, fuentes] =
     await Promise.all([
       listNotasAdmin(),
       listAutoresAdmin(),
-      getPerfilActual(),
       getVisitasPorNota(),
       getSerieDiaria(14),
       getVisitasPorHora(),
@@ -140,7 +139,6 @@ export default async function AdminResumen() {
   const publicadas = notas.filter((n) => n.estado === "publicada");
   const borradores = notas.filter((n) => n.estado === "borrador");
   const programadas = notas.filter((n) => n.estado === "programada");
-  const nombre = perfil?.firma ?? perfil?.email.split("@")[0] ?? "";
 
   const delta = deltaDeSerie(serie14);
   const publicadasSemana = publicadas.filter(
@@ -174,11 +172,7 @@ export default async function AdminResumen() {
 
   return (
     <div className="max-w-6xl mx-auto">
-      <PageHeader
-        overline={`Hola, ${nombre}`}
-        titulo="Resumen"
-        descripcion={ritmoDePublicacion(publicadas)}
-      >
+      <PageHeader titulo="Resumen">
         <Link
           href="/admin/notas/nueva"
           className="brut-cta-red px-5 py-3 font-sports uppercase tracking-[0.15em] text-sm inline-block"
@@ -186,6 +180,10 @@ export default async function AdminResumen() {
           + Nueva nota
         </Link>
       </PageHeader>
+      {/* Ritmo de publicación: debajo de la regla del título */}
+      <p className="font-body text-sm text-black/55 -mt-5 mb-6">
+        {ritmoDePublicacion(publicadas)}
+      </p>
 
       {/* Franja tablero: números con contexto + visitas por día */}
       <section
