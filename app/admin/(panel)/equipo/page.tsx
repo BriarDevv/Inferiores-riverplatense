@@ -17,9 +17,8 @@ export default async function AdminEquipo() {
   const opcionesAutor = autores.map((a) => ({ id: a.id, nombre: a.nombre }));
 
   return (
-    <div className="max-w-5xl mx-auto">
+    <div className="max-w-6xl mx-auto">
       <PageHeader
-        overline="Panel de redacción"
         titulo="Equipo"
         descripcion="Los usuarios entran al panel; las firmas aparecen en el sitio. Una cuenta puede vincularse a una firma. Editor: carga y edita sus notas. Admin: todo, incluida esta pantalla."
       />

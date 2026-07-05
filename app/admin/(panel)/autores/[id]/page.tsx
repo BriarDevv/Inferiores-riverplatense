@@ -15,7 +15,7 @@ export default async function EditarFirma({ params }: PageProps) {
   if (!autor) notFound();
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-6xl mx-auto">
       <PageHeader overline="Autores" titulo={autor.nombre} />
       <EditorAutor autor={autor} esAdmin={perfil?.rol === "admin"} />
     </div>

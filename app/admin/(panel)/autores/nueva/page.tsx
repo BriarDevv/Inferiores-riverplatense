@@ -10,7 +10,7 @@ export default async function NuevaFirma() {
   if (perfil?.rol !== "admin") redirect("/admin/autores");
 
   return (
-    <div className="max-w-4xl mx-auto">
+    <div className="max-w-6xl mx-auto">
       <PageHeader overline="Autores" titulo="Nueva firma" />
       <EditorAutor autor={null} esAdmin />
     </div>

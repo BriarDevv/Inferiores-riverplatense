@@ -101,7 +101,6 @@ export default async function AdminEstadisticas({ searchParams }: PageProps) {
   return (
     <div className="max-w-6xl mx-auto">
       <PageHeader
-        overline="Panel de redacción"
         titulo="Estadísticas"
         descripcion="Visitas medidas por el contador propio del sitio. Un mismo lector cuenta una sola vez cada 30 minutos."
       />

@@ -138,7 +138,7 @@ export default async function AdminNotas({ searchParams }: PageProps) {
 
   return (
     <div className="max-w-6xl mx-auto">
-      <PageHeader overline="Panel de redacción" titulo="Notas">
+      <PageHeader titulo="Notas">
         <Link
           href="/admin/notas/nueva"
           className="brut-cta-red px-5 py-3 font-sports uppercase tracking-[0.15em] text-sm inline-block"

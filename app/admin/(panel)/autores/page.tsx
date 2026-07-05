@@ -9,9 +9,8 @@ export default async function AdminAutores() {
   const esAdmin = perfil?.rol === "admin";
 
   return (
-    <div className="max-w-5xl mx-auto">
+    <div className="max-w-6xl mx-auto">
       <PageHeader
-        overline="Panel de redacción"
         titulo="Autores"
         descripcion="Las firmas que aparecen en las notas del sitio. Una firma no necesita cuenta: podés crear la de un colaborador y firmar notas por él."
       >
