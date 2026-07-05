@@ -24,8 +24,8 @@ interface EditorNotaProps {
 
 const FORMATOS = [
   { value: "articulo", label: "Artículo" },
-  { value: "youtube", label: "Video de YouTube" },
-  { value: "short", label: "Video corto (vertical)" },
+  { value: "youtube", label: "Video horizontal (YouTube)" },
+  { value: "short", label: "Video vertical" },
 ];
 
 const FUENTES = [
