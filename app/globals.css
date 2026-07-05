@@ -929,15 +929,9 @@ html {
   color: #fff;
   border-left-color: var(--color-river-red);
 }
-@media (max-width: 767px) {
-  .admin-nav-item {
-    border-left: none;
-    border-bottom: 4px solid transparent;
-  }
-  .admin-nav-activa {
-    border-bottom-color: var(--color-river-red);
-  }
-}
+/* En mobile la navegación vive en el panel de la hamburguesa (reusa
+   .nav-burger/.nav-mobile-panel del nav del sitio; el sidebar sticky
+   es el ancestro posicionado del panel). */
 
 /* Tabla del panel */
 .admin-table {
