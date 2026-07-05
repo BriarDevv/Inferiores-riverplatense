@@ -80,8 +80,10 @@ export default function AdminSidebar({ email, rol, firma, onCerrarSesion }: Admi
         className="flex items-center gap-3 py-3 md:px-5 md:py-5 md:border-b border-white/10 shrink-0 min-w-0 md:w-full"
       >
         <Image src="/logo.webp" alt="" width={36} height={36} className="rounded-full" />
-        <span className="font-display text-base md:text-lg font-bold leading-tight truncate">
-          Inferiores <em className="text-[var(--color-river-red)]">Rpl.</em>
+        {/* Mismo lockup que el masthead del sitio, apilado para el ancho del sidebar */}
+        <span className="font-display font-bold leading-[0.95] min-w-0 text-[15px] md:text-base">
+          <span className="block text-white">Inferiores</span>
+          <span className="block italic text-[var(--color-river-red)]">Riverplatense</span>
         </span>
       </Link>
 
@@ -91,11 +93,12 @@ export default function AdminSidebar({ email, rol, firma, onCerrarSesion }: Admi
       {!enEditor && (
         <Link
           href="/admin/notas/nueva"
-          className="brut-cta-red-dark md:mx-4 md:mt-4 md:w-auto md:self-stretch shrink-0 font-sports uppercase tracking-[0.15em] text-sm text-center px-3 py-1.5 md:py-2.5"
+          className="brut-cta-red-dark shrink-0 font-sports uppercase tracking-[0.15em] text-sm inline-flex items-center justify-center w-10 h-[38px] sm:w-auto sm:h-auto sm:px-4 sm:py-2 md:mx-4 md:mt-4 md:self-stretch md:py-2.5"
         >
-          <span className="sm:hidden">
-            +<span className="sr-only"> Nueva nota</span>
+          <span className="sm:hidden text-xl leading-none" aria-hidden>
+            +
           </span>
+          <span className="sr-only sm:hidden">Nueva nota</span>
           <span className="hidden sm:inline">+ Nueva nota</span>
         </Link>
       )}
