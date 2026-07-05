@@ -75,6 +75,19 @@ Propuesta completa en `docs/superpowers/specs/2026-07-04-admin-redesign-v2-propu
 - **Responsive verificado** (Playwright, 45 combinaciones ruta×ancho sin overflow horizontal): sidebar mobile con "+ nueva" y Salir, `chips-scroller` en el nav, marcador 2 col en mobile. ⚠️ **`.admin-shell { position: relative; overflow-x: clip }` es load-bearing**: sin el `relative`, los `sr-only` (absolutos sin ancestro posicionado) anclan en `<html>` y le inflan el scroll horizontal a toda la página; `clip` no rompe los sticky.
 - `.chip-estado-*` fue reemplazado por `.sello-*`; `NotaAcciones.tsx` borrado (lo reemplaza `MenuAccionesNota`).
 
+### ✅ Resumen v2 "Tablero de cierre" (2026-07-04)
+
+Spec: `docs/superpowers/specs/2026-07-04-resumen-tablero-design.md`. `/admin` rediseñado:
+
+- **Migración `005_resumen.sql`**: columna `dispositivo` en `nota_visitas` + vistas `security_invoker` `visitas_por_dia/hora/dispositivo/referer` (staff-only vía RLS de la tabla base; hora en TZ Buenos Aires).
+- **⚠️ Fix del referer**: el header Referer del ping era la URL de la propia nota. Ahora `RegistrarVisita` manda `document.referrer` en el body (`ref`) y la API lo valida (descarta host propio). Filas viejas → "Sin dato". La API también detecta `dispositivo` del UA.
+- **Franja tablero** (ink + shadow-red): Visitas·7días GIGANTE con `Delta` vs los 7 previos + 4 números chicos (Publicadas con "+N esta semana") + `GraficoBarras` de 14 días (SVG propio, pico en rojo) con insight textual ("El sábado fue el mejor día: N visitas").
+- **NotaDelMomento**: la más leída de la semana con poster + visitas estampadas + "N× más que la segunda" + top 2°–5° al pie (reemplaza el módulo "Más leídas").
+- **Mini-módulos** (`FilasBarra`): De dónde llegan (fuentes normalizadas en `getFuentes()`: Google/IG/X/etc.), Mobile vs Desktop, A qué hora leen (`franjaPico` = mejor ventana de 4hs).
+- **ProximasProgramadas** (agenda con fecha en cubo) + Para retomar + Últimas publicadas en fila de 3.
+- **Ritmo de publicación** como descripción del PageHeader ("Última nota hace N días · M en {mes}", en rojo si N>7). `PageHeader.descripcion` ahora acepta ReactNode.
+- Regla de armonía: `gap-6`/`mb-6` únicos, todos los módulos = `brut-frame-shadow` + header ink, `items-stretch` con contenido centrado en los minis.
+
 ### Pendiente (post-dashboard)
 
 - Fases 4–6 del rediseño v2 del panel (ver propuesta): visitas por día + deltas en Resumen, estadísticas con evolución/referers/CSV, perfil-completo en Autores y estados de invitación en Equipo.

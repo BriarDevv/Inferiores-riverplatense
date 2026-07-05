@@ -15,7 +15,8 @@ export default function RegistrarVisita({ slug }: { slug: string }) {
     void fetch("/api/visita", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ slug }),
+      // ref: de dónde vino el lector (el server descarta las navegaciones internas)
+      body: JSON.stringify({ slug, ref: document.referrer || null }),
       keepalive: true,
     }).catch(() => undefined);
   }, [slug]);

@@ -17,10 +17,27 @@ function admin() {
   );
 }
 
+/**
+ * El origen real de la visita viene del body (document.referrer del cliente):
+ * el header Referer del ping es siempre la propia nota, no sirve.
+ */
+function refererValido(ref: unknown, hostPropio: string): string | null {
+  if (typeof ref !== "string" || ref.length === 0) return null;
+  try {
+    const url = new URL(ref);
+    if (url.protocol !== "http:" && url.protocol !== "https:") return null;
+    if (url.host === hostPropio) return null; // navegación interna = no es fuente
+    return ref.slice(0, 300);
+  } catch {
+    return null;
+  }
+}
+
 export async function POST(request: Request) {
   let slug: unknown;
+  let ref: unknown;
   try {
-    ({ slug } = await request.json());
+    ({ slug, ref } = await request.json());
   } catch {
     return NextResponse.json({ ok: false }, { status: 400 });
   }
@@ -58,11 +75,13 @@ export async function POST(request: Request) {
     return NextResponse.json({ ok: true, dedupe: true });
   }
 
-  const referer = request.headers.get("referer");
+  const hostPropio = request.headers.get("host") ?? "";
+  const dispositivo = /Mobi|Android/i.test(ua) ? "mobile" : "desktop";
   await supabase.from("nota_visitas").insert({
     nota_id: nota.id,
     hash_visitante: hash,
-    referer: referer ? referer.slice(0, 300) : null,
+    referer: refererValido(ref, hostPropio),
+    dispositivo,
   });
 
   return NextResponse.json({ ok: true });

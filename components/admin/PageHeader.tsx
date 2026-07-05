@@ -1,7 +1,7 @@
 interface PageHeaderProps {
   overline: string;
   titulo: string;
-  descripcion?: string;
+  descripcion?: React.ReactNode;
   /** Acción primaria (botón/link), alineada a la derecha sobre la misma línea base. */
   children?: React.ReactNode;
 }
