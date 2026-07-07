@@ -10,6 +10,7 @@ import { formatearFechaLarga, labelDivision, labelTipo } from "@/lib/constants";
 import BackToHome from "@/components/layout/BackToHome";
 
 import { SITE_URL } from "@/lib/site";
+import { jsonLdSeguro } from "@/lib/json-ld";
 
 type Params = { slug: string };
 
@@ -30,6 +31,10 @@ export async function generateMetadata({
   const desc =
     sujeto.bio ??
     `Todas las notas, entrevistas y noticias sobre ${sujeto.nombre} en las inferiores de River.`;
+  // Sin foto propia del jugador, el poster de su nota más reciente es la
+  // imagen más representativa para compartir el hub.
+  const notas = await getNotasPorSujeto(sujeto.id);
+  const poster = notas[0]?.poster_url;
   return {
     title: sujeto.nombre,
     description: desc,
@@ -37,7 +42,15 @@ export async function generateMetadata({
     openGraph: {
       title: `${sujeto.nombre} — Inferiores Riverplatense`,
       description: desc,
+      url: `${SITE_URL}/jugador/${slug}`,
       type: "profile",
+      ...(poster ? { images: [{ url: poster, alt: sujeto.nombre }] } : {}),
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: `${sujeto.nombre} — Inferiores Riverplatense`,
+      description: desc,
+      ...(poster ? { images: [poster] } : {}),
     },
   };
 }
@@ -54,9 +67,45 @@ export default async function JugadorPage({
   const notas = await getNotasPorSujeto(sujeto.id);
   const desde = notas[notas.length - 1]?.publicada_en;
   const hayPrimicia = notas.some((n) => n.primicia);
+  const url = `${SITE_URL}/jugador/${slug}`;
+
+  const jsonLd = {
+    "@context": "https://schema.org",
+    "@type": "ProfilePage",
+    ...(notas[0] ? { dateModified: notas[0].publicada_en } : {}),
+    mainEntity: {
+      "@type": "Person",
+      name: sujeto.nombre,
+      url,
+      ...(sujeto.bio ? { description: sujeto.bio } : {}),
+      memberOf: {
+        "@type": "SportsTeam",
+        name: sujeto.division
+          ? `Club Atlético River Plate — ${labelDivision(sujeto.division)}`
+          : "Club Atlético River Plate",
+      },
+    },
+  };
+
+  const jsonLdMigas = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Inicio", item: SITE_URL },
+      { "@type": "ListItem", position: 2, name: sujeto.nombre },
+    ],
+  };
 
   return (
     <main style={{ background: "var(--color-paper)" }}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLdSeguro(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLdSeguro(jsonLdMigas) }}
+      />
       <div className="mx-auto max-w-[860px] px-6 lg:px-8 py-10 lg:py-14">
         <BackToHome />
 

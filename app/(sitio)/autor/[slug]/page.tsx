@@ -73,8 +73,21 @@ export default async function AutorPage({ params }: { params: Promise<Params> })
       ...(autor.foto_url ? { image: autor.foto_url } : {}),
       url,
       sameAs: redes.map((r) => r.href),
-      worksFor: { "@type": "Organization", name: "Inferiores Riverplatense" },
+      worksFor: {
+        "@type": "NewsMediaOrganization",
+        "@id": `${SITE_URL}/#organizacion`,
+        name: "Inferiores Riverplatense",
+      },
     },
+  };
+
+  const jsonLdMigas = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Inicio", item: SITE_URL },
+      { "@type": "ListItem", position: 2, name: autor.nombre },
+    ],
   };
 
   return (
@@ -82,6 +95,10 @@ export default async function AutorPage({ params }: { params: Promise<Params> })
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: jsonLdSeguro(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLdSeguro(jsonLdMigas) }}
       />
 
       <div className="mx-auto max-w-6xl px-6 lg:px-8 py-10 lg:py-14">
