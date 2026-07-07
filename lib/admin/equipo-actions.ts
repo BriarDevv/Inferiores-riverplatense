@@ -7,6 +7,7 @@
 import { revalidatePath } from "next/cache";
 import { createClient } from "@supabase/supabase-js";
 import { getPerfilActual } from "@/lib/admin/notas-admin";
+import { SITE_URL } from "@/lib/site";
 import type { ResultadoAccion } from "@/lib/admin/actions";
 
 function admin() {
@@ -35,7 +36,7 @@ export async function invitarMiembro(
 
   const supabase = admin();
   const { data, error } = await supabase.auth.admin.inviteUserByEmail(email, {
-    redirectTo: `${process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000"}/auth/callback`,
+    redirectTo: `${SITE_URL}/auth/callback`,
   });
   if (error) {
     if (error.message.includes("already been registered")) {

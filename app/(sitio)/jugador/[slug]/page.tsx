@@ -9,7 +9,7 @@ import {
 import { formatearFechaLarga, labelDivision, labelTipo } from "@/lib/constants";
 import BackToHome from "@/components/layout/BackToHome";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+import { SITE_URL } from "@/lib/site";
 
 type Params = { slug: string };
 

@@ -8,7 +8,7 @@ import RegistrarVisita from "@/components/article/RegistrarVisita";
 import AuthorBio from "@/components/article/AuthorBio";
 import BackToHome from "@/components/layout/BackToHome";
 import { getNotaPorSlug, getNotasRelacionadas, getTodasLasNotas } from "@/lib/notas";
-import { renderCuerpo } from "@/lib/render-cuerpo";
+import { renderCuerpo, textoDelCuerpo } from "@/lib/render-cuerpo";
 import {
   formatearDuracion,
   formatearFechaLarga,
@@ -17,7 +17,7 @@ import {
   tiempoLectura,
 } from "@/lib/constants";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+import { SITE_URL } from "@/lib/site";
 
 type Params = { slug: string };
 
@@ -191,7 +191,8 @@ export default async function NotaPage({
                 style={{ color: "var(--color-neutral-500)" }}
               >
                 {formatearFechaLarga(nota.publicada_en)}
-                {!esVideo && ` · ${tiempoLectura(nota.contenido)} min de lectura`}
+                {!esVideo &&
+                  ` · ${tiempoLectura(nota.contenido || textoDelCuerpo(nota.cuerpo))} min de lectura`}
               </p>
             </div>
           </div>

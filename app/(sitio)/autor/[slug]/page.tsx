@@ -7,7 +7,7 @@ import BackToHome from "@/components/layout/BackToHome";
 import { getAutorPorSlug, getSlugsDeAutores } from "@/lib/autores";
 import { getNotasPorAutor } from "@/lib/notas";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+import { SITE_URL } from "@/lib/site";
 
 type Params = { slug: string };
 

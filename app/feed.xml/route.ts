@@ -1,6 +1,6 @@
 import { getTodasLasNotas } from "@/lib/notas";
 
-const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "http://localhost:3000";
+import { SITE_URL } from "@/lib/site";
 
 function esc(s: string): string {
   return s
