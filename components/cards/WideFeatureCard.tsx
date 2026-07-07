@@ -63,7 +63,7 @@ export default function WideFeatureCard({ nota }: Props) {
         >
           {labelTipo(nota.tipo)} · {labelDivision(nota.division)}
         </p>
-        <h3
+        <h2
           className="font-display"
           style={{
             fontSize: "clamp(1.6rem, 2.4vw, 2.25rem)",
@@ -73,7 +73,7 @@ export default function WideFeatureCard({ nota }: Props) {
           }}
         >
           {nota.titulo}
-        </h3>
+        </h2>
         <p
           className="text-base leading-relaxed line-clamp-3 max-w-prose"
           style={{ color: "var(--color-neutral-700)" }}

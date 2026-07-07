@@ -59,7 +59,7 @@ export default function JugadorCard({ sujeto, notas }: Props) {
         className="p-4 lg:p-5 flex flex-col gap-2 flex-1"
         style={{ borderTop: "2px solid var(--color-ink)" }}
       >
-        <h3
+        <h2
           className="font-display leading-[1.1]"
           style={{
             fontSize: "1.25rem",
@@ -68,7 +68,7 @@ export default function JugadorCard({ sujeto, notas }: Props) {
           }}
         >
           {sujeto.nombre}
-        </h3>
+        </h2>
         <div
           className="mt-auto flex items-center gap-2 font-mono text-[0.6rem] uppercase tracking-[0.14em]"
           style={{ color: "var(--color-neutral-500)" }}

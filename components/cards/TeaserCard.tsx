@@ -87,7 +87,7 @@ export default function TeaserCard({ nota }: Props) {
         >
           {labelTipo(nota.tipo)} · {labelDivision(nota.division)}
         </p>
-        <h3
+        <h2
           className="font-display"
           style={{
             fontSize: "1.25rem",
@@ -97,7 +97,7 @@ export default function TeaserCard({ nota }: Props) {
           }}
         >
           {nota.titulo}
-        </h3>
+        </h2>
         <div className="mt-auto">
           <CardAuthorMeta autor={nota.autor} publicada_en={nota.publicada_en} />
         </div>

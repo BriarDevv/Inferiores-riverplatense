@@ -28,7 +28,7 @@ export default function NoticiasList({ notas, title = "Noticias" }: Props) {
         className="px-5 py-4 flex items-center justify-between shrink-0"
         style={{ borderBottom: "2px solid var(--color-ink)" }}
       >
-        <h3
+        <h2
           className="font-sports"
           style={{
             fontSize: "0.95rem",
@@ -37,7 +37,7 @@ export default function NoticiasList({ notas, title = "Noticias" }: Props) {
           }}
         >
           {title}
-        </h3>
+        </h2>
         <span
           aria-hidden
           className="inline-block"

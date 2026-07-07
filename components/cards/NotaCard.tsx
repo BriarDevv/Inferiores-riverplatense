@@ -69,7 +69,7 @@ function CardFooter({ nota }: { nota: Nota }) {
       >
         {labelTipo(nota.tipo)} · {labelDivision(nota.division)}
       </p>
-      <h3
+      <h2
         className="font-display leading-[1.1]"
         style={{
           fontSize: "1.2rem",
@@ -78,7 +78,7 @@ function CardFooter({ nota }: { nota: Nota }) {
         }}
       >
         {nota.titulo}
-      </h3>
+      </h2>
       <CardAuthorMeta autor={nota.autor} publicada_en={nota.publicada_en} />
     </div>
   );
@@ -157,7 +157,7 @@ function YouTubeCard({ nota, size }: { nota: Nota; size: "sm" | "md" | "lg" }) {
         >
           {labelTipo(nota.tipo)} · {labelDivision(nota.division)}
         </p>
-        <h3
+        <h2
           className={`font-display leading-[1.1] ${size === "lg" ? "text-3xl" : "text-xl"}`}
           style={{
             color: "var(--color-neutral-900)",
@@ -165,7 +165,7 @@ function YouTubeCard({ nota, size }: { nota: Nota; size: "sm" | "md" | "lg" }) {
           }}
         >
           {nota.titulo}
-        </h3>
+        </h2>
         <CardAuthorMeta autor={nota.autor} publicada_en={nota.publicada_en} />
       </div>
     </Link>
@@ -209,7 +209,7 @@ function ArticleCard({ nota, size }: { nota: Nota; size: "sm" | "md" | "lg" }) {
         >
           {labelTipo(nota.tipo)} · {labelDivision(nota.division)}
         </p>
-        <h3
+        <h2
           className={`font-display leading-[1.1] ${size === "lg" ? "text-3xl" : "text-xl"}`}
           style={{
             color: "var(--color-neutral-900)",
@@ -217,7 +217,7 @@ function ArticleCard({ nota, size }: { nota: Nota; size: "sm" | "md" | "lg" }) {
           }}
         >
           {nota.titulo}
-        </h3>
+        </h2>
         <p
           className="text-sm leading-snug line-clamp-2"
           style={{ color: "var(--color-neutral-700)" }}

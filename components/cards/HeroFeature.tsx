@@ -123,13 +123,13 @@ export default function HeroFeature({ nota }: Props) {
           borderColor: "var(--color-ink)",
           background: "var(--color-ink)",
         }}
-        aria-label={`Leer: ${nota.titulo}`}
       >
         <Image
           src={nota.poster_url}
           alt={nota.titulo}
           fill
           priority
+          fetchPriority="high"
           sizes="(max-width: 1024px) 100vw, 50vw"
           className="transition-transform duration-[600ms] ease-out group-hover:scale-[1.03]"
           style={{ objectFit: "cover" }}
