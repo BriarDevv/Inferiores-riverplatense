@@ -1,3 +1,4 @@
+import type { Metadata } from "next";
 import HeroFeature from "@/components/cards/HeroFeature";
 import NotaCard from "@/components/cards/NotaCard";
 import TeaserCard from "@/components/cards/TeaserCard";
@@ -36,6 +37,56 @@ const TEMAS: Record<string, { label: string; tags: string[] }> = {
   },
 };
 
+/** Etiqueta legible de los filtros activos (título del modo filtrado). */
+function labelFiltros(
+  tipo?: TipoNota,
+  division?: Division,
+  tema?: string,
+  q?: string,
+): string {
+  return [
+    tipo ? labelTipo(tipo) : null,
+    division ? labelDivision(division) : null,
+    tema && TEMAS[tema] ? TEMAS[tema].label : null,
+    q ? `“${q}”` : null,
+  ]
+    .filter(Boolean)
+    .join(" · ");
+}
+
+export async function generateMetadata({
+  searchParams,
+}: {
+  searchParams: Promise<SearchParams>;
+}): Promise<Metadata> {
+  const sp = await searchParams;
+  const tipo = first(sp.tipo) as TipoNota | undefined;
+  const division = first(sp.division) as Division | undefined;
+  const tema = first(sp.tema);
+  const q = first(sp.q)?.trim();
+
+  // Portada sin filtros = la URL canónica del sitio.
+  if (!tipo && !division && !tema && !q) {
+    return {
+      alternates: {
+        canonical: "/",
+        types: {
+          "application/rss+xml": [
+            { url: "/feed.xml", title: "Inferiores Riverplatense" },
+          ],
+        },
+      },
+    };
+  }
+
+  // Vistas filtradas y búsqueda: navegables pero fuera del índice
+  // (son recortes de la portada; indexarlas diluye el crawl budget).
+  return {
+    title: labelFiltros(tipo, division, tema, q),
+    robots: { index: false, follow: true },
+  };
+}
+
 export default async function HomePage({
   searchParams,
 }: {
@@ -53,14 +104,7 @@ export default async function HomePage({
     const tags = tema && TEMAS[tema] ? TEMAS[tema].tags : undefined;
     const resultados = await getNotas({ tipo, division, tags, q });
 
-    const descripcion = [
-      tipo ? labelTipo(tipo) : null,
-      division ? labelDivision(division) : null,
-      tema && TEMAS[tema] ? TEMAS[tema].label : null,
-      q ? `“${q}”` : null,
-    ]
-      .filter(Boolean)
-      .join(" · ");
+    const descripcion = labelFiltros(tipo, division, tema, q);
 
     return (
       <main style={{ background: "var(--color-paper)" }}>
