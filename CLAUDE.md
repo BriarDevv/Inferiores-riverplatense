@@ -23,6 +23,16 @@ Sigue siendo material de demo para cliente, pero ya **no** está recortado a `/`
 - **SEO**: `sitemap.xml`, `robots.txt`, `feed.xml` (RSS), `not-found.tsx` (404 brutalist), `metadataBase` + iconos. ✓
 - **Cards/links internos** → ahora apuntan a `/nota/${slug}` reales. ✓
 
+### ✅ Contenido REAL + dominio (2026-07-07) — SE FUERON LOS MOCKS
+
+- **Dominio comprado: `inferioresriverplatense.com`**. `lib/site.ts` centraliza `SITE_URL`: `NEXT_PUBLIC_SITE_URL` lo pisa siempre; sin env var, producción cae al dominio y dev a localhost. Lo importan layout/nota/jugador/autor/sitemap/robots/feed/equipo-actions (no queda ningún fallback duplicado). `robots` ahora también disallow `/admin`.
+- **Contenido real en la DB**: `scripts/seed-data.ts` = 20 notas (`nr-01..nr-20`) redactadas a partir de hechos reales de may–jul 2026 (Superclásico de Reserva por penales + final vs Racing, historia de Meloni, 8 juveniles citados por Escudero, gira de Coudet en Alicante, 2-2 vs Flamengo en Faro, final del Apertura perdida con Belgrano, mercado Otamendi/Arambarri/Borré/Beltrán/Correa, lesión de Ruberto, renovación de Subiabre, MagiCup 2014, femenino, estructura del semillero) + 8 sujetos reales (5 jugadores con hub: Meloni, Pellegrini, Sayago, Subiabre, Ruberto; Spiff sin slug; técnicos Escudero y Coudet). **Texto propio** (no copiado de medios) e **imágenes Unsplash verificadas una por una** (nada de fotos de agencias, por derechos).
+- **Cuerpos en Tiptap**: el seed convierte `parrafos` ("## " = h2, "> " = cita) a JSON Tiptap en la columna `cuerpo` → editables en el panel tal cual. `contenido` legacy queda null; el tiempo de lectura ahora sale del cuerpo (`textoDelCuerpo()` en `lib/render-cuerpo.ts`).
+- **`scripts/seed.ts`** ahora: borra los mocks si existen (`id ~ '^n-[0-9]+$'` y `jug|tec|eq-*`; los FK cascade limpian pivote y visitas) y upsertea el contenido real. Idempotente. ⚠️ Las visitas viejas se fueron con las notas mock: el contador arranca de cero.
+- **`lib/mock-data.ts` BORRADO.** `/ui` usa fixtures propios (`app/(sitio)/ui/_fixtures.ts`); `SobreAutorBand` y `/sobre` leen la firma real vía `getAutorPrincipal()` (`lib/autores.ts`).
+- ⚠️ **Lección**: si tras cambiar contenido aparecen 404 "fantasma" en páginas SSG que existen en la DB → `rm -rf .next` y rebuild (el fetch-cache viejo de `.next/cache` envenena el prerender; el build NO falla, hornea la página como 404).
+- Pendiente inmediato: deploy en Vercel + DNS del dominio (el código ya apunta ahí solo).
+
 ### ✅ Fase 1 "Cimientos Supabase" COMPLETADA (2026-07-04)
 
 En camino al **dashboard admin** (spec: `docs/superpowers/specs/2026-07-04-admin-dashboard-design.md`, plan: `docs/superpowers/plans/2026-07-04-fase-1-cimientos-supabase.md`):
@@ -30,7 +40,7 @@ En camino al **dashboard admin** (spec: `docs/superpowers/specs/2026-07-04-admin
 - **Supabase conectado** (proyecto `mqsbbptkhkkjjrkdwgvf`, región us-west-2). Keys en `.env.local` (URL + anon/publishable + `SUPABASE_DB_URL` para scripts). NO hay service_role key; los scripts locales usan conexión directa Postgres.
 - **Schema en DB**: `autores` (firmas), `profiles` (cuentas, rol admin/editor), `sujetos`, `notas` (con `estado` borrador/programada/publicada), `nota_sujetos`, `nota_visitas` + bucket `imagenes`. Migraciones versionadas en `supabase/migrations/*.sql` — correr con `npx tsx scripts/run-migrations.ts`.
 - **RLS activa y verificada** (`scripts/check-rls.ts`): anon solo lee publicadas; escritura bloqueada sin sesión; `nota_visitas` invisible al cliente.
-- **Seed**: las 22 notas + 2 autores + 7 sujetos migrados (`npx tsx scripts/seed.ts`, idempotente). `lib/mock-data.ts` queda SOLO como fuente del seed.
+- **Seed**: `npx tsx scripts/seed.ts` (idempotente). Desde 2026-07-07 siembra el CONTENIDO REAL de `scripts/seed-data.ts` y elimina los mocks si siguen en la DB (`lib/mock-data.ts` ya no existe).
 - **`lib/notas.ts` lee de Supabase** (misma interfaz; cliente anónimo sin cookies para que funcione en SSG/build). Mapper DB→`Nota` en `lib/notas-mapper.ts` con tests (`npm test`, vitest).
 - **Auth**: login magic-link (`/admin/login`, estética "acreditación de prensa"), callback `/auth/callback` (valida que exista `profile`, si no → sin acceso), **`proxy.ts`** (Next 16, ex-middleware) protege `/admin/*`. Placeholder `/admin` muestra sesión+rol.
 - **Route groups**: páginas públicas en `app/(sitio)/` con su layout (Nav/Footer/SocialRail/Lenis); root layout = solo fuentes/metadata; `/admin` tiene layout limpio propio.
@@ -120,7 +130,7 @@ Spec: `docs/superpowers/specs/2026-07-04-resumen-tablero-design.md`. `/admin` re
 - SMTP propio (Resend u otro) para que invitaciones/logins no choquen el rate limit.
 - Cablear form de `/contacto` y newsletter a algo real.
 - Handles reales en `SocialRail` + mail/WhatsApp reales en `/contacto`.
-- Deploy a Vercel + dominio + `NEXT_PUBLIC_SITE_URL` + subdominio `admin.*` (rewrite).
+- Deploy a Vercel + DNS de `inferioresriverplatense.com` (comprado 2026-07-07; el código ya cae a ese dominio en prod vía `lib/site.ts`). Opcional: subdominio `admin.*` (rewrite).
 
 ---
 
@@ -255,9 +265,13 @@ components/
 
 lib/
   types.ts      → Nota, Sujeto, Autor, FiltrosNota
-  mock-data.ts  → 22 notas (n-1..n-22; n-15..n-21 = "noticia", n-22 = "columna"). Sujetos jugador con slug+bio.
+  site.ts       → SITE_URL canónica (env > dominio en prod > localhost en dev)
   notas.ts      → capa de acceso: getNotas (con q/tags), getNotaPorSlug, getNotasRelacionadas, getSujetoPorSlug, getNotasPorSujeto, getSlugsDeJugadores
   constants.ts  → divisiones, tipos, formatters, norm(), tiempoLectura(), formatearFechaLarga()
+
+scripts/
+  seed-data.ts  → CONTENIDO REAL: 20 notas nr-01..nr-20 + 8 sujetos + 2 autores (fuente de verdad del seed)
+  seed.ts       → limpia mocks + upsertea seed-data (cuerpos → Tiptap)
 
 public/
   logo.webp               → badge circular del club (nav + footer)
