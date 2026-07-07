@@ -1,14 +1,12 @@
 import { getTodasLasNotas } from "@/lib/notas";
+import { renderCuerpo } from "@/lib/render-cuerpo";
 
 import { SITE_URL } from "@/lib/site";
+import { escXml } from "@/lib/xml";
 
-function esc(s: string): string {
-  return s
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;")
-    .replace(/"/g, "&quot;")
-    .replace(/'/g, "&apos;");
+/** Cierra CDATA de forma segura si el HTML llegara a contener "]]>". */
+function cdata(html: string): string {
+  return `<![CDATA[${html.replaceAll("]]>", "]]]]><![CDATA[>")}]]>`;
 }
 
 export async function GET() {
@@ -17,19 +15,24 @@ export async function GET() {
   const items = notas
     .map((n) => {
       const link = `${SITE_URL}/nota/${n.slug}`;
+      const cuerpoHtml = renderCuerpo(n.cuerpo);
+      const contenido = cuerpoHtml
+        ? `\n      <content:encoded>${cdata(cuerpoHtml)}</content:encoded>`
+        : "";
       return `    <item>
-      <title>${esc(n.titulo)}</title>
+      <title>${escXml(n.titulo)}</title>
       <link>${link}</link>
       <guid isPermaLink="true">${link}</guid>
-      <description>${esc(n.bajada)}</description>
-      <author>${esc(n.autor.nombre)}</author>
+      <description>${escXml(n.bajada)}</description>
+      <author>${escXml(n.autor.nombre)}</author>
       <pubDate>${new Date(n.publicada_en).toUTCString()}</pubDate>
+      <media:content url="${escXml(n.poster_url)}" medium="image" />${contenido}
     </item>`;
     })
     .join("\n");
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom">
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:media="http://search.yahoo.com/mrss/">
   <channel>
     <title>Inferiores Riverplatense</title>
     <link>${SITE_URL}</link>
