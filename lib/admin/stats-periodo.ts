@@ -4,7 +4,7 @@
  * devuelven números. Testeables con vitest.
  */
 
-export const TZ_SITIO = "America/Argentina/Buenos_Aires";
+const TZ_SITIO = "America/Argentina/Buenos_Aires";
 
 export interface VisitaCruda {
   nota_id: string;

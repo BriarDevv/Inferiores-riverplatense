@@ -4,6 +4,13 @@ import { useState } from "react";
 import Dropdown from "@/components/ui/Dropdown";
 import { DIVISIONES, TIPOS_NOTA } from "@/lib/constants";
 
+const OPC_FORMATO = [
+  { value: null, label: "Todos los formatos" },
+  { value: "short", label: "Shorts (verticales)" },
+  { value: "youtube", label: "Videos largos" },
+  { value: "articulo", label: "Notas escritas" },
+];
+
 export default function UiDropdownDemo() {
   const [tipo, setTipo] = useState<string | null>(null);
   const [division, setDivision] = useState<string | null>("reserva");
@@ -16,12 +23,6 @@ export default function UiDropdownDemo() {
   const opcDivision = [
     { value: null, label: "Todas las divisiones" },
     ...DIVISIONES.map((d) => ({ value: d.value, label: d.label })),
-  ];
-  const opcFormato = [
-    { value: null, label: "Todos los formatos" },
-    { value: "short", label: "Shorts (verticales)" },
-    { value: "youtube", label: "Videos largos" },
-    { value: "articulo", label: "Notas escritas" },
   ];
 
   return (
@@ -45,7 +46,7 @@ export default function UiDropdownDemo() {
         />
         <Dropdown
           label="Formato"
-          options={opcFormato}
+          options={OPC_FORMATO}
           value={formato}
           onChange={setFormato}
         />

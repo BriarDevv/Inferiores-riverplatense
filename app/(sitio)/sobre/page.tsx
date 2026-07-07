@@ -12,9 +12,11 @@ export const metadata: Metadata = {
 };
 
 export default async function SobrePage() {
-  const notas = await getNotas();
-  const jugadores = await getSlugsDeJugadores();
-  const autor = await getAutorPrincipal();
+  const [notas, jugadores, autor] = await Promise.all([
+    getNotas(),
+    getSlugsDeJugadores(),
+    getAutorPrincipal(),
+  ]);
   const divisiones = new Set(notas.map((n) => n.division)).size;
 
   const stats = [

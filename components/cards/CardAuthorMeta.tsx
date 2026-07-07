@@ -9,6 +9,15 @@ interface Props {
 }
 
 /** Avatar circular + nombre + fecha. Mismo formato para TeaserCard y NotaCard. */
+const FALLBACK_AVATAR_STYLE: React.CSSProperties = {
+  borderRadius: "9999px",
+  background: "var(--color-river-red)",
+  color: "var(--color-paper-pure)",
+  border: "1.5px solid var(--color-ink)",
+  fontSize: "0.6rem",
+  letterSpacing: "0.04em",
+};
+
 export default function CardAuthorMeta({ autor, publicada_en, size = "sm" }: Props) {
   const avatarSize = size === "md" ? 28 : 24;
 
@@ -36,16 +45,7 @@ export default function CardAuthorMeta({ autor, publicada_en, size = "sm" }: Pro
       ) : (
         <span
           className="inline-flex items-center justify-center font-sports shrink-0"
-          style={{
-            width: avatarSize,
-            height: avatarSize,
-            borderRadius: "9999px",
-            background: "var(--color-river-red)",
-            color: "var(--color-paper-pure)",
-            border: "1.5px solid var(--color-ink)",
-            fontSize: "0.6rem",
-            letterSpacing: "0.04em",
-          }}
+          style={{ ...FALLBACK_AVATAR_STYLE, width: avatarSize, height: avatarSize }}
         >
           {autor.nombre
             .split(" ")

@@ -4,16 +4,16 @@ import ToastProvider from "@/components/admin/Toasts";
 import { getPerfilActual } from "@/lib/admin/notas-admin";
 import { cerrarSesion } from "@/lib/admin/actions";
 
+// El formatter se construye una sola vez: crearlo es caro.
+const FORMATO_CIERRE = new Intl.DateTimeFormat("es-AR", {
+  weekday: "short",
+  day: "2-digit",
+  month: "short",
+  year: "numeric",
+});
+
 function fechaCierre(): string {
-  return new Intl.DateTimeFormat("es-AR", {
-    weekday: "short",
-    day: "2-digit",
-    month: "short",
-    year: "numeric",
-  })
-    .format(new Date())
-    .replaceAll(".", "")
-    .toUpperCase();
+  return FORMATO_CIERRE.format(new Date()).replaceAll(".", "").toUpperCase();
 }
 
 /** Layout del panel: guard de sesión + sidebar "mesa de redacción" + barra de cierre. */

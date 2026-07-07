@@ -73,8 +73,7 @@ export default async function NotaPage({
   const cuerpoHtml = renderCuerpo(nota.cuerpo);
   const parrafos = (nota.contenido ?? "")
     .split(/\n\s*\n/)
-    .map((p) => p.trim())
-    .filter(Boolean);
+    .flatMap((p) => (p.trim() ? [p.trim()] : []));
   const esVideo = nota.formato === "short" || nota.formato === "youtube";
   const jugadores = nota.sujetos.filter((s) => s.tipo === "jugador" && s.slug);
   const url = `${SITE_URL}/nota/${nota.slug}`;
@@ -265,7 +264,7 @@ export default async function NotaPage({
         ) : parrafos.length > 0 ? (
           <div className="article-prose">
             {parrafos.map((p, i) => (
-              <p key={i}>{p}</p>
+              <p key={`${i}:${p.slice(0, 32)}`}>{p}</p>
             ))}
           </div>
         ) : (

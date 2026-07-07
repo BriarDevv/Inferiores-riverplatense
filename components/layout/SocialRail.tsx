@@ -69,18 +69,19 @@ const REDES: Red[] = [
   },
 ];
 
+const btnStyle: React.CSSProperties = {
+  width: "44px",
+  height: "44px",
+  display: "inline-flex",
+  alignItems: "center",
+  justifyContent: "center",
+  border: "2px solid var(--color-ink)",
+  background: "var(--color-paper-pure)",
+  color: "var(--color-ink)",
+  transition: "all 140ms ease-out",
+};
+
 export default function SocialRail() {
-  const btnStyle: React.CSSProperties = {
-    width: "44px",
-    height: "44px",
-    display: "inline-flex",
-    alignItems: "center",
-    justifyContent: "center",
-    border: "2px solid var(--color-ink)",
-    background: "var(--color-paper-pure)",
-    color: "var(--color-ink)",
-    transition: "all 140ms ease-out",
-  };
 
   return (
     <div

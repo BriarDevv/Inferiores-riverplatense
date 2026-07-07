@@ -40,6 +40,16 @@ const SECCIONES = [
   { id: "nav-color", label: "Nav — variantes de color" },
 ];
 
+const ESTILO_DEMO_NEWSLETTER: React.CSSProperties = {
+  fontSize: "0.8rem",
+  letterSpacing: "0.12em",
+  padding: "0.6rem 1rem",
+  background: "var(--color-river-red)",
+  color: "var(--color-paper-pure)",
+  border: "2px solid var(--color-ink)",
+  boxShadow: "3px 3px 0 var(--color-ink)",
+};
+
 export default function UiPage() {
   const notaShort = NOTAS_DEMO.find((n) => n.formato === "short")!;
   const notaYoutube = NOTAS_DEMO.find((n) => n.formato === "youtube")!;
@@ -381,13 +391,7 @@ export default function UiPage() {
                 href="#botones"
                 className="font-sports inline-flex items-center gap-2"
                 style={{
-                  fontSize: "0.8rem",
-                  letterSpacing: "0.12em",
-                  padding: "0.6rem 1rem",
-                  background: "var(--color-river-red)",
-                  color: "var(--color-paper-pure)",
-                  border: "2px solid var(--color-ink)",
-                  boxShadow: "3px 3px 0 var(--color-ink)",
+                  ...ESTILO_DEMO_NEWSLETTER,
                   textDecoration: "none",
                 }}
               >
@@ -406,11 +410,11 @@ export default function UiPage() {
           >
             <div className="space-y-6">
               <div className="flex flex-wrap gap-2">
-                <button className="chip">Filtro común</button>
-                <button className="chip" data-active="true">
+                <button type="button" className="chip">Filtro común</button>
+                <button type="button" className="chip" data-active="true">
                   Filtro activo
                 </button>
-                <button className="chip">
+                <button type="button" className="chip">
                   <span
                     className="text-[0.6rem] font-mono uppercase tracking-wider"
                     style={{ color: "var(--color-river-red)" }}
@@ -973,6 +977,10 @@ function isLight(hex: string): boolean {
   return ["#FFFFFF", "#FAFAF7", "#FFF"].includes(hex.toUpperCase());
 }
 
+const fg = (bg: string) => (isLight(bg) ? "#0a0a0a" : "#ffffff");
+const dim = (bg: string) =>
+  isLight(bg) ? "rgba(0,0,0,0.55)" : "rgba(255,255,255,0.62)";
+
 function NavVariant({
   name,
   desc,
@@ -986,10 +994,6 @@ function NavVariant({
   masthead: string;
   seccion: string;
 }) {
-  const fg = (bg: string) => (isLight(bg) ? "#0a0a0a" : "#ffffff");
-  const dim = (bg: string) =>
-    isLight(bg) ? "rgba(0,0,0,0.55)" : "rgba(255,255,255,0.62)";
-
   return (
     <div>
       <p

@@ -119,8 +119,7 @@ export default async function HomePage({
   }
 
   // ===== PORTADA EDITORIAL (sin filtros) =====
-  const todas = await getNotas();
-  const destacada = await getNotaDestacada();
+  const [todas, destacada] = await Promise.all([getNotas(), getNotaDestacada()]);
   const restantes = destacada
     ? todas.filter((n) => n.id !== destacada.id)
     : todas;

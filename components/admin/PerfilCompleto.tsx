@@ -6,7 +6,7 @@ interface DatosFirma {
 }
 
 /** Qué le falta al perfil público de la firma (cada hueco es SEO desperdiciado). */
-export function itemsPerfil(a: DatosFirma): Array<{ label: string; ok: boolean }> {
+function itemsPerfil(a: DatosFirma): Array<{ label: string; ok: boolean }> {
   return [
     { label: "foto", ok: Boolean(a.avatar_url) },
     { label: "cargo", ok: Boolean(a.rol_publico?.trim()) },
@@ -18,9 +18,10 @@ export function itemsPerfil(a: DatosFirma): Array<{ label: string; ok: boolean }
 /** Barra de 4 segmentos + "Perfil 3/4". Verde tinta cuando está completo. */
 export default function PerfilCompleto({ autor }: { autor: DatosFirma }) {
   const items = itemsPerfil(autor);
-  const completos = items.filter((i) => i.ok).length;
-  const faltan = items.filter((i) => !i.ok).map((i) => i.label);
-  const completo = completos === items.length;
+  const faltan: string[] = [];
+  for (const i of items) if (!i.ok) faltan.push(i.label);
+  const completos = items.length - faltan.length;
+  const completo = faltan.length === 0;
 
   return (
     <div

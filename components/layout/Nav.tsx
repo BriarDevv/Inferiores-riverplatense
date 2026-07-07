@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { DIVISIONES } from "@/lib/constants";
 
 /** Items del dropdown "Notas" (tipos editoriales). */
@@ -14,6 +14,29 @@ const NOTAS_TIPOS = [
   { label: "Columnas", value: "columna" },
 ];
 const NOTAS_SET = new Set(NOTAS_TIPOS.map((t) => t.value));
+
+/** Redes de la barra roja (handles reales pendientes; ver CLAUDE.md). */
+const REDES_BARRA = [
+  { label: "Instagram", href: "https://instagram.com/" },
+  { label: "X", href: "https://x.com/" },
+  { label: "YouTube", href: "https://youtube.com/" },
+];
+
+/**
+ * Fecha editorial, solo en cliente vía useSyncExternalStore: el servidor
+ * muestra vacío y el primer render del cliente ya trae la fecha (sin el
+ * parpadeo del patrón useEffect+setState).
+ */
+let fechaCache: string | null = null;
+const getFecha = () =>
+  (fechaCache ??= new Date().toLocaleDateString("es-AR", {
+    weekday: "short",
+    day: "2-digit",
+    month: "short",
+    year: "numeric",
+  }));
+const getFechaServidor = () => "";
+const sinSuscripcion = () => () => {};
 
 /**
  * Nav brutalist — masthead de diario, copiado de la estructura de Roca & Madre
@@ -37,24 +60,12 @@ export default function Nav() {
   const [coords, setCoords] = useState<{ top: number; left: number } | null>(null);
   const [mobileOpen, setMobileOpen] = useState(false);
   const [q, setQ] = useState("");
-  const [fecha, setFecha] = useState("");
   const searchRef = useRef<HTMLInputElement>(null);
   const burgerRef = useRef<HTMLButtonElement>(null);
   const divisionesBtnRef = useRef<HTMLButtonElement>(null);
   const notasBtnRef = useRef<HTMLButtonElement>(null);
-  const mobileSearchRef = useRef<HTMLInputElement>(null);
 
-  // Fecha editorial — solo en cliente (evita mismatch de hidratación).
-  useEffect(() => {
-    setFecha(
-      new Date().toLocaleDateString("es-AR", {
-        weekday: "short",
-        day: "2-digit",
-        month: "short",
-        year: "numeric",
-      }),
-    );
-  }, []);
+  const fecha = useSyncExternalStore(sinSuscripcion, getFecha, getFechaServidor);
 
   // ⌘K / Ctrl+K enfoca el buscador. Escape cierra y DEVUELVE el foco al disparador.
   useEffect(() => {
@@ -74,11 +85,6 @@ export default function Nav() {
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
   }, [openDropdown, mobileOpen]);
-
-  // Al abrir el panel mobile, llevar el foco adentro (al buscador).
-  useEffect(() => {
-    if (mobileOpen) mobileSearchRef.current?.focus();
-  }, [mobileOpen]);
 
   // Reposiciona el dropdown abierto si se scrollea / redimensiona.
   // Va fixed para escapar del overflow-x del scroller de secciones (si no, lo recorta).
@@ -174,8 +180,10 @@ export default function Nav() {
             <Link href="/sobre" className="util-link">Sobre</Link>
             <Link href="/contacto" className="util-link">Contacto</Link>
             <span aria-hidden style={{ width: "1px", height: "12px", background: "rgba(255,255,255,0.32)" }} />
-            {["Instagram", "X", "YouTube"].map((r) => (
-              <a key={r} href="#" className="util-link">{r}</a>
+            {REDES_BARRA.map((r) => (
+              <a key={r.label} href={r.href} target="_blank" rel="noreferrer" className="util-link">
+                {r.label}
+              </a>
             ))}
             <span className="util-link" style={{ cursor: "default", opacity: 0.95 }}>Nº 001</span>
           </span>
@@ -398,12 +406,13 @@ export default function Nav() {
                 <path d="M21 21l-4.3-4.3" strokeLinecap="square" />
               </svg>
               <input
-                ref={mobileSearchRef}
                 type="search"
                 value={q}
                 onChange={(e) => setQ(e.target.value)}
                 placeholder="Buscar nota, jugador, división…"
                 aria-label="Buscar"
+                // El panel recién abierto lleva el foco adentro (patrón de menú).
+                autoFocus
               />
             </form>
 

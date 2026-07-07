@@ -16,6 +16,13 @@ interface TiptapEditorProps {
   enCanvas?: boolean;
 }
 
+const b = (activo: boolean) =>
+  `font-mono text-xs px-2.5 py-1.5 border-2 transition-colors ${
+    activo
+      ? "bg-[var(--color-ink)] text-white border-[var(--color-ink)]"
+      : "border-transparent hover:border-[var(--color-ink)]"
+  }`;
+
 export default function TiptapEditor({
   contenidoInicial,
   onChange,
@@ -78,12 +85,6 @@ export default function TiptapEditor({
     input.click();
   }
 
-  const b = (activo: boolean) =>
-    `font-mono text-xs px-2.5 py-1.5 border-2 transition-colors ${
-      activo
-        ? "bg-[var(--color-ink)] text-white border-[var(--color-ink)]"
-        : "border-transparent hover:border-[var(--color-ink)]"
-    }`;
 
   return (
     <div className={enCanvas ? "" : "brut-frame bg-[var(--color-paper-pure)]"}>

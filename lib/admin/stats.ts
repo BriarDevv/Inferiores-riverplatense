@@ -20,25 +20,6 @@ export async function getVisitasPorNota(): Promise<Map<string, VisitasNota>> {
   return new Map((data as VisitasNota[]).map((v) => [v.nota_id, v]));
 }
 
-export interface TotalesVisitas {
-  total: number;
-  ult_7d: number;
-  ult_30d: number;
-}
-
-export async function getTotalesVisitas(): Promise<TotalesVisitas> {
-  const porNota = await getVisitasPorNota();
-  let total = 0;
-  let ult_7d = 0;
-  let ult_30d = 0;
-  for (const v of porNota.values()) {
-    total += v.total;
-    ult_7d += v.ult_7d;
-    ult_30d += v.ult_30d;
-  }
-  return { total, ult_7d, ult_30d };
-}
-
 const PAGINA_CRUDAS = 1000;
 
 /**

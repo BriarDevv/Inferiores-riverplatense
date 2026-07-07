@@ -1,6 +1,6 @@
 "use client";
 
-import { createContext, useCallback, useContext, useRef, useState } from "react";
+import { createContext, use, useCallback, useRef, useState } from "react";
 
 export interface ToastInput {
   texto: string;
@@ -18,7 +18,7 @@ const ToastContext = createContext<(t: ToastInput) => void>(() => {});
 
 /** Dispara toasts desde cualquier client component del panel. */
 export function useToast() {
-  return useContext(ToastContext);
+  return use(ToastContext);
 }
 
 const DURACION_OK_MS = 4500;

@@ -3,6 +3,12 @@
 import { useState } from "react";
 
 /** Form de contacto. Hoy es fake (no persiste) — cablear a Supabase/email al salir de la demo. */
+const inputStyle: React.CSSProperties = {
+  background: "var(--color-paper-pure)",
+  color: "var(--color-ink)",
+  border: "2px solid var(--color-ink)",
+};
+
 export default function ContactForm() {
   const [sent, setSent] = useState(false);
 
@@ -12,11 +18,6 @@ export default function ContactForm() {
     setSent(true);
   };
 
-  const inputStyle: React.CSSProperties = {
-    background: "var(--color-paper-pure)",
-    color: "var(--color-ink)",
-    border: "2px solid var(--color-ink)",
-  };
 
   if (sent) {
     return (

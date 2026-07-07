@@ -173,8 +173,10 @@ export default async function AdminEstadisticas({ searchParams }: PageProps) {
   const fuentes = porFuente(actuales);
 
   const ranking = notas
-    .map((n) => ({ nota: n, valor: visitasNota.get(n.id) ?? 0 }))
-    .filter((x) => x.valor > 0)
+    .flatMap((n) => {
+      const valor = visitasNota.get(n.id) ?? 0;
+      return valor > 0 ? [{ nota: n, valor }] : [];
+    })
     .sort((a, b) => b.valor - a.valor);
   const maxNota = Math.max(1, ...ranking.map((x) => x.valor));
   const notasConVisitas = ranking.length;

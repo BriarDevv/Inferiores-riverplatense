@@ -124,6 +124,9 @@ function ritmoDePublicacion(publicadas: NotaAdmin[]): React.ReactNode {
 
 /* --- Página --- */
 
+const fmtDia = (iso: string) =>
+  new Date(`${iso}T12:00:00`).toLocaleDateString("es-AR", { day: "numeric", month: "short" });
+
 export default async function AdminResumen() {
   const [notas, autores, visitas, serie14, horas, dispositivos, fuentes] =
     await Promise.all([
@@ -147,8 +150,10 @@ export default async function AdminResumen() {
 
   // Top de la semana para "La nota del momento"
   const topSemana = publicadas
-    .map((n) => ({ nota: n, visitas: visitas.get(n.id)?.ult_7d ?? 0 }))
-    .filter((x) => x.visitas > 0)
+    .flatMap((n) => {
+      const v = visitas.get(n.id)?.ult_7d ?? 0;
+      return v > 0 ? [{ nota: n, visitas: v }] : [];
+    })
     .sort((a, b) => b.visitas - a.visitas)
     .slice(0, 5);
 
@@ -160,8 +165,6 @@ export default async function AdminResumen() {
       : `El ${new Date(`${mejorDia.dia}T12:00:00`).toLocaleDateString("es-AR", { weekday: "long" })} fue el mejor día: ${mejorDia.visitas} visita${mejorDia.visitas === 1 ? "" : "s"}.`;
 
   const pico = franjaPico(horas);
-  const fmtDia = (iso: string) =>
-    new Date(`${iso}T12:00:00`).toLocaleDateString("es-AR", { day: "numeric", month: "short" });
 
   const numerosChicos = [
     { valor: publicadas.length, label: "Publicadas", extra: publicadasSemana > 0 ? `+${publicadasSemana} esta semana` : null },
