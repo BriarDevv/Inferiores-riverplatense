@@ -1,5 +1,7 @@
 "use server";
 
+import "server-only";
+
 /**
  * Acciones de la pantalla Equipo. Usan service role (invitar/leer emails),
  * así que CADA acción verifica primero que quien la ejecuta sea admin.

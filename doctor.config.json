@@ -1,0 +1,61 @@
+{
+  // Excepciones DOCUMENTADAS de react-doctor (decisiones del 2026-07-07,
+  // detalle en CLAUDE.md → "Pasada react-doctor"). Todo lo demás se corrige.
+  "rules": {
+    // Microtipografía de marca: labels mono uppercase de 9-11px con tracking
+    // ancho (overlines, meta, fechas). Decisión de diseño aprobada.
+    "react-doctor/no-tiny-text": "off",
+
+    // Nav (masthead 3 niveles), EditorNota (canvas) y /ui (playground) son
+    // largos pero estables, verificados con Playwright y aprobados. Partirlos
+    // es riesgo de regresión sin cambio visible.
+    "react-doctor/no-giant-component": "off",
+
+    // Todos nuestros autoFocus mueven el foco DENTRO de un dialog/popover/panel
+    // recién abierto (patrón correcto de a11y), nunca al cargar la página.
+    "react-doctor/no-autofocus": "off",
+
+    // Cliente Supabase con RLS activa y verificada (scripts/check-rls.ts):
+    // el "mapa" que viaja al browser no otorga nada que la RLS no bloquee.
+    "react-doctor/artifact-baas-authority-surface": "off"
+  },
+  "ignore": {
+    "overrides": [
+      {
+        // <dialog> nativo: Escape lo cierra el browser (path de teclado) y el
+        // click en el backdrop es azúcar para mouse; el sync abierto→showModal
+        // necesita un efecto porque es API imperativa.
+        "files": ["components/admin/ConfirmDialog.tsx"],
+        "rules": [
+          "react-doctor/click-events-have-key-events",
+          "react-doctor/no-noninteractive-element-interactions",
+          "react-doctor/no-event-handler"
+        ]
+      },
+      {
+        // HTML generado por @tiptap/html desde JSON con links sanitizados
+        // (sinLinksPeligrosos + tests). Solo staff autenticado escribe cuerpos.
+        // Comodines porque (sitio)/[slug] tienen caracteres especiales de glob.
+        "files": [
+          "app/*/nota/*/page.tsx",
+          "components/admin/PreviewNota.tsx"
+        ],
+        "rules": ["react-doctor/dangerous-html-sink"]
+      },
+      {
+        // Listeners de "cerrar al clickear afuera / Escape / scroll": los
+        // setPos(null) viven en handlers de eventos (React los batchea);
+        // no hay cascada de renders.
+        "files": ["components/admin/MenuAccionesNota.tsx"],
+        "rules": ["react-doctor/no-cascading-set-state"]
+      },
+      {
+        // Archivo "use server" + import "server-only": escribe `rol` con
+        // service role DETRÁS de sesión + exigirAdmin(). Es gestión de equipo
+        // del admin, no un cliente confiando en campos de autorización.
+        "files": ["lib/admin/equipo-actions.ts"],
+        "rules": ["react-doctor/supabase-client-owned-authz-field"]
+      }
+    ]
+  }
+}

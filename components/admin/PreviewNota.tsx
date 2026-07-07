@@ -75,10 +75,10 @@ export default function PreviewNota({
         <p className="font-mono text-[11px] uppercase tracking-[0.18em]">
           Vista previa <span className="text-white/50">· así se ve en el sitio</span>
         </p>
+        {/* showModal() ya enfoca el primer focusable: este botón. */}
         <button
           type="button"
           onClick={onCerrar}
-          autoFocus
           className="font-sports uppercase tracking-[0.14em] text-sm px-4 py-1.5 border-2 border-white/80 hover:bg-[var(--color-river-red)] hover:border-[var(--color-river-red)] transition-colors"
         >
           ✕ Cerrar

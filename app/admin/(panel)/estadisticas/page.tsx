@@ -122,6 +122,9 @@ function agrupar(
     .slice(0, 8);
 }
 
+// Congelado y compartido a propósito: jamás se muta.
+const SIN_VISITAS: VisitaCruda[] = [];
+
 interface PageProps {
   searchParams: Promise<Record<string, string | undefined>>;
 }
@@ -144,9 +147,9 @@ export default async function AdminEstadisticas({ searchParams }: PageProps) {
     getVisitasPorNota(),
   ]);
 
-  let actuales: VisitaCruda[] = crudas;
-  let anteriores: VisitaCruda[] = [];
-  if (corte) ({ actuales, anteriores } = partirPorCorte(crudas, corte));
+  const { actuales, anteriores } = corte
+    ? partirPorCorte(crudas, corte)
+    : { actuales: crudas, anteriores: SIN_VISITAS };
 
   const totalPeriodo = actuales.length;
   const deltaPct =

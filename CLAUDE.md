@@ -33,9 +33,9 @@ Sigue siendo material de demo para cliente, pero ya **no** está recortado a `/`
 - ⚠️ **Lección**: si tras cambiar contenido aparecen 404 "fantasma" en páginas SSG que existen en la DB → `rm -rf .next` y rebuild (el fetch-cache viejo de `.next/cache` envenena el prerender; el build NO falla, hornea la página como 404).
 - Pendiente inmediato: deploy en Vercel + DNS del dominio (el código ya apunta ahí solo).
 
-### ✅ Pasada react-doctor (2026-07-07) — 101 → 27 hallazgos, 17 → 1 errores
+### ✅ Pasada react-doctor (2026-07-07) — score 100/100
 
-`npx react-doctor` sobre sitio+admin; se corrigió todo lo real (score 27 → 46):
+`npx react-doctor` sobre sitio+admin: 101 hallazgos → 0 (score 27 → **100 "Great"**). Se corrigió todo lo real; lo intencional quedó eximido en **`doctor.config.json`** (JSON5 comentado, cada excepción con su porqué — mantenerlo al día si se agregan reglas). Ojo: rutas con `(sitio)`/`[slug]` en los overrides van con comodines (`app/*/nota/*/page.tsx`) porque paréntesis/corchetes son glob chars. Fixes de la última milla: `RegistrarVisita` usa `navigator.sendBeacon` (mejor que fetch para telemetría), `equipo-actions` importa `server-only`, array vacío congelado a module scope en Estadísticas, autoFocus redundante fuera de PreviewNota (showModal ya enfoca).
 
 - **Server actions**: chequeo de sesión `supabase.auth.getUser()` INLINE en cada action que escribe (la regla no reconoce helpers) + `.select("id")` tras update/delete porque la RLS bloquea con "0 filas sin error" y la action reportaba `ok:true` sin permiso. En `equipo-actions`, sesión (cliente SSR) ANTES de `exigirAdmin()`.
 - **Sinks**: JSON-LD via `jsonLdSeguro()` (lib/json-ld.ts, escapa `</script>`); `renderCuerpo()` elimina links `javascript:`/`data:` (`sinLinksPeligrosos`). Tests en `lib/render-cuerpo.test.ts`.
