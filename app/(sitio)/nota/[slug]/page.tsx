@@ -77,6 +77,8 @@ export default async function NotaPage({
   const esVideo = nota.formato === "short" || nota.formato === "youtube";
   const jugadores = nota.sujetos.filter((s) => s.tipo === "jugador" && s.slug);
   const url = `${SITE_URL}/nota/${nota.slug}`;
+  const textoPlano = nota.contenido || textoDelCuerpo(nota.cuerpo) || "";
+  const cantPalabras = textoPlano.split(/\s+/).filter(Boolean).length;
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -86,9 +88,49 @@ export default async function NotaPage({
     image: [nota.poster_url],
     datePublished: nota.publicada_en,
     dateModified: nota.actualizada_en ?? nota.publicada_en,
-    author: { "@type": "Person", name: nota.autor.nombre },
-    publisher: { "@type": "Organization", name: "Inferiores Riverplatense" },
-    mainEntityOfPage: url,
+    inLanguage: "es-AR",
+    isAccessibleForFree: true,
+    articleSection: labelTipo(nota.tipo),
+    ...(nota.tags.length > 0 ? { keywords: nota.tags.join(", ") } : {}),
+    ...(cantPalabras > 0 ? { wordCount: cantPalabras } : {}),
+    author: {
+      "@type": "Person",
+      name: nota.autor.nombre,
+      // La URL del perfil conecta la firma con su página de autor (E-E-A-T).
+      ...(nota.autor.slug ? { url: `${SITE_URL}/autor/${nota.autor.slug}` } : {}),
+    },
+    publisher: {
+      "@type": "NewsMediaOrganization",
+      "@id": `${SITE_URL}/#organizacion`,
+      name: "Inferiores Riverplatense",
+      logo: { "@type": "ImageObject", url: `${SITE_URL}/logo.webp` },
+    },
+    mainEntityOfPage: { "@type": "WebPage", "@id": url },
+    // Entidades de la nota → hubs de jugador (linkeo semántico).
+    ...(jugadores.length > 0
+      ? {
+          about: jugadores.map((s) => ({
+            "@type": "Person",
+            name: s.nombre,
+            url: `${SITE_URL}/jugador/${s.slug}`,
+          })),
+        }
+      : {}),
+  };
+
+  const jsonLdMigas = {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    itemListElement: [
+      { "@type": "ListItem", position: 1, name: "Inicio", item: SITE_URL },
+      {
+        "@type": "ListItem",
+        position: 2,
+        name: labelTipo(nota.tipo),
+        item: `${SITE_URL}/?tipo=${nota.tipo}`,
+      },
+      { "@type": "ListItem", position: 3, name: nota.titulo },
+    ],
   };
 
   return (
@@ -96,6 +138,10 @@ export default async function NotaPage({
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: jsonLdSeguro(jsonLd) }}
+      />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: jsonLdSeguro(jsonLdMigas) }}
       />
       <RegistrarVisita slug={nota.slug} />
 
@@ -191,8 +237,7 @@ export default async function NotaPage({
                 style={{ color: "var(--color-neutral-500)" }}
               >
                 {formatearFechaLarga(nota.publicada_en)}
-                {!esVideo &&
-                  ` · ${tiempoLectura(nota.contenido || textoDelCuerpo(nota.cuerpo))} min de lectura`}
+                {!esVideo && ` · ${tiempoLectura(textoPlano)} min de lectura`}
               </p>
             </div>
           </div>
