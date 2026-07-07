@@ -50,6 +50,12 @@ const fetchAutores = cache(async (): Promise<AutorPublico[]> => {
   }));
 });
 
+/** La firma principal del sitio (el periodista dueño del proyecto). */
+export async function getAutorPrincipal(): Promise<AutorPublico | null> {
+  const autores = await fetchAutores();
+  return autores.find((a) => a.id === "autor-1") ?? autores[0] ?? null;
+}
+
 export async function getAutorPorSlug(slug: string): Promise<AutorPublico | null> {
   const autores = await fetchAutores();
   return autores.find((a) => a.slug === slug) ?? null;

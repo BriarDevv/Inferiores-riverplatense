@@ -14,6 +14,7 @@ import {
   getSlugsDeJugadores,
   getSujetoPorSlug,
 } from "@/lib/notas";
+import { getAutorPrincipal } from "@/lib/autores";
 import { labelDivision, labelTipo } from "@/lib/constants";
 import type { Division, Nota, Sujeto, TipoNota } from "@/lib/types";
 
@@ -197,7 +198,8 @@ export default async function HomePage({
   ]);
   const ultimas = todas.filter((n) => !mostradas.has(n.id)).slice(0, 6);
 
-  // Stats para la banda del periodista
+  // Stats + firma para la banda del periodista
+  const autorPrincipal = await getAutorPrincipal();
   const stats = {
     notas: todas.length,
     divisiones: new Set(todas.map((n) => n.division)).size,
@@ -304,7 +306,7 @@ export default async function HomePage({
         )}
 
         {/* === SOBRE EL PERIODISTA === */}
-        <SobreAutorBand stats={stats} />
+        {autorPrincipal && <SobreAutorBand autor={autorPrincipal} stats={stats} />}
 
         {/* === NEWSLETTER === */}
         <NewsletterBand />

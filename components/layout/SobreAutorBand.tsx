@@ -1,8 +1,8 @@
 import Link from "next/link";
 import Image from "next/image";
-import { AUTOR_PRINCIPAL } from "@/lib/mock-data";
 
 interface Props {
+  autor: { nombre: string; foto_url?: string };
   stats: { notas: number; divisiones: number; jugadores: number };
 }
 
@@ -10,7 +10,7 @@ interface Props {
  * Banda brutalist del periodista (cierre de la home, antes del newsletter).
  * Identidad + bio corta + stats reales + CTA a /sobre.
  */
-export default function SobreAutorBand({ stats }: Props) {
+export default function SobreAutorBand({ autor, stats }: Props) {
   const items = [
     { n: stats.notas, label: "Notas" },
     { n: stats.divisiones, label: "Divisiones" },
@@ -30,7 +30,7 @@ export default function SobreAutorBand({ stats }: Props) {
         <div className="flex flex-col lg:flex-row lg:items-center gap-8">
           {/* identidad + bio */}
           <div className="flex items-start gap-5 flex-1 min-w-0">
-            {AUTOR_PRINCIPAL.avatar_url && (
+            {autor.foto_url && (
               <span
                 className="relative inline-block shrink-0"
                 style={{
@@ -42,7 +42,7 @@ export default function SobreAutorBand({ stats }: Props) {
                 }}
               >
                 <Image
-                  src={AUTOR_PRINCIPAL.avatar_url}
+                  src={autor.foto_url}
                   alt=""
                   fill
                   sizes="88px"
@@ -65,7 +65,7 @@ export default function SobreAutorBand({ stats }: Props) {
                   color: "var(--color-ink)",
                 }}
               >
-                {AUTOR_PRINCIPAL.nombre}
+                {autor.nombre}
               </h2>
               <p
                 className="text-sm leading-relaxed max-w-prose"

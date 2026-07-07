@@ -2,7 +2,7 @@ import Image from "next/image";
 import Link from "next/link";
 import type { Metadata } from "next";
 import { getNotas, getSlugsDeJugadores } from "@/lib/notas";
-import { AUTOR_PRINCIPAL } from "@/lib/mock-data";
+import { getAutorPrincipal } from "@/lib/autores";
 import BackToHome from "@/components/layout/BackToHome";
 
 export const metadata: Metadata = {
@@ -14,6 +14,7 @@ export const metadata: Metadata = {
 export default async function SobrePage() {
   const notas = await getNotas();
   const jugadores = await getSlugsDeJugadores();
+  const autor = await getAutorPrincipal();
   const divisiones = new Set(notas.map((n) => n.division)).size;
 
   const stats = [
@@ -29,7 +30,7 @@ export default async function SobrePage() {
 
         {/* encabezado */}
         <header className="flex flex-col sm:flex-row items-start gap-7 mb-12">
-          {AUTOR_PRINCIPAL.avatar_url && (
+          {autor?.foto_url && (
             <span
               className="relative inline-block shrink-0"
               style={{
@@ -41,8 +42,8 @@ export default async function SobrePage() {
               }}
             >
               <Image
-                src={AUTOR_PRINCIPAL.avatar_url}
-                alt={AUTOR_PRINCIPAL.nombre}
+                src={autor.foto_url}
+                alt={autor.nombre}
                 fill
                 sizes="132px"
                 style={{ objectFit: "cover" }}
@@ -73,7 +74,7 @@ export default async function SobrePage() {
                 color: "var(--color-ink)",
               }}
             >
-              {AUTOR_PRINCIPAL.nombre}
+              {autor?.nombre ?? "Inferiores Riverplatense"}
             </h1>
             <p
               className="font-mono text-[0.7rem] uppercase tracking-[0.14em]"

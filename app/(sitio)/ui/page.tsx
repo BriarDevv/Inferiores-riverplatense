@@ -8,7 +8,7 @@ import NewsletterBand from "@/components/layout/NewsletterBand";
 import NoticiasList from "@/components/lists/NoticiasList";
 import UltimasList from "@/components/lists/UltimasList";
 import BrutalistButton from "@/components/ui/BrutalistButton";
-import { MOCK_NOTAS } from "@/lib/mock-data";
+import { NOTAS_DEMO } from "./_fixtures";
 import UiDropdownDemo from "./_components/UiDropdownDemo";
 
 export const metadata = {
@@ -41,19 +41,19 @@ const SECCIONES = [
 ];
 
 export default function UiPage() {
-  const notaShort = MOCK_NOTAS.find((n) => n.formato === "short")!;
-  const notaYoutube = MOCK_NOTAS.find((n) => n.formato === "youtube")!;
-  const notaArticulo = MOCK_NOTAS.find((n) => n.formato === "articulo")!;
-  const destacada = MOCK_NOTAS.find((n) => n.destacada) ?? MOCK_NOTAS[0];
+  const notaShort = NOTAS_DEMO.find((n) => n.formato === "short")!;
+  const notaYoutube = NOTAS_DEMO.find((n) => n.formato === "youtube")!;
+  const notaArticulo = NOTAS_DEMO.find((n) => n.formato === "articulo")!;
+  const destacada = NOTAS_DEMO.find((n) => n.destacada) ?? NOTAS_DEMO[0];
   const entrevistaArticulo =
-    MOCK_NOTAS.find(
+    NOTAS_DEMO.find(
       (n) => n.tipo === "entrevista" && n.formato === "articulo",
     ) ?? notaArticulo;
-  const teaserPool = MOCK_NOTAS.filter(
+  const teaserPool = NOTAS_DEMO.filter(
     (n) => n.formato !== "youtube" && n.tipo !== "noticia",
   ).slice(0, 3);
-  const noticias = MOCK_NOTAS.filter((n) => n.tipo === "noticia").slice(0, 6);
-  const ultimas = MOCK_NOTAS.filter((n) => n.tipo !== "noticia").slice(0, 5);
+  const noticias = NOTAS_DEMO.filter((n) => n.tipo === "noticia").slice(0, 6);
+  const ultimas = NOTAS_DEMO.filter((n) => n.tipo !== "noticia").slice(0, 5);
 
   return (
     <div className="py-16 lg:py-20" style={{ background: "var(--color-paper)" }}>
