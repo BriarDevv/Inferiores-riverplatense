@@ -26,7 +26,7 @@ Sigue siendo material de demo para cliente, pero ya **no** está recortado a `/`
 ### ✅ Contenido REAL + dominio (2026-07-07) — SE FUERON LOS MOCKS
 
 - **Dominio comprado: `inferioresriverplatense.com`**. `lib/site.ts` centraliza `SITE_URL`: `NEXT_PUBLIC_SITE_URL` lo pisa siempre; sin env var, producción cae al dominio y dev a localhost. Lo importan layout/nota/jugador/autor/sitemap/robots/feed/equipo-actions (no queda ningún fallback duplicado). `robots` ahora también disallow `/admin`.
-- **Contenido real en la DB**: `scripts/seed-data.ts` = 20 notas (`nr-01..nr-20`) redactadas a partir de hechos reales de may–jul 2026 (Superclásico de Reserva por penales + final vs Racing, historia de Meloni, 8 juveniles citados por Escudero, gira de Coudet en Alicante, 2-2 vs Flamengo en Faro, final del Apertura perdida con Belgrano, mercado Otamendi/Arambarri/Borré/Beltrán/Correa, lesión de Ruberto, renovación de Subiabre, MagiCup 2014, femenino, estructura del semillero) + 8 sujetos reales (5 jugadores con hub: Meloni, Pellegrini, Sayago, Subiabre, Ruberto; Spiff sin slug; técnicos Escudero y Coudet). **Texto propio** (no copiado de medios) e **imágenes Unsplash verificadas una por una** (nada de fotos de agencias, por derechos).
+- **Contenido real en la DB**: `scripts/seed-data.ts` = 22 notas (`nr-01..nr-22`) redactadas a partir de hechos reales de may–jul 2026 (Superclásico de Reserva por penales + final vs Racing, historia de Meloni, 8 juveniles citados por Escudero, gira de Coudet en Alicante, 2-2 vs Flamengo en Faro, final del Apertura perdida con Belgrano, mercado Otamendi/Arambarri/Borré/Beltrán/Correa, lesión de Ruberto, renovación de Subiabre, MagiCup 2014, femenino, estructura del semillero) + 8 sujetos reales (5 jugadores con hub: Meloni, Pellegrini, Sayago, Subiabre, Ruberto; Spiff sin slug; técnicos Escudero y Coudet). **Texto propio** (no copiado de medios) e **imágenes Unsplash verificadas una por una** (nada de fotos de agencias, por derechos).
 - **Cuerpos en Tiptap**: el seed convierte `parrafos` ("## " = h2, "> " = cita) a JSON Tiptap en la columna `cuerpo` → editables en el panel tal cual. `contenido` legacy queda null; el tiempo de lectura ahora sale del cuerpo (`textoDelCuerpo()` en `lib/render-cuerpo.ts`).
 - **`scripts/seed.ts`** ahora: borra los mocks si existen (`id ~ '^n-[0-9]+$'` y `jug|tec|eq-*`; los FK cascade limpian pivote y visitas) y upsertea el contenido real. Idempotente. ⚠️ Las visitas viejas se fueron con las notas mock: el contador arranca de cero.
 - **`lib/mock-data.ts` BORRADO.** `/ui` usa fixtures propios (`app/(sitio)/ui/_fixtures.ts`); `SobreAutorBand` y `/sobre` leen la firma real vía `getAutorPrincipal()` (`lib/autores.ts`).
@@ -270,7 +270,7 @@ lib/
   constants.ts  → divisiones, tipos, formatters, norm(), tiempoLectura(), formatearFechaLarga()
 
 scripts/
-  seed-data.ts  → CONTENIDO REAL: 20 notas nr-01..nr-20 + 8 sujetos + 2 autores (fuente de verdad del seed)
+  seed-data.ts  → CONTENIDO REAL: 22 notas nr-01..nr-22 + 8 sujetos + 2 autores (fuente de verdad del seed)
   seed.ts       → limpia mocks + upsertea seed-data (cuerpos → Tiptap)
 
 public/
