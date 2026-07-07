@@ -72,6 +72,9 @@ function ThOrdenable({
   );
 }
 
+const valorFecha = (n: NotaAdmin) =>
+  n.publicada_en ? Date.parse(n.publicada_en) : Number.MAX_SAFE_INTEGER;
+
 export default async function AdminNotas({ searchParams }: PageProps) {
   const params = await searchParams;
   const filtros: FiltrosAdmin = {
@@ -93,9 +96,7 @@ export default async function AdminNotas({ searchParams }: PageProps) {
   const orden: Orden =
     params.orden === "visitas" || params.orden === "titulo" ? params.orden : "fecha";
   const dir = params.dir === "asc" ? 1 : -1;
-  const valorFecha = (n: NotaAdmin) =>
-    n.publicada_en ? Date.parse(n.publicada_en) : Number.MAX_SAFE_INTEGER;
-  const ordenadas = [...todas].sort((a, b) => {
+  const ordenadas = todas.toSorted((a, b) => {
     if (orden === "titulo") return a.titulo.localeCompare(b.titulo, "es") * dir;
     if (orden === "visitas") {
       return ((visitas.get(a.id)?.total ?? 0) - (visitas.get(b.id)?.total ?? 0)) * dir;
@@ -228,10 +229,12 @@ export default async function AdminNotas({ searchParams }: PageProps) {
                 <td data-label="Firma" className="font-body text-sm whitespace-nowrap">
                   <span className="inline-flex items-center gap-2">
                     {n.autor.avatar_url ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
+                      <Image
                         src={n.autor.avatar_url}
                         alt=""
+                        width={24}
+                        height={24}
+                        unoptimized
                         className="w-6 h-6 rounded-full object-cover border border-black/20"
                       />
                     ) : (

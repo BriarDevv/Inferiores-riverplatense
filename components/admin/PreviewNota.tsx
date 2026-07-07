@@ -1,6 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
+import Image from "next/image";
+import { useEffect, useRef, useState } from "react";
 import { labelDivision, labelTipo, formatearFechaLarga } from "@/lib/constants";
 
 interface PreviewNotaProps {
@@ -25,7 +26,8 @@ const PALABRAS_POR_MINUTO = 200;
 /**
  * Vista previa de la NOTA COMPLETA con la misma estructura y clases que
  * /nota/[slug]: overline, título, bajada, byline, poster y .article-prose.
- * Lo que se ve acá es lo que se publica.
+ * Lo que se ve acá es lo que se publica. Usa <dialog> nativo: trap de foco,
+ * Escape y backdrop vienen gratis.
  */
 export default function PreviewNota({
   abierto,
@@ -42,18 +44,18 @@ export default function PreviewNota({
   cuerpoHtml,
   contenidoLegacy,
 }: PreviewNotaProps) {
+  const dialogRef = useRef<HTMLDialogElement>(null);
+  // Fecha estable por apertura (la vista previa muestra "hoy").
+  const [fechaHoy] = useState(() => new Date().toISOString());
+
   useEffect(() => {
     if (!abierto) return;
-    function conTeclado(e: KeyboardEvent) {
-      if (e.key === "Escape") onCerrar();
-    }
-    document.addEventListener("keydown", conTeclado);
+    dialogRef.current?.showModal();
     document.body.style.overflow = "hidden";
     return () => {
-      document.removeEventListener("keydown", conTeclado);
       document.body.style.overflow = "";
     };
-  }, [abierto, onCerrar]);
+  }, [abierto]);
 
   if (!abierto) return null;
 
@@ -61,12 +63,12 @@ export default function PreviewNota({
   const minutos = Math.max(1, Math.round(palabras / PALABRAS_POR_MINUTO));
 
   return (
-    <div
-      role="dialog"
-      aria-modal="true"
+    <dialog
+      ref={dialogRef}
+      onClose={onCerrar}
       aria-label="Vista previa de la nota"
-      className="fixed inset-0 z-[70] overflow-y-auto"
-      style={{ background: "var(--color-paper)" }}
+      className="fixed inset-0 z-[70] m-0 h-dvh w-screen max-h-none max-w-none overflow-y-auto p-0"
+      style={{ background: "var(--color-paper)", color: "inherit" }}
     >
       {/* Barra de la vista previa */}
       <div className="sticky top-0 z-10 bg-[var(--color-ink)] text-white border-b-4 border-[var(--color-river-red)] px-5 py-3 flex items-center justify-between gap-4">
@@ -129,10 +131,12 @@ export default function PreviewNota({
           style={{ borderBottom: "2px solid var(--color-ink)" }}
         >
           {autor?.avatar_url && (
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
+            <Image
               src={autor.avatar_url}
               alt=""
+              width={40}
+              height={40}
+              unoptimized
               className="w-10 h-10 rounded-full object-cover shrink-0"
               style={{ border: "2px solid var(--color-ink)" }}
             />
@@ -148,7 +152,7 @@ export default function PreviewNota({
               className="font-mono text-[0.62rem] uppercase tracking-[0.1em]"
               style={{ color: "var(--color-neutral-500)" }}
             >
-              {formatearFechaLarga(new Date().toISOString())}
+              {formatearFechaLarga(fechaHoy)}
               {!esVideo && ` · ${minutos} min de lectura`}
             </p>
           </div>
@@ -167,11 +171,13 @@ export default function PreviewNota({
               marginInline: formato === "short" ? "auto" : undefined,
             }}
           >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
+            <Image
               src={posterUrl}
               alt={titulo}
-              className="absolute inset-0 w-full h-full object-cover"
+              fill
+              sizes="(max-width: 768px) 100vw, 760px"
+              unoptimized
+              className="object-cover"
             />
           </figure>
         ) : (
@@ -189,10 +195,9 @@ export default function PreviewNota({
           <div className="article-prose">
             {contenidoLegacy
               .split(/\n\s*\n/)
-              .map((p) => p.trim())
-              .filter(Boolean)
+              .flatMap((p) => (p.trim() ? [p.trim()] : []))
               .map((p, i) => (
-                <p key={i}>{p}</p>
+                <p key={`${i}:${p.slice(0, 32)}`}>{p}</p>
               ))}
           </div>
         ) : (
@@ -201,6 +206,6 @@ export default function PreviewNota({
           </p>
         )}
       </article>
-    </div>
+    </dialog>
   );
 }

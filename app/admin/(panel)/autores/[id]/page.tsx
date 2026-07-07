@@ -1,4 +1,5 @@
 import { notFound } from "next/navigation";
+import Image from "next/image";
 import EditorAutor from "@/components/admin/EditorAutor";
 import PageHeader from "@/components/admin/PageHeader";
 import PerfilCompleto from "@/components/admin/PerfilCompleto";
@@ -48,10 +49,12 @@ export default async function EditarFirma({ params }: PageProps) {
       {/* Tira del legajo: la firma en números */}
       <div className="brut-frame bg-[var(--color-paper-pure)] px-5 py-4 mb-6 flex flex-wrap items-center gap-x-8 gap-y-3">
         {autor.avatar_url ? (
-          // eslint-disable-next-line @next/next/no-img-element
-          <img
+          <Image
             src={autor.avatar_url}
             alt=""
+            width={56}
+            height={56}
+            unoptimized
             className="w-14 h-14 shrink-0 rounded-full object-cover border-2 border-[var(--color-ink)]"
           />
         ) : (

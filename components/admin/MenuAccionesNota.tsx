@@ -41,8 +41,9 @@ export default function MenuAccionesNota({
   const router = useRouter();
   const toast = useToast();
   const [pendiente, startTransition] = useTransition();
-  const [abierto, setAbierto] = useState(false);
+  // pos != null ES el estado "abierto": un solo estado para el popover.
   const [pos, setPos] = useState<{ top: number; left: number } | null>(null);
+  const abierto = pos !== null;
   const [confirmacion, setConfirmacion] = useState<"borrar" | "despublicar" | null>(null);
   const botonRef = useRef<HTMLButtonElement>(null);
   const menuRef = useRef<HTMLDivElement>(null);
@@ -55,7 +56,6 @@ export default function MenuAccionesNota({
       top: arriba ? rect.top - 6 : rect.bottom + 6,
       left: Math.max(8, Math.min(rect.right - ANCHO_MENU, window.innerWidth - ANCHO_MENU - 8)),
     });
-    setAbierto(true);
   }
 
   useEffect(() => {
@@ -65,16 +65,16 @@ export default function MenuAccionesNota({
         !menuRef.current?.contains(e.target as Node) &&
         !botonRef.current?.contains(e.target as Node)
       ) {
-        setAbierto(false);
+        setPos(null);
       }
     }
     function conTeclado(e: KeyboardEvent) {
       if (e.key === "Escape") {
-        setAbierto(false);
+        setPos(null);
         botonRef.current?.focus();
       }
     }
-    const cerrar = () => setAbierto(false);
+    const cerrar = () => setPos(null);
     document.addEventListener("mousedown", cerrarSiAfuera);
     document.addEventListener("keydown", conTeclado);
     window.addEventListener("scroll", cerrar, true);
@@ -89,7 +89,7 @@ export default function MenuAccionesNota({
   }, [abierto]);
 
   function correr(fn: () => Promise<ResultadoAccion>, okToast: Parameters<typeof toast>[0]) {
-    setAbierto(false);
+    setPos(null);
     startTransition(async () => {
       const r = await fn();
       setConfirmacion(null);
@@ -110,7 +110,7 @@ export default function MenuAccionesNota({
         ref={botonRef}
         type="button"
         disabled={pendiente}
-        onClick={() => (abierto ? setAbierto(false) : abrir())}
+        onClick={() => (abierto ? setPos(null) : abrir())}
         aria-haspopup="menu"
         aria-expanded={abierto}
         aria-label={`Acciones de «${titulo}»`}
@@ -119,7 +119,7 @@ export default function MenuAccionesNota({
         ⋯
       </button>
 
-      {abierto && pos && (
+      {pos && (
         <div
           ref={menuRef}
           role="menu"
@@ -166,7 +166,7 @@ export default function MenuAccionesNota({
               type="button"
               className={item}
               onClick={() => {
-                setAbierto(false);
+                setPos(null);
                 setConfirmacion("despublicar");
               }}
             >
@@ -207,7 +207,7 @@ export default function MenuAccionesNota({
                 type="button"
                 className={`${item} text-[var(--color-river-red-deep)]`}
                 onClick={() => {
-                  setAbierto(false);
+                  setPos(null);
                   setConfirmacion("borrar");
                 }}
               >

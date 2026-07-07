@@ -56,25 +56,19 @@ export default function BarraEditor({
   onGuardar,
   onDespublicar,
 }: BarraEditorProps) {
-  const [menuAbierto, setMenuAbierto] = useState(false);
-  const [programarAbierto, setProgramarAbierto] = useState(false);
+  // Un solo popover posible a la vez: el menú de publicación o el panel de fecha.
+  const [panel, setPanel] = useState<"menu" | "programar" | null>(null);
   const [fecha, setFecha] = useState(programadaPara ?? fechaSugerida());
   const [confirmaDespublicar, setConfirmaDespublicar] = useState(false);
   const zonaAcciones = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
-    if (!menuAbierto && !programarAbierto) return;
+    if (!panel) return;
     function cerrarSiAfuera(e: MouseEvent) {
-      if (!zonaAcciones.current?.contains(e.target as Node)) {
-        setMenuAbierto(false);
-        setProgramarAbierto(false);
-      }
+      if (!zonaAcciones.current?.contains(e.target as Node)) setPanel(null);
     }
     function conTeclado(e: KeyboardEvent) {
-      if (e.key === "Escape") {
-        setMenuAbierto(false);
-        setProgramarAbierto(false);
-      }
+      if (e.key === "Escape") setPanel(null);
     }
     document.addEventListener("mousedown", cerrarSiAfuera);
     document.addEventListener("keydown", conTeclado);
@@ -82,7 +76,7 @@ export default function BarraEditor({
       document.removeEventListener("mousedown", cerrarSiAfuera);
       document.removeEventListener("keydown", conTeclado);
     };
-  }, [menuAbierto, programarAbierto]);
+  }, [panel]);
 
   const indicador =
     guardado === "guardando"
@@ -108,8 +102,7 @@ export default function BarraEditor({
 
   function accionPrimaria() {
     if (esBorrador) {
-      setMenuAbierto(!menuAbierto);
-      setProgramarAbierto(false);
+      setPanel(panel === "menu" ? null : "menu");
     } else if (estadoNota === "programada") {
       onGuardar("programada", programadaPara);
     } else {
@@ -164,7 +157,7 @@ export default function BarraEditor({
             disabled={primarioBloqueado}
             onClick={accionPrimaria}
             aria-haspopup={esBorrador ? "menu" : undefined}
-            aria-expanded={esBorrador ? menuAbierto : undefined}
+            aria-expanded={esBorrador ? panel === "menu" : undefined}
             className="brut-cta-red px-5 py-2.5 font-sports uppercase tracking-[0.15em] text-sm disabled:opacity-50"
           >
             {primarioLabel}
@@ -176,12 +169,9 @@ export default function BarraEditor({
             <button
               type="button"
               disabled={pendiente}
-              onClick={() => {
-                setMenuAbierto(!menuAbierto);
-                setProgramarAbierto(false);
-              }}
+              onClick={() => setPanel(panel === "menu" ? null : "menu")}
               aria-haspopup="menu"
-              aria-expanded={menuAbierto}
+              aria-expanded={panel === "menu"}
               aria-label="Más acciones de publicación"
               className="font-sports text-sm px-2.5 py-2.5 border-2 border-[var(--color-ink)] hover:bg-[var(--color-river-red-soft)] transition-colors disabled:opacity-50"
             >
@@ -189,7 +179,7 @@ export default function BarraEditor({
             </button>
           )}
 
-          {menuAbierto && (
+          {panel === "menu" && (
             <div
               role="menu"
               className="absolute right-0 top-full mt-2 z-50 min-w-56 bg-[var(--color-paper-pure)] border-2 border-[var(--color-ink)] p-1"
@@ -204,7 +194,7 @@ export default function BarraEditor({
                     title={puedePublicar ? undefined : motivoBloqueo}
                     className={itemMenu}
                     onClick={() => {
-                      setMenuAbierto(false);
+                      setPanel(null);
                       onGuardar("ahora");
                     }}
                   >
@@ -216,10 +206,7 @@ export default function BarraEditor({
                     disabled={!puedePublicar}
                     title={puedePublicar ? undefined : motivoBloqueo}
                     className={itemMenu}
-                    onClick={() => {
-                      setMenuAbierto(false);
-                      setProgramarAbierto(true);
-                    }}
+                    onClick={() => setPanel("programar")}
                   >
                     Programar fecha…
                   </button>
@@ -238,7 +225,7 @@ export default function BarraEditor({
                         type="button"
                         className={itemMenu}
                         onClick={() => {
-                          setMenuAbierto(false);
+                          setPanel(null);
                           onGuardar("ahora");
                         }}
                       >
@@ -248,10 +235,7 @@ export default function BarraEditor({
                         role="menuitem"
                         type="button"
                         className={itemMenu}
-                        onClick={() => {
-                          setMenuAbierto(false);
-                          setProgramarAbierto(true);
-                        }}
+                        onClick={() => setPanel("programar")}
                       >
                         Cambiar fecha…
                       </button>
@@ -262,7 +246,7 @@ export default function BarraEditor({
                     type="button"
                     className={`${itemMenu} text-[var(--color-river-red-deep)]`}
                     onClick={() => {
-                      setMenuAbierto(false);
+                      setPanel(null);
                       setConfirmaDespublicar(true);
                     }}
                   >
@@ -274,23 +258,27 @@ export default function BarraEditor({
           )}
 
           {/* Panel de programación */}
-          {programarAbierto && (
+          {panel === "programar" && (
             <div
               className="absolute right-0 top-full mt-2 z-50 w-72 bg-[var(--color-paper-pure)] border-2 border-[var(--color-ink)] p-4"
               style={{ boxShadow: "5px 5px 0 var(--color-ink)" }}
             >
-              <p className="brut-label mb-2">Sale sola el…</p>
+              <label htmlFor="programar-fecha" className="brut-label mb-2 block">
+                Sale sola el…
+              </label>
               <input
+                id="programar-fecha"
                 type="datetime-local"
                 value={fecha}
                 onChange={(e) => setFecha(e.target.value)}
+                // El popover recién abierto lleva el foco adentro (patrón de diálogo).
                 autoFocus
                 className="admin-input w-full font-mono text-sm mb-3"
               />
               <div className="flex items-center justify-end gap-2">
                 <button
                   type="button"
-                  onClick={() => setProgramarAbierto(false)}
+                  onClick={() => setPanel(null)}
                   className="font-mono text-[11px] uppercase tracking-widest px-2 py-1.5 text-black/50 hover:text-[var(--color-ink)]"
                 >
                   Cancelar
@@ -299,7 +287,7 @@ export default function BarraEditor({
                   type="button"
                   disabled={!fecha || pendiente}
                   onClick={() => {
-                    setProgramarAbierto(false);
+                    setPanel(null);
                     onGuardar("programada", fecha);
                   }}
                   className="brut-cta-red px-4 py-2 font-sports uppercase tracking-[0.14em] text-sm disabled:opacity-50"

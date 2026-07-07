@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import type { JSONContent } from "@tiptap/react";
 import TiptapEditor from "./TiptapEditor";
 import BarraEditor, { type EstadoGuardado } from "./BarraEditor";
@@ -126,7 +127,8 @@ export default function EditorNota({ nota, autores, sujetos }: EditorNotaProps) 
   const [error, setError] = useState<string | null>(null);
   const [subiendoPoster, setSubiendoPoster] = useState(false);
 
-  const [notaId, setNotaId] = useState(nota?.id);
+  // Solo lo leen los handlers (nunca se muestra): ref para no re-renderizar.
+  const notaIdRef = useRef<string | undefined>(nota?.id);
   const [estadoActual, setEstadoActual] = useState<EstadoNota>(nota?.estado ?? "borrador");
   const [guardado, setGuardado] = useState<EstadoGuardado>("inicial");
   const [ultimoGuardado, setUltimoGuardado] = useState<Date | null>(null);
@@ -204,7 +206,7 @@ export default function EditorNota({ nota, autores, sujetos }: EditorNotaProps) 
     silencioso = false,
   ): GuardarNotaInput {
     return {
-      id: notaId,
+      id: notaIdRef.current,
       titulo,
       bajada,
       slug,
@@ -216,7 +218,7 @@ export default function EditorNota({ nota, autores, sujetos }: EditorNotaProps) 
       youtube_id: youtubeId || undefined,
       video_url: videoUrl || undefined,
       autor_id: autorId,
-      tags: tags.split(",").map((t) => t.trim()).filter(Boolean),
+      tags: tags.split(",").flatMap((t) => (t.trim() ? [t.trim()] : [])),
       sujetos: [...sujetosSel],
       cuerpo: cuerpoRef.current,
       primicia,
@@ -236,7 +238,7 @@ export default function EditorNota({ nota, autores, sujetos }: EditorNotaProps) 
     setGuardado("guardando");
     void guardarNota(armarPayload("borrador", undefined, true)).then((r) => {
       if (r.ok) {
-        if (r.id) setNotaId(r.id);
+        if (r.id) notaIdRef.current = r.id;
         setGuardado("guardado");
         setUltimoGuardado(new Date());
       } else {
@@ -303,7 +305,7 @@ export default function EditorNota({ nota, autores, sujetos }: EditorNotaProps) 
 
   function guardar(modo: ModoPublicacion, fechaLocal?: string, esDespublicar = false) {
     setError(null);
-    const eraNueva = !notaId;
+    const eraNueva = !notaIdRef.current;
     const estabaPublicada = estadoActual === "publicada";
     setGuardado("guardando");
     startTransition(async () => {
@@ -314,7 +316,7 @@ export default function EditorNota({ nota, autores, sujetos }: EditorNotaProps) 
         window.scrollTo({ top: 0 });
         return;
       }
-      if (r.id) setNotaId(r.id);
+      if (r.id) notaIdRef.current = r.id;
       setGuardado("guardado");
       setUltimoGuardado(new Date());
       const nuevoEstado: EstadoNota =
@@ -589,8 +591,14 @@ export default function EditorNota({ nota, autores, sujetos }: EditorNotaProps) 
                 <div className="pb-4">
                   {posterUrl ? (
                     <div className="relative">
-                      {/* eslint-disable-next-line @next/next/no-img-element */}
-                      <img src={posterUrl} alt="Vista previa de la imagen principal" className="w-full aspect-video object-cover brut-frame" />
+                      <Image
+                        src={posterUrl}
+                        alt="Vista previa de la imagen principal"
+                        width={640}
+                        height={360}
+                        unoptimized
+                        className="w-full aspect-video object-cover brut-frame"
+                      />
                       <button
                         type="button"
                         onClick={() => { setPosterUrl(""); marcar(); }}

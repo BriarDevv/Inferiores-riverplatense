@@ -1,8 +1,9 @@
 "use client";
 
-import { useState, useTransition } from "react";
+import { useRef, useState, useTransition } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import Image from "next/image";
 import { guardarAutor, borrarAutor } from "@/lib/admin/actions";
 import { subirImagen } from "@/lib/admin/upload";
 import type { AutorAdmin } from "@/lib/admin/notas-admin";
@@ -34,7 +35,8 @@ export default function EditorAutor({ autor, esAdmin }: EditorAutorProps) {
 
   const [nombre, setNombre] = useState(autor?.nombre ?? "");
   const [slug, setSlug] = useState(autor?.slug ?? "");
-  const [slugEditado, setSlugEditado] = useState(Boolean(autor));
+  // Solo lo leen los handlers: ref para no re-renderizar al marcarlo.
+  const slugEditado = useRef(Boolean(autor));
   const [fotoUrl, setFotoUrl] = useState(autor?.avatar_url ?? "");
   const [bio, setBio] = useState(autor?.bio ?? "");
   const [rolPublico, setRolPublico] = useState(autor?.rol_publico ?? "");
@@ -122,10 +124,12 @@ export default function EditorAutor({ autor, esAdmin }: EditorAutorProps) {
           <div className="shrink-0">
             {fotoUrl ? (
               <div className="relative">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
+                <Image
                   src={fotoUrl}
                   alt={`Foto de ${nombre || "la firma"}`}
+                  width={112}
+                  height={112}
+                  unoptimized
                   className="w-28 h-28 rounded-full object-cover border-2 border-[var(--color-ink)]"
                 />
                 {!soloLectura && (
@@ -157,7 +161,7 @@ export default function EditorAutor({ autor, esAdmin }: EditorAutorProps) {
                 value={nombre}
                 onChange={(e) => {
                   setNombre(e.target.value);
-                  if (!slugEditado) setSlug(slugificar(e.target.value));
+                  if (!slugEditado.current) setSlug(slugificar(e.target.value));
                 }}
                 placeholder="Nombre y apellido"
                 className="admin-input w-full font-display text-xl font-bold"
@@ -172,7 +176,7 @@ export default function EditorAutor({ autor, esAdmin }: EditorAutorProps) {
                   required
                   value={slug}
                   onChange={(e) => {
-                    setSlugEditado(true);
+                    slugEditado.current = true;
                     setSlug(slugificar(e.target.value));
                   }}
                   className="admin-input flex-1 font-mono text-sm"

@@ -1,4 +1,5 @@
 import Link from "next/link";
+import Image from "next/image";
 import PageHeader from "@/components/admin/PageHeader";
 import PerfilCompleto from "@/components/admin/PerfilCompleto";
 import { listAutoresAdmin, listNotasAdmin, getPerfilActual } from "@/lib/admin/notas-admin";
@@ -58,10 +59,12 @@ export default async function AdminAutores() {
           >
             <div className="flex items-start gap-4 sm:gap-5 min-w-0">
               {a.avatar_url ? (
-                // eslint-disable-next-line @next/next/no-img-element
-                <img
+                <Image
                   src={a.avatar_url}
                   alt=""
+                  width={96}
+                  height={96}
+                  unoptimized
                   className="w-20 h-20 sm:w-24 sm:h-24 shrink-0 rounded-full object-cover border-2 border-[var(--color-ink)]"
                 />
               ) : (

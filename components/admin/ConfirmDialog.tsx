@@ -42,6 +42,7 @@ export default function ConfirmDialog({
     <dialog
       ref={ref}
       className="brut-dialog"
+      aria-labelledby="confirm-dialog-titulo"
       onCancel={(e) => {
         e.preventDefault();
         if (!pendiente) onCerrar();
@@ -52,7 +53,9 @@ export default function ConfirmDialog({
       }}
     >
       <div className="bg-[var(--color-ink)] text-white px-5 py-3">
-        <h2 className="font-sports uppercase tracking-[0.16em] text-sm">{titulo}</h2>
+        <h2 id="confirm-dialog-titulo" className="font-sports uppercase tracking-[0.16em] text-sm">
+          {titulo}
+        </h2>
       </div>
       <div className="px-5 py-5">
         {descripcion && (

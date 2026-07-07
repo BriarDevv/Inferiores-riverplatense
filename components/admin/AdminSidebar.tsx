@@ -27,11 +27,7 @@ export default function AdminSidebar({ email, rol, firma, onCerrarSesion }: Admi
 
   const [menuAbierto, setMenuAbierto] = useState(false);
   const burgerRef = useRef<HTMLButtonElement>(null);
-
-  // Navegar cierra el panel.
-  useEffect(() => {
-    setMenuAbierto(false);
-  }, [pathname]);
+  const cerrarMenu = () => setMenuAbierto(false);
 
   // Escape cierra y devuelve el foco a la hamburguesa.
   useEffect(() => {
@@ -170,6 +166,7 @@ export default function AdminSidebar({ email, rol, firma, onCerrarSesion }: Admi
                 <Link
                   key={s.href}
                   href={s.href}
+                  onClick={cerrarMenu}
                   aria-current={esActiva(s) ? "page" : undefined}
                   className={`font-sports uppercase tracking-[0.15em] text-base py-2.5 border-l-4 pl-3 transition-colors ${
                     esActiva(s)
@@ -184,6 +181,7 @@ export default function AdminSidebar({ email, rol, firma, onCerrarSesion }: Admi
                 href="/"
                 target="_blank"
                 rel="noreferrer"
+                onClick={cerrarMenu}
                 className="font-sports uppercase tracking-[0.15em] text-base py-2.5 border-l-4 border-transparent pl-3 text-white/60 hover:text-white"
               >
                 Ver el sitio ↗
