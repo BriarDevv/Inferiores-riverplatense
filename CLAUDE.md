@@ -46,7 +46,18 @@ Pasada completa de SEO técnico + performance. Lighthouse mobile post-fix: porta
 - **a11y**: títulos de cards = `h2` (antes h3, saltaba h1→h3). El único fail restante (a11y 96) es `color-contrast` = la **excepción de marca documentada** (blanco sobre `#EB192E`) — no tocar.
 - **`revalidarPublico()` completa**: invalida todas las familias SSG (nota/jugador/autor/division/seccion, con y sin route group) + sitemap/news-sitemap/feed. Antes, despublicar/borrar desde la tabla dejaba la nota vieja horneada y los hubs/perfiles no se refrescaban nunca.
 - LCP lab ~4.1–4.6s = proxy `/_next/image` en frío a Unsplash + throttling de Lighthouse; re-medir post-deploy (CDN + AVIF de Vercel). Palanca restante si hace falta: recortar pesos de fuentes (hoy 13 woff2 entre las 4 familias — tocar solo con OK del usuario, tipografía locked-in).
-- Pendiente SEO post-deploy: alta en Search Console/Bing (+ IndexNow opcional). `VideoObject` bloqueado a propósito hasta que exista player real (schema de video sin video en la página = spam para Google).
+- Pendiente SEO post-deploy: alta en Search Console/Bing (+ IndexNow opcional).
+
+### ✅ Video en las notas (2026-07-07)
+
+El player existía solo como botón decorativo; ahora la nota reproduce según la fuente (`components/article/MediaNota.tsx`):
+
+- **YouTube** (horizontal o Short, `youtube_id`) → **fachada**: poster como LCP + iframe `youtube-nocookie` inyectado recién al click (`YouTubeFacade`, client). Cero JS de terceros en la carga.
+- **Short `fuente: propio`** (`video_url` = MP4 en Storage) → `<video>` nativo con poster.
+- **Short de TikTok/Instagram** (`video_url` = URL del post) → poster + play + **link al post en nueva pestaña**. ⚠️ Decisión deliberada: NO embeber los players oficiales de TikTok/Meta (~1MB de JS + cookies; destrozan el Lighthouse 84-87). No "mejorar" a embed sin pedido explícito.
+- **`VideoObject`** en el JSON-LD **solo** cuando el video se reproduce en la página (embedUrl para YouTube, contentUrl para propio) — los link-out no califican según Google.
+- **Panel**: los inputs "ID de YouTube" / "URL del video" se unificaron en **"Link del video"**: se pega la URL tal cual (watch/youtu.be/shorts, TikTok, reel de IG, o MP4) y `parseVideoLink()` (`lib/video.ts`, con tests) detecta la fuente, extrae el ID y limpia el tracking de los links de compartir. El checklist de shorts acepta también Shorts de YouTube.
+- Pendiente: botón de **upload de MP4 al Storage desde el panel** (hoy el video propio se pega por URL; `lib/admin/upload.ts` solo sube imágenes). `duracion_seg` sigue sin campo en el editor.
 
 ### ✅ Pasada react-doctor (2026-07-07) — score 100/100
 
@@ -417,8 +428,8 @@ SUPABASE_SERVICE_ROLE_KEY=
    - tags como `text[]` + índice GIN (no sobre-normalizar) · `suscriptores` (newsletter)
    - **RLS desde el día 1**: lectura pública de notas publicadas; escritura solo rol admin/editor.
 6. **ABM protegido** — login magic-link, CRUD de notas, asociación a sujetos.
-7. **Upload de video vertical** — Supabase Storage directo, no Mux (costo).
-8. **Embed YouTube** — solo guardar ID, el player lazy-load.
+7. **Upload de video vertical** — Supabase Storage directo, no Mux (costo). Pendiente el botón de upload en el panel; el render nativo ya está (ver "Video en las notas").
+8. ✅ **Embed YouTube** — fachada + iframe nocookie al click (ver "Video en las notas").
 
 ### Largo plazo (pulido)
 9. ✅ Hub `/jugador/[slug]` (hecho, versión con timeline). Pendiente opcional: `/tecnico/[slug]`, `/equipo/[slug]`.
