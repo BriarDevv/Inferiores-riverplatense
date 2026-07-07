@@ -23,6 +23,18 @@ function esJsonTiptap(cuerpo: unknown): cuerpo is JSONContent {
   );
 }
 
+/** Texto plano del cuerpo Tiptap (p. ej. para estimar tiempo de lectura). */
+export function textoDelCuerpo(cuerpo: unknown): string {
+  if (!esJsonTiptap(cuerpo)) return "";
+  const partes: string[] = [];
+  const visitar = (nodo: JSONContent): void => {
+    if (typeof nodo.text === "string") partes.push(nodo.text);
+    nodo.content?.forEach(visitar);
+  };
+  visitar(cuerpo);
+  return partes.join(" ");
+}
+
 /** null si el cuerpo está vacío o no es un documento Tiptap válido. */
 export function renderCuerpo(cuerpo: unknown): string | null {
   if (!esJsonTiptap(cuerpo)) return null;
