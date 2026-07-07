@@ -19,6 +19,7 @@ import {
 
 import { SITE_URL } from "@/lib/site";
 import { jsonLdSeguro } from "@/lib/json-ld";
+import { hrefTipo } from "@/lib/secciones";
 
 type Params = { slug: string };
 
@@ -37,6 +38,8 @@ export async function generateMetadata({
   if (!nota) return { title: "Nota no encontrada" };
 
   const url = `${SITE_URL}/nota/${nota.slug}`;
+  // La imagen OG NO se declara acá: la genera opengraph-image.tsx (placa
+  // brutalist con el poster + título); X/WhatsApp caen a og:image.
   return {
     title: nota.titulo,
     description: nota.bajada,
@@ -49,13 +52,11 @@ export async function generateMetadata({
       publishedTime: nota.publicada_en,
       modifiedTime: nota.actualizada_en ?? nota.publicada_en,
       authors: [nota.autor.nombre],
-      images: [{ url: nota.poster_url, alt: nota.titulo }],
     },
     twitter: {
       card: "summary_large_image",
       title: nota.titulo,
       description: nota.bajada,
-      images: [nota.poster_url],
     },
   };
 }
@@ -127,7 +128,7 @@ export default async function NotaPage({
         "@type": "ListItem",
         position: 2,
         name: labelTipo(nota.tipo),
-        item: `${SITE_URL}/?tipo=${nota.tipo}`,
+        item: `${SITE_URL}${hrefTipo(nota.tipo)}`,
       },
       { "@type": "ListItem", position: 3, name: nota.titulo },
     ],
@@ -261,6 +262,7 @@ export default async function NotaPage({
             alt={nota.titulo}
             fill
             priority
+            fetchPriority="high"
             sizes="(max-width: 768px) 100vw, 760px"
             style={{ objectFit: "cover" }}
           />
