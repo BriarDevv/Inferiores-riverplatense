@@ -1,4 +1,3 @@
-import { Suspense } from "react";
 import LenisProvider from "@/components/layout/LenisProvider";
 import Nav from "@/components/layout/Nav";
 import Footer from "@/components/layout/Footer";
@@ -54,9 +53,11 @@ export default function SitioLayout({ children }: { children: React.ReactNode })
       <a href="#contenido" className="skip-link">
         Saltar al contenido
       </a>
-      <Suspense fallback={null}>
-        <Nav />
-      </Suspense>
+      {/* Nav va SIN Suspense externo: su único useSearchParams vive aislado
+          en TraspasosLink (con boundary propio y fallback idéntico). Un
+          boundary acá haría que el header llegue por streaming-swap y
+          empuje la página al aparecer (CLS). */}
+      <Nav />
       <SocialRail />
       <div id="contenido" tabIndex={-1}>
         {children}

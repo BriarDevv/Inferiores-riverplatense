@@ -3,7 +3,7 @@
 import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
-import { useEffect, useRef, useState, useSyncExternalStore } from "react";
+import { Suspense, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { DIVISIONES } from "@/lib/constants";
 import { hrefDivision, hrefTipo } from "@/lib/secciones";
 import type { TipoNota } from "@/lib/types";
@@ -40,6 +40,33 @@ const getFechaServidor = () => "";
 const sinSuscripcion = () => () => {};
 
 /**
+ * Único consumidor de useSearchParams, aislado con su propio <Suspense>:
+ * si el hook viviera en Nav, TODO el header caería a client-side rendering
+ * en las páginas estáticas (BAILOUT_TO_CLIENT_SIDE_RENDERING) y su
+ * aparición tardía empujaba la página entera hacia abajo (CLS 0.2).
+ * El fallback es el mismo link sin estado activo, así no hay salto visual.
+ */
+function TraspasosLink({
+  className,
+  onClick,
+}: {
+  className: string;
+  onClick?: () => void;
+}) {
+  const tema = useSearchParams().get("tema");
+  return (
+    <Link
+      href="/?tema=traspasos"
+      className={className}
+      data-active={tema === "traspasos"}
+      onClick={onClick}
+    >
+      Traspasos
+    </Link>
+  );
+}
+
+/**
  * Nav brutalist — masthead de diario, copiado de la estructura de Roca & Madre
  * con nuestros textos y paleta:
  *
@@ -52,9 +79,6 @@ const sinSuscripcion = () => () => {};
 export default function Nav() {
   const router = useRouter();
   const pathname = usePathname();
-  const searchParams = useSearchParams();
-
-  const tema = searchParams.get("tema");
 
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
   const [coords, setCoords] = useState<{ top: number; left: number } | null>(null);
@@ -202,7 +226,6 @@ export default function Nav() {
         <div className="mx-auto max-w-[1440px] px-4 lg:px-10 py-3 sm:py-4 lg:py-6 flex justify-center">
           <Link
             href="/"
-            aria-label="Inferiores Riverplatense · Portada"
             className="flex items-center justify-center gap-3 sm:gap-4 lg:gap-5 group min-w-0 max-w-full"
           >
             <Image
@@ -357,9 +380,15 @@ export default function Nav() {
               Noticias
             </Link>
             <span className="section-divider" aria-hidden />
-            <Link href="/?tema=traspasos" className="section-link" data-active={tema === "traspasos"}>
-              Traspasos
-            </Link>
+            <Suspense
+              fallback={
+                <Link href="/?tema=traspasos" className="section-link">
+                  Traspasos
+                </Link>
+              }
+            >
+              <TraspasosLink className="section-link" />
+            </Suspense>
             <span className="section-divider" aria-hidden />
             <Link href={hrefDivision("primera")} className="section-link" data-active={pathname === hrefDivision("primera")}>
               Primera
@@ -424,9 +453,18 @@ export default function Nav() {
               <Link href={hrefTipo("noticia")} className="nav-mobile-link" data-active={pathname === hrefTipo("noticia")} onClick={() => setMobileOpen(false)}>
                 Noticias
               </Link>
-              <Link href="/?tema=traspasos" className="nav-mobile-link" data-active={tema === "traspasos"} onClick={() => setMobileOpen(false)}>
-                Traspasos
-              </Link>
+              <Suspense
+                fallback={
+                  <Link href="/?tema=traspasos" className="nav-mobile-link">
+                    Traspasos
+                  </Link>
+                }
+              >
+                <TraspasosLink
+                  className="nav-mobile-link"
+                  onClick={() => setMobileOpen(false)}
+                />
+              </Suspense>
               <Link href="/sobre" className="nav-mobile-link" onClick={() => setMobileOpen(false)}>
                 Sobre
               </Link>
