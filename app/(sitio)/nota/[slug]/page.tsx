@@ -6,16 +6,17 @@ import TeaserCard from "@/components/cards/TeaserCard";
 import ShareBar from "@/components/article/ShareBar";
 import RegistrarVisita from "@/components/article/RegistrarVisita";
 import AuthorBio from "@/components/article/AuthorBio";
+import MediaNota from "@/components/article/MediaNota";
 import BackToHome from "@/components/layout/BackToHome";
 import { getNotaPorSlug, getNotasRelacionadas, getTodasLasNotas } from "@/lib/notas";
 import { renderCuerpo, textoDelCuerpo } from "@/lib/render-cuerpo";
 import {
-  formatearDuracion,
   formatearFechaLarga,
   labelDivision,
   labelTipo,
   tiempoLectura,
 } from "@/lib/constants";
+import { duracionISO, youtubeEmbedUrl } from "@/lib/video";
 
 import { SITE_URL } from "@/lib/site";
 import { jsonLdSeguro } from "@/lib/json-ld";
@@ -107,6 +108,23 @@ export default async function NotaPage({
       logo: { "@type": "ImageObject", url: `${SITE_URL}/logo.webp` },
     },
     mainEntityOfPage: { "@type": "WebPage", "@id": url },
+    // VideoObject SOLO si el video se reproduce en la página (embed de
+    // YouTube o MP4 propio); los link-out a TikTok/IG no califican.
+    ...(esVideo && (nota.youtube_id || (nota.fuente === "propio" && nota.video_url))
+      ? {
+          video: {
+            "@type": "VideoObject",
+            name: nota.titulo,
+            description: nota.bajada,
+            thumbnailUrl: [nota.poster_url],
+            uploadDate: nota.publicada_en,
+            ...(nota.duracion_seg ? { duration: duracionISO(nota.duracion_seg) } : {}),
+            ...(nota.youtube_id
+              ? { embedUrl: youtubeEmbedUrl(nota.youtube_id) }
+              : { contentUrl: nota.video_url }),
+          },
+        }
+      : {}),
     // Entidades de la nota → hubs de jugador (linkeo semántico).
     ...(jugadores.length > 0
       ? {
@@ -245,62 +263,8 @@ export default async function NotaPage({
           <ShareBar url={url} title={nota.titulo} />
         </div>
 
-        {/* media */}
-        <figure
-          className="mb-9 relative overflow-hidden"
-          style={{
-            border: "2px solid var(--color-ink)",
-            boxShadow: "8px 8px 0 var(--color-ink)",
-            background: "var(--color-ink)",
-            aspectRatio: nota.formato === "short" ? "9 / 16" : "16 / 9",
-            maxWidth: nota.formato === "short" ? "380px" : undefined,
-            marginInline: nota.formato === "short" ? "auto" : undefined,
-          }}
-        >
-          <Image
-            src={nota.poster_url}
-            alt={nota.titulo}
-            fill
-            priority
-            fetchPriority="high"
-            sizes="(max-width: 768px) 100vw, 760px"
-            style={{ objectFit: "cover" }}
-          />
-          {esVideo && (
-            <span
-              aria-hidden
-              className="absolute inset-0 flex items-center justify-center"
-            >
-              <span
-                className="flex items-center justify-center"
-                style={{
-                  width: 64,
-                  height: 64,
-                  background: "var(--color-river-red)",
-                  border: "2px solid var(--color-paper-pure)",
-                  color: "var(--color-paper-pure)",
-                }}
-              >
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="currentColor">
-                  <path d="M8 5v14l11-7z" />
-                </svg>
-              </span>
-            </span>
-          )}
-          {nota.duracion_seg && (
-            <span
-              className="absolute bottom-0 right-0 px-2 py-1 font-mono text-[0.65rem] tabular-nums"
-              style={{
-                background: "var(--color-ink)",
-                color: "var(--color-paper-pure)",
-                borderLeft: "2px solid var(--color-paper-pure)",
-                borderTop: "2px solid var(--color-paper-pure)",
-              }}
-            >
-              {formatearDuracion(nota.duracion_seg)}
-            </span>
-          )}
-        </figure>
+        {/* media: player según youtube_id / fuente (ver MediaNota) */}
+        <MediaNota nota={nota} />
 
         {/* cuerpo: primero el del editor visual (Tiptap), después el legacy del mock */}
         {cuerpoHtml ? (
