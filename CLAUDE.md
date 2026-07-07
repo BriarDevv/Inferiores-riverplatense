@@ -33,6 +33,16 @@ Sigue siendo material de demo para cliente, pero ya **no** está recortado a `/`
 - ⚠️ **Lección**: si tras cambiar contenido aparecen 404 "fantasma" en páginas SSG que existen en la DB → `rm -rf .next` y rebuild (el fetch-cache viejo de `.next/cache` envenena el prerender; el build NO falla, hornea la página como 404).
 - Pendiente inmediato: deploy en Vercel + DNS del dominio (el código ya apunta ahí solo).
 
+### ✅ Pasada react-doctor (2026-07-07) — 101 → 27 hallazgos, 17 → 1 errores
+
+`npx react-doctor` sobre sitio+admin; se corrigió todo lo real (score 27 → 46):
+
+- **Server actions**: chequeo de sesión `supabase.auth.getUser()` INLINE en cada action que escribe (la regla no reconoce helpers) + `.select("id")` tras update/delete porque la RLS bloquea con "0 filas sin error" y la action reportaba `ok:true` sin permiso. En `equipo-actions`, sesión (cliente SSR) ANTES de `exigirAdmin()`.
+- **Sinks**: JSON-LD via `jsonLdSeguro()` (lib/json-ld.ts, escapa `</script>`); `renderCuerpo()` elimina links `javascript:`/`data:` (`sinLinksPeligrosos`). Tests en `lib/render-cuerpo.test.ts`.
+- **Next 16.2.6** (CVE-2026-23870) · `@tiptap/extension-link` removido (StarterKit v3 trae Link) · 001_schema.sql habilita RLS al crear tablas (idempotente, políticas siguen en 002).
+- **PreviewNota = `<dialog>` nativo** · BarraEditor/MenuAccionesNota con un solo estado de popover · sidebar mobile cierra por onClick del link (no efecto sobre pathname) · ScrollToTop y fecha del Nav con `useSyncExternalStore` · `<img>` del panel → next/image `unoptimized` · Promise.all en portada y /sobre · hoists/toSorted/flatMap/`use()`.
+- **⚠️ Excepciones DOCUMENTADAS (no "arreglar")**: texto mono <12px = microtipografía de marca aprobada; `autoFocus` en dialogs/popovers/panel mobile = foco-al-abrir correcto; `RegistrarVisita` fetch-en-efecto = beacon con guard de sessionStorage (no puede ser server); backdrop-click de ConfirmDialog sin handler de teclado (Escape nativo cubre); "Client writes authorization field" = equipo-actions escribe `rol` con service role DETRÁS de sesión+exigirAdmin (patrón correcto); "BaaS authority map" = inherente al cliente Supabase con RLS verificada; Nav/EditorNota/UiPage grandes = estables y aprobados, no partir porque sí.
+
 ### ✅ Fase 1 "Cimientos Supabase" COMPLETADA (2026-07-04)
 
 En camino al **dashboard admin** (spec: `docs/superpowers/specs/2026-07-04-admin-dashboard-design.md`, plan: `docs/superpowers/plans/2026-07-04-fase-1-cimientos-supabase.md`):
