@@ -2,18 +2,19 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { DIVISIONES } from "@/lib/constants";
+import { hrefDivision, hrefTipo } from "@/lib/secciones";
+import type { TipoNota } from "@/lib/types";
 
 /** Items del dropdown "Notas" (tipos editoriales). */
-const NOTAS_TIPOS = [
+const NOTAS_TIPOS: Array<{ label: string; value: TipoNota }> = [
   { label: "Perfiles", value: "perfil" },
   { label: "Crónicas", value: "cronica" },
   { label: "Análisis", value: "analisis" },
   { label: "Columnas", value: "columna" },
 ];
-const NOTAS_SET = new Set(NOTAS_TIPOS.map((t) => t.value));
 
 /** Redes de la barra roja (handles reales pendientes; ver CLAUDE.md). */
 const REDES_BARRA = [
@@ -50,10 +51,9 @@ const sinSuscripcion = () => () => {};
  */
 export default function Nav() {
   const router = useRouter();
+  const pathname = usePathname();
   const searchParams = useSearchParams();
 
-  const division = searchParams.get("division");
-  const tipo = searchParams.get("tipo");
   const tema = searchParams.get("tema");
 
   const [openDropdown, setOpenDropdown] = useState<string | null>(null);
@@ -131,8 +131,8 @@ export default function Nav() {
     setOpenDropdown(id);
   };
 
-  const divisionesActive = Boolean(division);
-  const notasActive = tipo ? NOTAS_SET.has(tipo) : false;
+  const divisionesActive = pathname.startsWith("/division/");
+  const notasActive = NOTAS_TIPOS.some((t) => pathname === hrefTipo(t.value));
 
   return (
     <>
@@ -302,7 +302,7 @@ export default function Nav() {
                   {DIVISIONES.map((d) => (
                     <Link
                       key={d.value}
-                      href={`/?division=${d.value}`}
+                      href={hrefDivision(d.value)}
                       onClick={() => setOpenDropdown(null)}
                     >
                       {d.label}
@@ -338,7 +338,7 @@ export default function Nav() {
                   {NOTAS_TIPOS.map((t) => (
                     <Link
                       key={t.value}
-                      href={`/?tipo=${t.value}`}
+                      href={hrefTipo(t.value)}
                       onClick={() => setOpenDropdown(null)}
                     >
                       {t.label}
@@ -349,11 +349,11 @@ export default function Nav() {
             </div>
 
             <span className="section-divider" aria-hidden />
-            <Link href="/?tipo=entrevista" className="section-link" data-active={tipo === "entrevista"}>
+            <Link href={hrefTipo("entrevista")} className="section-link" data-active={pathname === hrefTipo("entrevista")}>
               Entrevistas
             </Link>
             <span className="section-divider" aria-hidden />
-            <Link href="/?tipo=noticia" className="section-link" data-active={tipo === "noticia"}>
+            <Link href={hrefTipo("noticia")} className="section-link" data-active={pathname === hrefTipo("noticia")}>
               Noticias
             </Link>
             <span className="section-divider" aria-hidden />
@@ -361,11 +361,11 @@ export default function Nav() {
               Traspasos
             </Link>
             <span className="section-divider" aria-hidden />
-            <Link href="/?division=primera" className="section-link" data-active={division === "primera"}>
+            <Link href={hrefDivision("primera")} className="section-link" data-active={pathname === hrefDivision("primera")}>
               Primera
             </Link>
             <span className="section-divider" aria-hidden />
-            <Link href="/?division=reserva" className="section-link" data-active={division === "reserva"}>
+            <Link href={hrefDivision("reserva")} className="section-link" data-active={pathname === hrefDivision("reserva")}>
               Reserva
             </Link>
           </nav>
@@ -418,10 +418,10 @@ export default function Nav() {
 
             {/* secciones principales */}
             <div className="nav-mobile-group">
-              <Link href="/?tipo=entrevista" className="nav-mobile-link" data-active={tipo === "entrevista"} onClick={() => setMobileOpen(false)}>
+              <Link href={hrefTipo("entrevista")} className="nav-mobile-link" data-active={pathname === hrefTipo("entrevista")} onClick={() => setMobileOpen(false)}>
                 Entrevistas
               </Link>
-              <Link href="/?tipo=noticia" className="nav-mobile-link" data-active={tipo === "noticia"} onClick={() => setMobileOpen(false)}>
+              <Link href={hrefTipo("noticia")} className="nav-mobile-link" data-active={pathname === hrefTipo("noticia")} onClick={() => setMobileOpen(false)}>
                 Noticias
               </Link>
               <Link href="/?tema=traspasos" className="nav-mobile-link" data-active={tema === "traspasos"} onClick={() => setMobileOpen(false)}>
@@ -442,9 +442,9 @@ export default function Nav() {
                 {DIVISIONES.map((d) => (
                   <Link
                     key={d.value}
-                    href={`/?division=${d.value}`}
+                    href={hrefDivision(d.value)}
                     className="nav-mobile-chip"
-                    data-active={division === d.value}
+                    data-active={pathname === hrefDivision(d.value)}
                     onClick={() => setMobileOpen(false)}
                   >
                     {d.label}
@@ -460,9 +460,9 @@ export default function Nav() {
                 {NOTAS_TIPOS.map((t) => (
                   <Link
                     key={t.value}
-                    href={`/?tipo=${t.value}`}
+                    href={hrefTipo(t.value)}
                     className="nav-mobile-chip"
-                    data-active={tipo === t.value}
+                    data-active={pathname === hrefTipo(t.value)}
                     onClick={() => setMobileOpen(false)}
                   >
                     {t.label}

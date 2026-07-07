@@ -1,11 +1,12 @@
 import Image from "next/image";
 import Link from "next/link";
 import { DIVISIONES } from "@/lib/constants";
+import { hrefDivision, hrefTipo } from "@/lib/secciones";
 
 const SECCIONES = [
   { label: "Notas", href: "/" },
-  { label: "Entrevistas", href: "/?tipo=entrevista" },
-  { label: "Noticias", href: "/?tipo=noticia" },
+  { label: "Entrevistas", href: hrefTipo("entrevista") },
+  { label: "Noticias", href: hrefTipo("noticia") },
   { label: "Sobre", href: "/sobre" },
   { label: "Contacto", href: "/contacto" },
   { label: "UI / Design system", href: "/ui" },
@@ -111,7 +112,7 @@ export default function Footer() {
               {DIVISIONES.map((d) => (
                 <Link
                   key={d.value}
-                  href={`/?division=${d.value}`}
+                  href={hrefDivision(d.value)}
                   className="px-2 py-1.5 font-sports text-xs text-center transition-colors hover:bg-[var(--color-river-red)]"
                   style={{
                     border: "2px solid var(--color-ink-contrast)",
