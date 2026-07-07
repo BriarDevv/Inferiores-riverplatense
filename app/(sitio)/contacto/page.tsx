@@ -6,6 +6,7 @@ export const metadata: Metadata = {
   title: "Contacto",
   description:
     "¿Tenés un dato de las inferiores de River? Escribime. Contacto directo para fuentes, primicias y consultas.",
+  alternates: { canonical: "/contacto" },
 };
 
 // Placeholders — reemplazar por los reales al salir de la demo.

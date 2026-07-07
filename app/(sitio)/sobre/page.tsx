@@ -9,6 +9,7 @@ export const metadata: Metadata = {
   title: "Sobre",
   description:
     "Quién está detrás de Inferiores Riverplatense: periodismo dedicado a las divisiones formativas de River Plate, de la Novena a la Primera.",
+  alternates: { canonical: "/sobre" },
 };
 
 export default async function SobrePage() {

@@ -14,6 +14,9 @@ import UiDropdownDemo from "./_components/UiDropdownDemo";
 export const metadata = {
   title: "UI — Inferiores Riverplatense",
   description: "Todo lo que se puede usar en el sitio.",
+  // Playground interno: fuera del índice (se sacó del Disallow de robots.txt
+  // justamente para que los crawlers puedan leer este noindex).
+  robots: { index: false, follow: false },
 };
 
 const SECCIONES = [
