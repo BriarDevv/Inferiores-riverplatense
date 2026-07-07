@@ -6,6 +6,7 @@
  */
 import { revalidatePath } from "next/cache";
 import { createClient } from "@supabase/supabase-js";
+import { createSupabaseServer } from "@/lib/supabase/server";
 import { getPerfilActual } from "@/lib/admin/notas-admin";
 import { SITE_URL } from "@/lib/site";
 import type { ResultadoAccion } from "@/lib/admin/actions";
@@ -28,6 +29,10 @@ export async function invitarMiembro(
   email: string,
   rol: "admin" | "editor",
 ): Promise<ResultadoAccion> {
+  const {
+    data: { user },
+  } = await (await createSupabaseServer()).auth.getUser();
+  if (!user) return { ok: false, error: "Sesión vencida. Volvé a entrar." };
   const noAutorizado = await exigirAdmin();
   if (noAutorizado) return { ok: false, error: noAutorizado };
   if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
@@ -66,6 +71,10 @@ export async function cambiarRol(
   userId: string,
   rol: "admin" | "editor",
 ): Promise<ResultadoAccion> {
+  const {
+    data: { user },
+  } = await (await createSupabaseServer()).auth.getUser();
+  if (!user) return { ok: false, error: "Sesión vencida. Volvé a entrar." };
   const noAutorizado = await exigirAdmin();
   if (noAutorizado) return { ok: false, error: noAutorizado };
 
@@ -88,6 +97,10 @@ export async function vincularFirma(
   userId: string,
   autorId: string | null,
 ): Promise<ResultadoAccion> {
+  const {
+    data: { user },
+  } = await (await createSupabaseServer()).auth.getUser();
+  if (!user) return { ok: false, error: "Sesión vencida. Volvé a entrar." };
   const noAutorizado = await exigirAdmin();
   if (noAutorizado) return { ok: false, error: noAutorizado };
 
@@ -103,6 +116,10 @@ export async function vincularFirma(
 }
 
 export async function revocarAcceso(userId: string): Promise<ResultadoAccion> {
+  const {
+    data: { user },
+  } = await (await createSupabaseServer()).auth.getUser();
+  if (!user) return { ok: false, error: "Sesión vencida. Volvé a entrar." };
   const noAutorizado = await exigirAdmin();
   if (noAutorizado) return { ok: false, error: noAutorizado };
 

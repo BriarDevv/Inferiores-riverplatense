@@ -78,3 +78,13 @@ create index if not exists nota_visitas_nota_idx on public.nota_visitas (nota_id
 insert into storage.buckets (id, name, public)
 values ('imagenes', 'imagenes', true)
 on conflict (id) do nothing;
+
+-- RLS encendida desde el nacimiento de cada tabla (sin ventana insegura entre
+-- migraciones). Las POLÍTICAS viven en 002_rls.sql; estos alter son
+-- idempotentes, así que re-ejecutarlos con 002 no cambia nada.
+alter table public.autores enable row level security;
+alter table public.profiles enable row level security;
+alter table public.sujetos enable row level security;
+alter table public.notas enable row level security;
+alter table public.nota_sujetos enable row level security;
+alter table public.nota_visitas enable row level security;

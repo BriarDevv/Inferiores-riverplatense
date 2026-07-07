@@ -68,26 +68,18 @@ const SIN_SESION = "Sesión vencida. Volvé a entrar.";
 const SIN_PERMISO =
   "No tenés permiso para esta acción (o el registro ya no existe).";
 
-/**
- * Guard de sesión para toda action que escribe. La RLS sigue siendo la
- * autoridad final, pero sin este chequeo una llamada anónima directa a la
- * action "afecta 0 filas" sin error y reportaría un falso ok.
- */
-async function usuarioActual(
-  supabase: Awaited<ReturnType<typeof createSupabaseServer>>,
-) {
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  return user;
-}
+// Guard de sesión INLINE en cada action que escribe: la RLS es la autoridad
+// final, pero sin este chequeo una llamada anónima "afecta 0 filas" sin error
+// y la action reportaría un falso ok.
 
 export async function guardarNota(input: GuardarNotaInput): Promise<ResultadoAccion> {
   const error = validar(input);
   if (error) return { ok: false, error };
 
   const supabase = await createSupabaseServer();
-  const user = await usuarioActual(supabase);
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
   if (!user) return { ok: false, error: SIN_SESION };
 
   // Estado persistido: 'programada' se guarda como publicada con fecha futura
@@ -174,7 +166,10 @@ export async function cambiarEstadoNota(
   accion: "publicar" | "despublicar",
 ): Promise<ResultadoAccion> {
   const supabase = await createSupabaseServer();
-  if (!(await usuarioActual(supabase))) return { ok: false, error: SIN_SESION };
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: SIN_SESION };
   const patch =
     accion === "publicar"
       ? { estado: "publicada", publicada_en: new Date().toISOString() }
@@ -192,7 +187,10 @@ export async function cambiarEstadoNota(
 
 export async function toggleDestacada(id: string, destacada: boolean): Promise<ResultadoAccion> {
   const supabase = await createSupabaseServer();
-  if (!(await usuarioActual(supabase))) return { ok: false, error: SIN_SESION };
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: SIN_SESION };
   const { data: filas, error } = await supabase
     .from("notas")
     .update({ destacada })
@@ -264,7 +262,10 @@ export async function duplicarNota(id: string): Promise<ResultadoAccion> {
 
 export async function borrarNota(id: string): Promise<ResultadoAccion> {
   const supabase = await createSupabaseServer();
-  if (!(await usuarioActual(supabase))) return { ok: false, error: SIN_SESION };
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: SIN_SESION };
   // La RLS solo deja borrar al admin; select("id") detecta el bloqueo silencioso.
   const { data: filas, error } = await supabase
     .from("notas")
@@ -295,7 +296,10 @@ export async function guardarAutor(input: GuardarAutorInput): Promise<ResultadoA
   }
 
   const supabase = await createSupabaseServer();
-  if (!(await usuarioActual(supabase))) return { ok: false, error: SIN_SESION };
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: SIN_SESION };
   const fila = {
     nombre: input.nombre.trim(),
     slug: input.slug,
@@ -327,7 +331,10 @@ export async function guardarAutor(input: GuardarAutorInput): Promise<ResultadoA
 
 export async function borrarAutor(id: string): Promise<ResultadoAccion> {
   const supabase = await createSupabaseServer();
-  if (!(await usuarioActual(supabase))) return { ok: false, error: SIN_SESION };
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (!user) return { ok: false, error: SIN_SESION };
   const { data: filas, error } = await supabase
     .from("autores")
     .delete()
@@ -344,10 +351,12 @@ export async function borrarAutor(id: string): Promise<ResultadoAccion> {
   return { ok: true };
 }
 
-// Sin guard a propósito: cerrar una sesión inexistente es inofensivo.
 export async function cerrarSesion(): Promise<void> {
   const supabase = await createSupabaseServer();
-  await supabase.auth.signOut();
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  if (user) await supabase.auth.signOut();
   redirect("/admin/login");
 }
 
