@@ -377,6 +377,27 @@ function revalidarPublico(slug?: string): void {
   revalidatePath("/admin/notas");
   revalidatePath("/admin");
   if (slug) revalidatePath(`/nota/${slug}`);
+  // Una nota alimenta más páginas horneadas que su propio detalle: el
+  // timeline del jugador, el perfil de la firma, el slug viejo si se
+  // renombró, y las acciones de la tabla (publicar/despublicar/borrar)
+  // ni siquiera traen slug. Se invalida cada familia SSG completa; se
+  // prueban ambas formas del path porque revalidatePath matchea contra
+  // la estructura de archivos (con route group) según la versión.
+  for (const patron of [
+    "/nota/[slug]",
+    "/(sitio)/nota/[slug]",
+    "/jugador/[slug]",
+    "/(sitio)/jugador/[slug]",
+    "/autor/[slug]",
+    "/(sitio)/autor/[slug]",
+    "/division/[division]",
+    "/(sitio)/division/[division]",
+    "/seccion/[slug]",
+    "/(sitio)/seccion/[slug]",
+  ]) {
+    revalidatePath(patron, "page");
+  }
   revalidatePath("/sitemap.xml");
+  revalidatePath("/news-sitemap.xml");
   revalidatePath("/feed.xml");
 }
