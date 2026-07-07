@@ -7,9 +7,11 @@ export default function robots(): MetadataRoute.Robots {
     rules: {
       userAgent: "*",
       allow: "/",
-      // /ui = playground de diseño; /admin = panel privado
-      disallow: ["/ui", "/admin"],
+      // /admin = panel privado; /auth = callback de login; /api = endpoints.
+      // /ui NO va acá: está linkeado desde el footer, y con Disallow Google
+      // nunca leería su meta noindex (quedaría "indexed though blocked").
+      disallow: ["/admin", "/auth", "/api"],
     },
-    sitemap: `${SITE_URL}/sitemap.xml`,
+    sitemap: [`${SITE_URL}/sitemap.xml`, `${SITE_URL}/news-sitemap.xml`],
   };
 }

@@ -48,7 +48,28 @@ export const metadata: Metadata = {
   },
   description:
     "Entrevistas, perfiles y crónicas de las divisiones formativas del Club Atlético River Plate.",
+  applicationName: "Inferiores Riverplatense",
+  publisher: "Inferiores Riverplatense",
   icons: { icon: "/logo.webp", apple: "/logo.webp" },
+  alternates: {
+    types: {
+      "application/rss+xml": [
+        { url: "/feed.xml", title: "Inferiores Riverplatense" },
+      ],
+    },
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      // Preview grande = requisito práctico para aparecer bien en Discover.
+      "max-image-preview": "large",
+      "max-snippet": -1,
+      "max-video-preview": -1,
+    },
+  },
   openGraph: {
     title: "Inferiores Riverplatense",
     description:
