@@ -12,7 +12,8 @@ Sitio de periodismo dedicado a las divisiones formativas del **Club Atlético Ri
 
 Sigue siendo material de demo para cliente, pero ya **no** está recortado a `/` + `/ui`: el 2026-05-31 se repusieron las páginas internas y se sumó SEO. Rutas vivas:
 
-- **Portada `/`** con contenido real: hero → 3 teasers → bento → newsletter. Tiene **modo filtrado** (`?tipo` / `?division` / `?tema` / `?q`) que alimenta el nav. ✓
+- **Portada `/`** con contenido real: hero → 3 teasers → bento → newsletter. Tiene **modo filtrado** (`?tipo` / `?division` / `?tema` / `?q`) — desde 2026-07-07 es `noindex,follow` (el nav ya no lo usa para secciones, solo búsqueda y tema). ✓
+- **`/division/[division]`** (SSG, 9) y **`/seccion/[slug]`** (SSG, 6 slugs plurales) — landings indexables por división y tipo con copy editorial propio (`lib/secciones.ts`). Sin notas → noindex automático. ✓
 - **`/nota/[slug]`** (SSG, 22 páginas) — detalle de nota: `.article-prose`, byline con tiempo de lectura, badge **"Lo contamos primero"** (`primicia`), sujetos linkeados al hub, JSON-LD, OG por nota, ShareBar (WhatsApp/X/copiar), AuthorBio, relacionadas. ✓
 - **`/jugador/[slug]`** (SSG, 5 jugadores) — hub de seguimiento: bio + contador + **línea de tiempo** de toda la cobertura del jugador. El diferenciador de cantera. ✓
 - **`/sobre`** — página del periodista (Pablo Molina): bio + stats reales (notas/divisiones/jugadores) + CTAs. ✓
@@ -20,7 +21,7 @@ Sigue siendo material de demo para cliente, pero ya **no** está recortado a `/`
 - **Nav masthead de diario** (3 niveles, responsive con hamburguesa). Sobre/Contacto viven en la barra roja superior + footer + panel mobile. Ver sección Nav. ✓
 - **Footer brutalist**, **SocialRail** (desktop), **ScrollToTop**, **NewsletterBand** (`#newsletter`). ✓
 - **`/ui`** = design system en lenguaje no técnico (visible para el cliente; `disallow` en robots). ✓
-- **SEO**: `sitemap.xml`, `robots.txt`, `feed.xml` (RSS), `not-found.tsx` (404 brutalist), `metadataBase` + iconos. ✓
+- **SEO**: `sitemap.xml` + `news-sitemap.xml`, `robots.txt`, `feed.xml` (RSS enriquecido), JSON-LD completo, OG images dinámicas, `manifest`, `not-found.tsx`, `metadataBase` + iconos. Ver sección **"SEO agresivo"**. ✓
 - **Cards/links internos** → ahora apuntan a `/nota/${slug}` reales. ✓
 
 ### ✅ Contenido REAL + dominio (2026-07-07) — SE FUERON LOS MOCKS
@@ -32,6 +33,20 @@ Sigue siendo material de demo para cliente, pero ya **no** está recortado a `/`
 - **`lib/mock-data.ts` BORRADO.** `/ui` usa fixtures propios (`app/(sitio)/ui/_fixtures.ts`); `SobreAutorBand` y `/sobre` leen la firma real vía `getAutorPrincipal()` (`lib/autores.ts`).
 - ⚠️ **Lección**: si tras cambiar contenido aparecen 404 "fantasma" en páginas SSG que existen en la DB → `rm -rf .next` y rebuild (el fetch-cache viejo de `.next/cache` envenena el prerender; el build NO falla, hornea la página como 404).
 - Pendiente inmediato: deploy en Vercel + DNS del dominio (el código ya apunta ahí solo).
+
+### ✅ SEO agresivo — 5 fases (2026-07-07)
+
+Pasada completa de SEO técnico + performance. Lighthouse mobile post-fix: portada 84/96/100/100 (perf/a11y/bp/seo), nota 87, **CLS 0.202 → 0.001** en todo el sitio.
+
+- **Landings indexables**: `/division/[division]` (9) y `/seccion/[slug]` (6, slugs plurales: `entrevistas|perfiles|cronicas|analisis|columnas|noticias`). Fuente de verdad: **`lib/secciones.ts`** (título + meta description + intro editorial por landing, helpers `hrefTipo()` / `hrefDivision()` — usarlos SIEMPRE para linkear secciones). SSG con `dynamicParams=false`. **Sin notas → `noindex,follow` automático y fuera del sitemap** (hoy: séptima, octava, entrevistas — se indexan solas al publicar la primera nota). Nav/footer linkean a las landings; activo por `usePathname`.
+- **Structured data**: grafo `NewsMediaOrganization` + `WebSite`/SearchAction en `(sitio)/layout.tsx` (`sameAs` pendiente de handles reales); NewsArticle enriquecido en la nota (`author.url` → /autor, publisher con `@id`+logo, articleSection, keywords, wordCount, `about` → hubs de jugador); `ProfilePage`+`Person` en /jugador; `BreadcrumbList` en nota/jugador/autor/landings; `CollectionPage`+ItemList en landings. Todo vía `jsonLdSeguro()`.
+- **News/Discover**: `news-sitemap.xml` (solo notas <48h, regla de Google News; referenciado en robots) + `googleBot` con `max-image-preview:large` en el root layout. `robots.txt`: disallow `/admin` `/auth` `/api`; **`/ui` salió del disallow y usa meta noindex** (linkeado en el footer, con disallow quedaba "indexed though blocked"). RSS con autodiscovery, `content:encoded` y `media:content` (`escXml` compartido en `lib/xml.ts`).
+- **OG images**: default brutalist del sitio (`app/opengraph-image.tsx`) + **por nota** (`app/(sitio)/nota/[slug]/opengraph-image.tsx`: poster de fondo + banda ink + kicker rojo + título). ⚠️ La nota ya **NO** declara `openGraph.images`/`twitter.images`: el file convention pisa la config y X cae a og:image. `app/manifest.ts` nuevo.
+- **⚠️ CLS 0.2 → 0.001 — NO regresionar**: `useSearchParams` en el cuerpo del Nav causaba `BAILOUT_TO_CLIENT_SIDE_RENDERING` → el header entero no existía en el HTML estático y empujaba la página 165px al hidratar. El único consumidor vive en **`TraspasosLink`** (Suspense propio con fallback idéntico) y el Nav va **sin Suspense externo** en `(sitio)/layout.tsx` (con boundary externo llegaba por streaming-swap y el shift volvía). Si algo del shell vuelve a necesitar `useSearchParams`, repetir el patrón hoja + boundary con fallback gemelo.
+- **a11y**: títulos de cards = `h2` (antes h3, saltaba h1→h3). El único fail restante (a11y 96) es `color-contrast` = la **excepción de marca documentada** (blanco sobre `#EB192E`) — no tocar.
+- **`revalidarPublico()` completa**: invalida todas las familias SSG (nota/jugador/autor/division/seccion, con y sin route group) + sitemap/news-sitemap/feed. Antes, despublicar/borrar desde la tabla dejaba la nota vieja horneada y los hubs/perfiles no se refrescaban nunca.
+- LCP lab ~4.1–4.6s = proxy `/_next/image` en frío a Unsplash + throttling de Lighthouse; re-medir post-deploy (CDN + AVIF de Vercel). Palanca restante si hace falta: recortar pesos de fuentes (hoy 13 woff2 entre las 4 familias — tocar solo con OK del usuario, tipografía locked-in).
+- Pendiente SEO post-deploy: alta en Search Console/Bing (+ IndexNow opcional). `VideoObject` bloqueado a propósito hasta que exista player real (schema de video sin video en la página = spam para Google).
 
 ### ✅ Pasada react-doctor (2026-07-07) — score 100/100
 
@@ -253,13 +268,19 @@ app/
   layout.tsx              → root, fuentes, Lenis, Nav (en Suspense), SocialRail, Footer, ScrollToTop, metadata+viewport
   page.tsx                → portada (hero + teasers + bento + newsletter) + modo filtrado (?tipo/?division/?tema/?q)
   nota/[slug]/page.tsx    → detalle de nota (SSG, generateStaticParams + generateMetadata + JSON-LD)
-  jugador/[slug]/page.tsx → hub de jugador con línea de tiempo (SSG)
+  nota/[slug]/opengraph-image.tsx → OG image brutalist por nota (poster + banda ink + título)
+  division/[division]/page.tsx    → landing SSG por división (lib/secciones.ts)
+  seccion/[slug]/page.tsx         → landing SSG por tipo de nota (slugs plurales)
+  jugador/[slug]/page.tsx → hub de jugador con línea de tiempo (SSG, ProfilePage JSON-LD)
   sobre/page.tsx          → página del periodista (bio + stats)
   contacto/page.tsx       → contacto (mail/WhatsApp + form)
   not-found.tsx           → 404 brutalist
-  sitemap.ts              → sitemap (home + notas + jugadores)
-  robots.ts               → robots (disallow /ui)
-  feed.xml/route.ts       → RSS 2.0
+  sitemap.ts              → sitemap (home + landings + notas + jugadores + autores)
+  news-sitemap.xml/route.ts → sitemap de Google News (notas <48h)
+  robots.ts               → robots (disallow /admin /auth /api; /ui va por meta noindex)
+  manifest.ts             → manifest.webmanifest
+  opengraph-image.tsx     → OG image default del sitio
+  feed.xml/route.ts       → RSS 2.0 (content:encoded + media:content)
   ui/
     page.tsx              → design system aplicado, lenguaje no técnico
     _components/UiDropdownDemo.tsx
@@ -278,6 +299,8 @@ lib/
   site.ts       → SITE_URL canónica (env > dominio en prod > localhost en dev)
   notas.ts      → capa de acceso: getNotas (con q/tags), getNotaPorSlug, getNotasRelacionadas, getSujetoPorSlug, getNotasPorSujeto, getSlugsDeJugadores
   constants.ts  → divisiones, tipos, formatters, norm(), tiempoLectura(), formatearFechaLarga()
+  secciones.ts  → landings SEO: copy por división/sección + hrefTipo()/hrefDivision()
+  xml.ts        → escXml() compartido (feed + news sitemap)
 
 scripts/
   seed-data.ts  → CONTENIDO REAL: 22 notas nr-01..nr-22 + 8 sujetos + 2 autores (fuente de verdad del seed)
@@ -400,7 +423,7 @@ SUPABASE_SERVICE_ROLE_KEY=
 ### Largo plazo (pulido)
 9. ✅ Hub `/jugador/[slug]` (hecho, versión con timeline). Pendiente opcional: `/tecnico/[slug]`, `/equipo/[slug]`.
 10. Newsletter real (si se decide) — hoy el form es fake (no persiste).
-11. ✅ SEO base (sitemap/robots/RSS/OG/JSON-LD). Pendiente: dominio real + `NEXT_PUBLIC_SITE_URL` en prod (hoy cae a `localhost:3000`).
+11. ✅ SEO completo (ver sección "SEO agresivo — 5 fases"): landings, JSON-LD, news sitemap, OG dinámicas, CWV. Pendiente solo: deploy + Search Console.
 
 ---
 
