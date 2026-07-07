@@ -23,6 +23,26 @@ function esJsonTiptap(cuerpo: unknown): cuerpo is JSONContent {
   );
 }
 
+const PROTOCOLOS_PERMITIDOS = /^(https?:|mailto:|tel:|\/)/i;
+
+/**
+ * Defensa en profundidad del sink HTML: aunque el cuerpo lo escribe solo el
+ * staff (RLS), un link con protocolo raro (javascript:, data:) no debe llegar
+ * al HTML publicado. Devuelve una copia del documento sin esos marks.
+ */
+function sinLinksPeligrosos(nodo: JSONContent): JSONContent {
+  const marks = nodo.marks?.filter((m) => {
+    if (m.type !== "link") return true;
+    const href = String(m.attrs?.href ?? "");
+    return PROTOCOLOS_PERMITIDOS.test(href.trim());
+  });
+  return {
+    ...nodo,
+    ...(marks ? { marks } : {}),
+    ...(nodo.content ? { content: nodo.content.map(sinLinksPeligrosos) } : {}),
+  };
+}
+
 /** Texto plano del cuerpo Tiptap (p. ej. para estimar tiempo de lectura). */
 export function textoDelCuerpo(cuerpo: unknown): string {
   if (!esJsonTiptap(cuerpo)) return "";
@@ -40,7 +60,7 @@ export function renderCuerpo(cuerpo: unknown): string | null {
   if (!esJsonTiptap(cuerpo)) return null;
   if (!cuerpo.content || cuerpo.content.length === 0) return null;
   try {
-    const html = generateHTML(cuerpo, EXTENSIONES);
+    const html = generateHTML(sinLinksPeligrosos(cuerpo), EXTENSIONES);
     return html === "<p></p>" ? null : html;
   } catch {
     // Documento con nodos desconocidos (editor más nuevo que el sitio): mejor

@@ -18,6 +18,7 @@ import {
 } from "@/lib/constants";
 
 import { SITE_URL } from "@/lib/site";
+import { jsonLdSeguro } from "@/lib/json-ld";
 
 type Params = { slug: string };
 
@@ -95,7 +96,7 @@ export default async function NotaPage({
     <main style={{ background: "var(--color-paper)" }}>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdSeguro(jsonLd) }}
       />
       <RegistrarVisita slug={nota.slug} />
 

@@ -8,6 +8,7 @@ import { getAutorPorSlug, getSlugsDeAutores } from "@/lib/autores";
 import { getNotasPorAutor } from "@/lib/notas";
 
 import { SITE_URL } from "@/lib/site";
+import { jsonLdSeguro } from "@/lib/json-ld";
 
 type Params = { slug: string };
 
@@ -56,6 +57,10 @@ export default async function AutorPage({ params }: { params: Promise<Params> })
 
   const notas = await getNotasPorAutor(autor.id);
   const url = `${SITE_URL}/autor/${autor.slug}`;
+  const redes = REDES_LINKS.flatMap((r) => {
+    const handle = autor.redes[r.key];
+    return handle ? [{ ...r, href: `${r.base}${handle.replace(/^@/, "")}` }] : [];
+  });
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -67,9 +72,7 @@ export default async function AutorPage({ params }: { params: Promise<Params> })
       description: autor.bio,
       ...(autor.foto_url ? { image: autor.foto_url } : {}),
       url,
-      sameAs: REDES_LINKS.filter((r) => autor.redes[r.key]).map(
-        (r) => `${r.base}${autor.redes[r.key]!.replace(/^@/, "")}`,
-      ),
+      sameAs: redes.map((r) => r.href),
       worksFor: { "@type": "Organization", name: "Inferiores Riverplatense" },
     },
   };
@@ -78,7 +81,7 @@ export default async function AutorPage({ params }: { params: Promise<Params> })
     <main style={{ background: "var(--color-paper)" }}>
       <script
         type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
+        dangerouslySetInnerHTML={{ __html: jsonLdSeguro(jsonLd) }}
       />
 
       <div className="mx-auto max-w-6xl px-6 lg:px-8 py-10 lg:py-14">
@@ -120,10 +123,10 @@ export default async function AutorPage({ params }: { params: Promise<Params> })
               </p>
             )}
             <div className="flex flex-wrap items-center gap-3">
-              {REDES_LINKS.filter((r) => autor.redes[r.key]).map((r) => (
+              {redes.map((r) => (
                 <a
                   key={r.key}
-                  href={`${r.base}${autor.redes[r.key]!.replace(/^@/, "")}`}
+                  href={r.href}
                   target="_blank"
                   rel="noreferrer"
                   className="chip font-mono text-xs uppercase tracking-widest"

@@ -64,15 +64,31 @@ export interface ResultadoAccion {
   id?: string;
 }
 
+const SIN_SESION = "Sesión vencida. Volvé a entrar.";
+const SIN_PERMISO =
+  "No tenés permiso para esta acción (o el registro ya no existe).";
+
+/**
+ * Guard de sesión para toda action que escribe. La RLS sigue siendo la
+ * autoridad final, pero sin este chequeo una llamada anónima directa a la
+ * action "afecta 0 filas" sin error y reportaría un falso ok.
+ */
+async function usuarioActual(
+  supabase: Awaited<ReturnType<typeof createSupabaseServer>>,
+) {
+  const {
+    data: { user },
+  } = await supabase.auth.getUser();
+  return user;
+}
+
 export async function guardarNota(input: GuardarNotaInput): Promise<ResultadoAccion> {
   const error = validar(input);
   if (error) return { ok: false, error };
 
   const supabase = await createSupabaseServer();
-  const {
-    data: { user },
-  } = await supabase.auth.getUser();
-  if (!user) return { ok: false, error: "Sesión vencida. Volvé a entrar." };
+  const user = await usuarioActual(supabase);
+  if (!user) return { ok: false, error: SIN_SESION };
 
   // Estado persistido: 'programada' se guarda como publicada con fecha futura
   // (la RLS pública la oculta hasta que llegue la hora).
@@ -123,8 +139,14 @@ export async function guardarNota(input: GuardarNotaInput): Promise<ResultadoAcc
       input.modo === "borrador"
         ? { ...fila, publicada_en: null }
         : { ...fila, publicada_en: fechaFinal };
-    const { error: err } = await supabase.from("notas").update(patch).eq("id", notaId);
+    const { data: filas, error: err } = await supabase
+      .from("notas")
+      .update(patch)
+      .eq("id", notaId)
+      .select("id");
     if (err) return { ok: false, error: traducirError(err.message) };
+    // La RLS filtra sin error: 0 filas = nota ajena o inexistente.
+    if (!filas || filas.length === 0) return { ok: false, error: SIN_PERMISO };
   } else {
     notaId = `n-${crypto.randomUUID().slice(0, 8)}`;
     const { error: err } = await supabase
@@ -152,20 +174,32 @@ export async function cambiarEstadoNota(
   accion: "publicar" | "despublicar",
 ): Promise<ResultadoAccion> {
   const supabase = await createSupabaseServer();
+  if (!(await usuarioActual(supabase))) return { ok: false, error: SIN_SESION };
   const patch =
     accion === "publicar"
       ? { estado: "publicada", publicada_en: new Date().toISOString() }
       : { estado: "borrador", publicada_en: null };
-  const { error } = await supabase.from("notas").update(patch).eq("id", id);
+  const { data: filas, error } = await supabase
+    .from("notas")
+    .update(patch)
+    .eq("id", id)
+    .select("id");
   if (error) return { ok: false, error: traducirError(error.message) };
+  if (!filas || filas.length === 0) return { ok: false, error: SIN_PERMISO };
   revalidarPublico();
   return { ok: true };
 }
 
 export async function toggleDestacada(id: string, destacada: boolean): Promise<ResultadoAccion> {
   const supabase = await createSupabaseServer();
-  const { error } = await supabase.from("notas").update({ destacada }).eq("id", id);
+  if (!(await usuarioActual(supabase))) return { ok: false, error: SIN_SESION };
+  const { data: filas, error } = await supabase
+    .from("notas")
+    .update({ destacada })
+    .eq("id", id)
+    .select("id");
   if (error) return { ok: false, error: traducirError(error.message) };
+  if (!filas || filas.length === 0) return { ok: false, error: SIN_PERMISO };
   revalidarPublico();
   return { ok: true };
 }
@@ -230,8 +264,15 @@ export async function duplicarNota(id: string): Promise<ResultadoAccion> {
 
 export async function borrarNota(id: string): Promise<ResultadoAccion> {
   const supabase = await createSupabaseServer();
-  const { error } = await supabase.from("notas").delete().eq("id", id);
+  if (!(await usuarioActual(supabase))) return { ok: false, error: SIN_SESION };
+  // La RLS solo deja borrar al admin; select("id") detecta el bloqueo silencioso.
+  const { data: filas, error } = await supabase
+    .from("notas")
+    .delete()
+    .eq("id", id)
+    .select("id");
   if (error) return { ok: false, error: traducirError(error.message) };
+  if (!filas || filas.length === 0) return { ok: false, error: SIN_PERMISO };
   revalidarPublico();
   return { ok: true };
 }
@@ -254,6 +295,7 @@ export async function guardarAutor(input: GuardarAutorInput): Promise<ResultadoA
   }
 
   const supabase = await createSupabaseServer();
+  if (!(await usuarioActual(supabase))) return { ok: false, error: SIN_SESION };
   const fila = {
     nombre: input.nombre.trim(),
     slug: input.slug,
@@ -265,8 +307,13 @@ export async function guardarAutor(input: GuardarAutorInput): Promise<ResultadoA
   };
 
   if (input.id) {
-    const { error } = await supabase.from("autores").update(fila).eq("id", input.id);
+    const { data: filas, error } = await supabase
+      .from("autores")
+      .update(fila)
+      .eq("id", input.id)
+      .select("id");
     if (error) return { ok: false, error: traducirError(error.message) };
+    if (!filas || filas.length === 0) return { ok: false, error: SIN_PERMISO };
   } else {
     const id = `a-${crypto.randomUUID().slice(0, 8)}`;
     const { error } = await supabase.from("autores").insert({ ...fila, id, rol: "editor" });
@@ -280,17 +327,24 @@ export async function guardarAutor(input: GuardarAutorInput): Promise<ResultadoA
 
 export async function borrarAutor(id: string): Promise<ResultadoAccion> {
   const supabase = await createSupabaseServer();
-  const { error } = await supabase.from("autores").delete().eq("id", id);
+  if (!(await usuarioActual(supabase))) return { ok: false, error: SIN_SESION };
+  const { data: filas, error } = await supabase
+    .from("autores")
+    .delete()
+    .eq("id", id)
+    .select("id");
   if (error) {
     if (error.message.includes("foreign key")) {
       return { ok: false, error: "Esta firma tiene notas publicadas: reasignalas antes de borrarla." };
     }
     return { ok: false, error: traducirError(error.message) };
   }
+  if (!filas || filas.length === 0) return { ok: false, error: SIN_PERMISO };
   revalidatePath("/admin/autores");
   return { ok: true };
 }
 
+// Sin guard a propósito: cerrar una sesión inexistente es inofensivo.
 export async function cerrarSesion(): Promise<void> {
   const supabase = await createSupabaseServer();
   await supabase.auth.signOut();
