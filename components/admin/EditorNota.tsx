@@ -13,6 +13,7 @@ import ConfirmDialog from "./ConfirmDialog";
 import { useToast } from "./Toasts";
 import { guardarNota, type GuardarNotaInput, type ModoPublicacion } from "@/lib/admin/actions";
 import { subirImagen } from "@/lib/admin/upload";
+import { parseVideoLink } from "@/lib/video";
 import { DIVISIONES, TIPOS_NOTA, labelDivision, labelTipo } from "@/lib/constants";
 import type { AutorAdmin, NotaAdmin } from "@/lib/admin/notas-admin";
 import type { EstadoNota, Sujeto } from "@/lib/types";
@@ -149,6 +150,12 @@ export default function EditorNota({ nota, autores, sujetos }: EditorNotaProps) 
   const [posterUrl, setPosterUrl] = useState(nota?.poster_url ?? "");
   const [youtubeId, setYoutubeId] = useState(nota?.youtube_id ?? "");
   const [videoUrl, setVideoUrl] = useState(nota?.video_url ?? "");
+  // Lo que el periodista pega tal cual; youtube_id/video_url salen del parser.
+  const [linkVideo, setLinkVideo] = useState(
+    nota?.youtube_id
+      ? `https://www.youtube.com/watch?v=${nota.youtube_id}`
+      : (nota?.video_url ?? ""),
+  );
   const [tags, setTags] = useState(nota?.tags.join(", ") ?? "");
   const [sujetosSel, setSujetosSel] = useState<Set<string>>(
     new Set(nota?.sujetos.map((s) => s.id) ?? []),
@@ -179,6 +186,21 @@ export default function EditorNota({ nota, autores, sujetos }: EditorNotaProps) 
   function cambiarTitulo(v: string) {
     setTitulo(v);
     if (!slugEditado.current) setSlug(slugificar(v));
+    marcar();
+  }
+
+  /** Un solo campo para cualquier video: detecta fuente y extrae el id. */
+  function cambiarLinkVideo(v: string) {
+    setLinkVideo(v);
+    const det = parseVideoLink(v);
+    if (det) {
+      setFuente(det.fuente);
+      setYoutubeId(det.youtube_id ?? "");
+      setVideoUrl(det.video_url ?? "");
+    } else {
+      setYoutubeId("");
+      setVideoUrl("");
+    }
     marcar();
   }
 
@@ -289,10 +311,14 @@ export default function EditorNota({ nota, autores, sujetos }: EditorNotaProps) 
         }]
       : []),
     ...(formato === "youtube"
-      ? [{ label: "ID de YouTube", ok: youtubeId.trim().length > 0, obligatorio: true }]
+      ? [{ label: "Link de YouTube", ok: youtubeId.trim().length > 0, obligatorio: true }]
       : []),
     ...(formato === "short"
-      ? [{ label: "URL del video", ok: videoUrl.trim().length > 0, obligatorio: true }]
+      ? [{
+          label: "Link del video",
+          ok: videoUrl.trim().length > 0 || youtubeId.trim().length > 0,
+          obligatorio: true,
+        }]
       : []),
     { label: "Al menos un protagonista", ok: sujetosSel.size > 0, obligatorio: false },
     { label: "Tags", ok: tags.trim().length > 0, obligatorio: false },
@@ -569,16 +595,27 @@ export default function EditorNota({ nota, autores, sujetos }: EditorNotaProps) 
                       </select>
                     </div>
                   </div>
-                  {formato === "youtube" && (
+                  {formato !== "articulo" && (
                     <div className="mt-5">
-                      <label htmlFor="ytid" className={labelCls}>ID de YouTube</label>
-                      <input id="ytid" value={youtubeId} onChange={(e) => { setYoutubeId(e.target.value); marcar(); }} placeholder="ej: dQw4w9WgXcQ" className="admin-input w-full font-mono text-sm" />
-                    </div>
-                  )}
-                  {formato === "short" && (
-                    <div className="mt-5">
-                      <label htmlFor="videourl" className={labelCls}>URL del video</label>
-                      <input id="videourl" value={videoUrl} onChange={(e) => { setVideoUrl(e.target.value); marcar(); }} placeholder="Link al video vertical" className="admin-input w-full font-mono text-sm" />
+                      <label htmlFor="linkvideo" className={labelCls}>Link del video</label>
+                      <input
+                        id="linkvideo"
+                        value={linkVideo}
+                        onChange={(e) => cambiarLinkVideo(e.target.value)}
+                        placeholder="Pegá el link de YouTube, TikTok, Instagram o el MP4 propio"
+                        className="admin-input w-full font-mono text-sm"
+                      />
+                      <p className="mt-1.5 font-mono text-[10px] uppercase tracking-widest text-black/45">
+                        {youtubeId
+                          ? "YouTube · se reproduce en la página"
+                          : videoUrl && (fuente === "tiktok" || fuente === "instagram")
+                            ? `${fuente === "tiktok" ? "TikTok" : "Instagram"} · poster con link al post`
+                            : videoUrl
+                              ? "Video propio · player nativo"
+                              : linkVideo.trim()
+                                ? "No se reconoce el link"
+                                : "La fuente se detecta sola al pegar el link"}
+                      </p>
                     </div>
                   )}
                 </div>
