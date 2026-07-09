@@ -16,6 +16,7 @@ const SECCIONES = [
   { href: "/admin", label: "Resumen", exact: true, soloAdmin: false },
   { href: "/admin/notas", label: "Notas", exact: false, soloAdmin: false },
   { href: "/admin/autores", label: "Autores", exact: false, soloAdmin: false },
+  { href: "/admin/partido", label: "Próximo partido", exact: false, soloAdmin: false },
   { href: "/admin/estadisticas", label: "Estadísticas", exact: false, soloAdmin: false },
   { href: "/admin/equipo", label: "Equipo", exact: false, soloAdmin: true },
 ];
