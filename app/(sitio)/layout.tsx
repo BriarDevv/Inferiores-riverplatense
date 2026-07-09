@@ -3,6 +3,7 @@ import Nav from "@/components/layout/Nav";
 import Footer from "@/components/layout/Footer";
 import ScrollToTop from "@/components/layout/ScrollToTop";
 import SocialRail from "@/components/layout/SocialRail";
+import { getTodasLasNotas } from "@/lib/notas";
 import { SITE_URL } from "@/lib/site";
 import { jsonLdSeguro } from "@/lib/json-ld";
 
@@ -43,7 +44,13 @@ const JSONLD_SITIO = {
 };
 
 /** Layout del sitio público: masthead, redes, footer y smooth scroll. */
-export default function SitioLayout({ children }: { children: React.ReactNode }) {
+export default async function SitioLayout({ children }: { children: React.ReactNode }) {
+  // La barra roja del Nav muestra la última nota publicada (vienen ordenadas).
+  const [masReciente] = await getTodasLasNotas();
+  const ultima = masReciente
+    ? { titulo: masReciente.titulo, slug: masReciente.slug }
+    : null;
+
   return (
     <LenisProvider>
       <script
@@ -57,7 +64,7 @@ export default function SitioLayout({ children }: { children: React.ReactNode })
           en TraspasosLink (con boundary propio y fallback idéntico). Un
           boundary acá haría que el header llegue por streaming-swap y
           empuje la página al aparecer (CLS). */}
-      <Nav />
+      <Nav ultima={ultima} />
       <SocialRail />
       <div id="contenido" tabIndex={-1}>
         {children}

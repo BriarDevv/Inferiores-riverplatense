@@ -18,7 +18,7 @@ Sigue siendo material de demo para cliente, pero ya **no** está recortado a `/`
 - **`/jugador/[slug]`** (SSG, 5 jugadores) — hub de seguimiento: bio + contador + **línea de tiempo** de toda la cobertura del jugador. El diferenciador de cantera. ✓
 - **`/sobre`** — página del periodista (Pablo Molina): bio + stats reales (notas/divisiones/jugadores) + CTAs. ✓
 - **`/contacto`** — métodos directos (mail/WhatsApp para datos y primicias) + form (fake submit, sin backend aún). ✓
-- **Nav masthead de diario** (3 niveles, responsive con hamburguesa). Sobre/Contacto viven en la barra roja superior + footer + panel mobile. Ver sección Nav. ✓
+- **Nav masthead de diario** (3 niveles, responsive con hamburguesa). Sobre/Contacto viven en footer + panel mobile (se sacaron de la barra roja el 2026-07-08). Ver sección Nav. ✓
 - **Footer brutalist**, **SocialRail** (desktop), **ScrollToTop**, **NewsletterBand** (`#newsletter`). ✓
 - **`/ui`** = design system en lenguaje no técnico (visible para el cliente; `disallow` en robots). ✓
 - **SEO**: `sitemap.xml` + `news-sitemap.xml`, `robots.txt`, `feed.xml` (RSS enriquecido), JSON-LD completo, OG images dinámicas, `manifest`, `not-found.tsx`, `metadataBase` + iconos. Ver sección **"SEO agresivo"**. ✓
@@ -364,7 +364,7 @@ Definido en `lib/types.ts`:
 
 > Revierte el "nav simple" anterior. El usuario lo pidió e iteró hasta aprobarlo ("el fondo negro eso esta impecable").
 
-**NIVEL 1 — barra roja**: fecha `es-AR` + Buenos Aires (izq) · kicker "De la Novena a la Primera" (centro) · redes Instagram/X/YouTube + "Nº 001" (der). Centro y derecha se ocultan en `<md`.
+**NIVEL 1 — barra roja**: fecha `es-AR` + Buenos Aires (izq) · link **"Último · {título de la última nota publicada}"** (der, truncado con ellipsis; oculto en `<md`). El dato viene del server: `(sitio)/layout.tsx` (async) toma la primera de `getTodasLasNotas()` y se la pasa al Nav por prop `ultima` — sin hooks nuevos, sin CLS. ⚠️ El 2026-07-08 el usuario pidió SACAR de esta barra el kicker "De la Novena a la Primera", Sobre, Contacto, las redes y "Nº 001" — no restaurarlos acá (Sobre/Contacto siguen en footer + panel mobile).
 
 **NIVEL 2 — masthead negro (ink)**: logo badge `logo.webp` + wordmark "Inferiores *Riverplatense*" centrado, escalable (`clamp`), envuelve en pantallas chicas.
 

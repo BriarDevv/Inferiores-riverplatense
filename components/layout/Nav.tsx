@@ -16,12 +16,11 @@ const NOTAS_TIPOS: Array<{ label: string; value: TipoNota }> = [
   { label: "Columnas", value: "columna" },
 ];
 
-/** Redes de la barra roja (handles reales pendientes; ver CLAUDE.md). */
-const REDES_BARRA = [
-  { label: "Instagram", href: "https://instagram.com/" },
-  { label: "X", href: "https://x.com/" },
-  { label: "YouTube", href: "https://youtube.com/" },
-];
+/** Última nota publicada, para el link "Último" de la barra roja. */
+interface UltimaNota {
+  titulo: string;
+  slug: string;
+}
 
 /**
  * Fecha editorial, solo en cliente vía useSyncExternalStore: el servidor
@@ -76,7 +75,7 @@ function TraspasosLink({
  *  ├ secciones (sticky) ─ Divisiones▾ · Notas▾ · Entrevistas · …   [⌕ buscar ⌘K] [NEWSLETTER]
  *  └────────────────────────────────────────────────────────────────────────────────┘
  */
-export default function Nav() {
+export default function Nav({ ultima }: { ultima?: UltimaNota | null }) {
   const router = useRouter();
   const pathname = usePathname();
 
@@ -166,13 +165,10 @@ export default function Nav() {
           Rojo PROFUNDO (#C21020) para que el texto blanco chico pase contraste AA.
           ============================================================ */}
       <div style={{ background: "var(--color-river-red-deep)" }}>
-        <div
-          className="mx-auto max-w-[1440px] px-4 lg:px-10 h-8 grid items-center gap-4"
-          style={{ gridTemplateColumns: "1fr auto 1fr" }}
-        >
+        <div className="mx-auto max-w-[1440px] px-4 lg:px-10 h-8 flex items-center justify-between gap-4">
           {/* izquierda: fecha + lugar */}
           <span
-            className="justify-self-start font-mono whitespace-nowrap"
+            className="font-mono whitespace-nowrap shrink-0"
             style={{
               fontSize: "0.62rem",
               letterSpacing: "0.14em",
@@ -184,33 +180,30 @@ export default function Nav() {
             {fecha ? `${fecha} · ` : ""}Buenos Aires
           </span>
 
-          {/* centro: kicker editorial */}
-          <span
-            className="hidden lg:inline-flex items-center gap-2.5 justify-self-center font-mono whitespace-nowrap"
-            style={{
-              fontSize: "0.62rem",
-              letterSpacing: "0.2em",
-              textTransform: "uppercase",
-              color: "#ffffff",
-            }}
-          >
-            <span aria-hidden style={{ width: "4px", height: "4px", borderRadius: "9999px", background: "#fff" }} />
-            De la Novena a la Primera
-            <span aria-hidden style={{ width: "4px", height: "4px", borderRadius: "9999px", background: "#fff" }} />
-          </span>
-
-          {/* derecha: navegación util + redes + edición */}
-          <span className="hidden md:flex items-center gap-4 justify-self-end whitespace-nowrap">
-            <Link href="/sobre" className="util-link">Sobre</Link>
-            <Link href="/contacto" className="util-link">Contacto</Link>
-            <span aria-hidden style={{ width: "1px", height: "12px", background: "rgba(255,255,255,0.32)" }} />
-            {REDES_BARRA.map((r) => (
-              <a key={r.label} href={r.href} target="_blank" rel="noreferrer" className="util-link">
-                {r.label}
-              </a>
-            ))}
-            <span className="util-link" style={{ cursor: "default", opacity: 0.95 }}>Nº 001</span>
-          </span>
+          {/* derecha: la última nota publicada */}
+          {ultima && (
+            <Link
+              href={`/nota/${ultima.slug}`}
+              className="util-link hidden md:inline-flex items-center gap-2.5 min-w-0"
+            >
+              <span
+                className="shrink-0 inline-flex items-center gap-2"
+                style={{ fontWeight: 700 }}
+              >
+                <span
+                  aria-hidden
+                  style={{ width: "0.45rem", height: "0.45rem", background: "#fff" }}
+                />
+                Último
+              </span>
+              <span
+                className="truncate"
+                style={{ color: "rgba(255,255,255,0.85)", maxWidth: "52ch" }}
+              >
+                {ultima.titulo}
+              </span>
+            </Link>
+          )}
         </div>
       </div>
 
