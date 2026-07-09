@@ -9,8 +9,9 @@ interface Red {
 /**
  * Redes sociales del periodista. Rail fijo izquierda en desktop.
  * Cambiá los href por las URLs reales cuando estén.
+ * Exportado para reusarlo adentro de la nota (RedesNota).
  */
-const REDES: Red[] = [
+export const REDES: Red[] = [
   {
     label: "X (Twitter)",
     href: "https://twitter.com/",
@@ -84,8 +85,11 @@ const btnStyle: React.CSSProperties = {
 export default function SocialRail() {
 
   return (
+    // Solo en monitores MUY anchos: el contenido usa contenedores de hasta
+    // 1440px, y con menos de ~1700px de viewport el rail fijo lo taparía.
+    // En pantallas más chicas las redes viven adentro de la nota (RedesNota).
     <div
-      className="hidden lg:block fixed left-6 top-1/2 z-40"
+      className="hidden min-[1700px]:block fixed left-6 top-1/2 z-40"
       style={{ transform: "translateY(-50%)" }}
     >
       <div

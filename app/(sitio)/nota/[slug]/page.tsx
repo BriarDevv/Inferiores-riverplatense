@@ -7,6 +7,7 @@ import ShareBar from "@/components/article/ShareBar";
 import RegistrarVisita from "@/components/article/RegistrarVisita";
 import AuthorBio from "@/components/article/AuthorBio";
 import MediaNota from "@/components/article/MediaNota";
+import RedesNota from "@/components/article/RedesNota";
 import BackToHome from "@/components/layout/BackToHome";
 import { getNotaPorSlug, getNotasRelacionadas, getTodasLasNotas } from "@/lib/notas";
 import { renderCuerpo, textoDelCuerpo } from "@/lib/render-cuerpo";
@@ -313,6 +314,9 @@ export default async function NotaPage({
         <div className="mt-10">
           <AuthorBio autor={nota.autor} />
         </div>
+
+        {/* redes del medio (el rail fijo solo aparece en monitores muy anchos) */}
+        <RedesNota />
       </article>
 
       {/* relacionadas */}

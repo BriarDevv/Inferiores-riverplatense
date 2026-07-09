@@ -266,8 +266,8 @@ Auditado con **axe-core (WCAG 2.1 AA)**: pasan headings, landmarks, labels, foco
 
 - `components/cards/HeroFeature.tsx` — nota destacada. Split 50/50, borde 2px ink + shadow `8px 8px 0`, `minHeight 540px`. Meta empieza con avatar circular 32px. CTA "Leer la nota" usa `.brut-cta-ink`.
 - `components/cards/WideFeatureCard.tsx` — entrevista wide del bento. Imagen 16:9 arriba + footer. Borde 2px ink + shadow `8px 8px 0` (matchea el hero). Usa `CardAuthorMeta size="md"`.
-- `components/cards/NotaCard.tsx` — 3 variantes según `variant`/`formato`: `short` (9:16), `youtube` (16:9), `articulo` (4:5). Frame 2px ink, hover revela offset shadow. ArticleCard: `h-full flex flex-col`, footer `flex-1`, meta en `mt-auto`.
-- `components/cards/TeaserCard.tsx` — card de los 3 teasers bajo el hero. Imagen 4:3 + footer. `h-full flex flex-col`, footer `flex-1`, meta en `mt-auto` (para que el autor quede al pie aunque el título sea de 1 línea).
+- `components/cards/NotaCard.tsx` — 3 variantes según `variant`/`formato`: `short` (9:16), `youtube` (16:9), `articulo` (4:5). Frame 2px ink, hover revela offset shadow. ⚠️ ArticleCard y TeaserCard van **sin `h-full`/`flex-1`/`mt-auto` y con `self-start`** desde 2026-07-08: el usuario pidió que NO haya hueco adentro de la card cuando la fila la estira — la card termina donde termina su contenido y el sobrante queda afuera del marco. No volver al patrón "meta al pie con mt-auto".
+- `components/cards/TeaserCard.tsx` — card de los 3 teasers bajo el hero. Imagen 4:3 + footer. Misma regla que ArticleCard: sin estiramiento interno, `self-start`, meta pegada al título.
 - `components/cards/CardAuthorMeta.tsx` — bloque autor: avatar circular (24px `sm` / 28px `md`) con fallback de iniciales + nombre + punto rojo + fecha.
 - `components/lists/NoticiasList.tsx` — `aside` de la columna de noticias del bento. Header + items (número + thumb 72×72 + meta + título) + footer. `h-full flex flex-col`, `overflow:hidden`, `min-height:0`, shadow `8px 8px 0`.
 - `components/lists/UltimasList.tsx` — lista numerada (número Anton rojo + kicker + título + fecha). Disponible, no usada en la portada actual.
@@ -277,7 +277,7 @@ Auditado con **axe-core (WCAG 2.1 AA)**: pasan headings, landmarks, labels, foco
 - `components/layout/Nav.tsx` — **client component** (usa `useSearchParams`, por eso va envuelto en `<Suspense>` en `layout.tsx`). **Masthead de diario de 3 niveles** (ver sección Nav). La barra de secciones es `sticky top-0 z-50` con bottom border **4px red**. Responsive: en `<md` colapsa a una **hamburguesa** que abre un panel (buscador + secciones + chips). ⚠️ Las clases custom del nav (`.inline-search`, `.nav-burger`, `.nav-mobile-panel`) NO fijan `display` — eso lo controla Tailwind (`hidden`/`md:hidden`/`lg:flex`); si una clase custom fija `display`, pisa el responsive (bug ya corregido).
 - `components/layout/Footer.tsx` — logo 72×72, secciones (Notas/Entrevistas/Noticias/UI), 9 divisiones, copyright + CTA newsletter. Top border 4px red.
 - `components/layout/NewsletterBand.tsx` — client, `id="newsletter"` (target del CTA del nav). Fondo ink + shadow rojo `8px`. Disclaimer "Sin spam. Te das de baja desde cualquier mail.".
-- `components/layout/SocialRail.tsx` — server, fijo a la izquierda en desktop. Orden: X, Instagram, TikTok, YouTube, Facebook. Hrefs placeholder.
+- `components/layout/SocialRail.tsx` — server, fijo a la izquierda. ⚠️ Solo visible en `min-[1700px]` (2026-07-08): el contenido usa contenedores de hasta 1440px y en monitores más angostos el rail lo tapaba. Exporta `REDES` (X, Instagram, TikTok, YouTube, Facebook; hrefs placeholder) que reusa `components/article/RedesNota.tsx` — la fila "Seguí la cobertura" al pie de cada nota (siempre visible, con `.share-btn`).
 - `components/layout/ScrollToTop.tsx` — client, fijo abajo a la derecha. Aparece con `scrollY > 400` (solo opacity, sin transform, para no chocar con el hover de `.brut-cta-red-lg`).
 - `components/layout/LenisProvider.tsx` — wrapper de smooth scroll.
 
@@ -313,7 +313,7 @@ components/
   ui/       BrutalistButton, Dropdown
   cards/    HeroFeature, WideFeatureCard, NotaCard (short/youtube/articulo), TeaserCard, CardAuthorMeta
   lists/    NoticiasList, UltimasList (sin usar en portada)
-  article/  ShareBar (client: WhatsApp/X/copiar), AuthorBio (bio al pie de la nota)
+  article/  ShareBar (client: WhatsApp/X/copiar), AuthorBio (bio al pie de la nota), RedesNota (redes del medio al pie)
   contacto/ ContactForm (client: form fake-submit)
 
 lib/

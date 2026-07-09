@@ -28,7 +28,9 @@ export default function TeaserCard({ nota }: Props) {
   return (
     <Link
       href={`/nota/${nota.slug}`}
-      className="group brut-hover h-full flex flex-col"
+      // Sin h-full: la card termina donde termina su contenido (si la fila
+      // la estira, el hueco queda AFUERA del marco, no adentro de la card).
+      className="group brut-hover flex flex-col self-start"
       style={{ background: "var(--color-paper-pure)" }}
     >
       <div
@@ -78,7 +80,7 @@ export default function TeaserCard({ nota }: Props) {
       </div>
 
       <div
-        className="p-6 flex flex-col gap-3.5 flex-1"
+        className="p-6 flex flex-col gap-3.5"
         style={{ borderTop: "2px solid var(--color-ink)" }}
       >
         <p
@@ -98,9 +100,7 @@ export default function TeaserCard({ nota }: Props) {
         >
           {nota.titulo}
         </h2>
-        <div className="mt-auto">
-          <CardAuthorMeta autor={nota.autor} publicada_en={nota.publicada_en} />
-        </div>
+        <CardAuthorMeta autor={nota.autor} publicada_en={nota.publicada_en} />
       </div>
     </Link>
   );
