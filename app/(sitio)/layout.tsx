@@ -3,7 +3,16 @@ import Nav from "@/components/layout/Nav";
 import Footer from "@/components/layout/Footer";
 import ScrollToTop from "@/components/layout/ScrollToTop";
 import SocialRail from "@/components/layout/SocialRail";
+import type { PartidoBarra } from "@/components/layout/Nav";
+import { labelDivision } from "@/lib/constants";
 import { getTodasLasNotas } from "@/lib/notas";
+import {
+  expiraPartido,
+  formatearFechaPartido,
+  getProximoPartido,
+  partidoVigente,
+} from "@/lib/partido";
+import { hrefDivision } from "@/lib/secciones";
 import { SITE_URL } from "@/lib/site";
 import { jsonLdSeguro } from "@/lib/json-ld";
 
@@ -45,11 +54,25 @@ const JSONLD_SITIO = {
 
 /** Layout del sitio público: masthead, redes, footer y smooth scroll. */
 export default async function SitioLayout({ children }: { children: React.ReactNode }) {
-  // La barra roja del Nav muestra la última nota publicada (vienen ordenadas).
-  const [masReciente] = await getTodasLasNotas();
+  // La barra roja del Nav anuncia el próximo partido (si hay uno cargado y
+  // vigente) y, si no, la última nota publicada (vienen ordenadas).
+  const [[masReciente], partidoDb] = await Promise.all([
+    getTodasLasNotas(),
+    getProximoPartido(),
+  ]);
   const ultima = masReciente
     ? { titulo: masReciente.titulo, slug: masReciente.slug }
     : null;
+  const partido: PartidoBarra | null =
+    partidoDb && partidoVigente(partidoDb.fecha)
+      ? {
+          rival: partidoDb.rival,
+          divisionLabel: labelDivision(partidoDb.division),
+          href: hrefDivision(partidoDb.division),
+          fechaLabel: formatearFechaPartido(partidoDb.fecha),
+          expira: expiraPartido(partidoDb.fecha),
+        }
+      : null;
 
   return (
     <LenisProvider>
@@ -64,7 +87,7 @@ export default async function SitioLayout({ children }: { children: React.ReactN
           en TraspasosLink (con boundary propio y fallback idéntico). Un
           boundary acá haría que el header llegue por streaming-swap y
           empuje la página al aparecer (CLS). */}
-      <Nav ultima={ultima} />
+      <Nav ultima={ultima} partido={partido} />
       <SocialRail />
       <div id="contenido" tabIndex={-1}>
         {children}

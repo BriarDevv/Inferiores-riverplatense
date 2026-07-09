@@ -23,6 +23,21 @@ interface UltimaNota {
 }
 
 /**
+ * Próximo partido para la barra roja, ya formateado por el server
+ * ((sitio)/layout.tsx): acá solo se muestra y se chequea la vigencia.
+ */
+export interface PartidoBarra {
+  rival: string;
+  divisionLabel: string;
+  /** Landing de la división del partido. */
+  href: string;
+  /** "vie 10/07 · 12:00" en hora de Buenos Aires. */
+  fechaLabel: string;
+  /** Epoch ms en que el anuncio deja de mostrarse (partido + gracia). */
+  expira: number;
+}
+
+/**
  * Fecha editorial, solo en cliente vía useSyncExternalStore: el servidor
  * muestra vacío y el primer render del cliente ya trae la fecha (sin el
  * parpadeo del patrón useEffect+setState).
@@ -75,7 +90,13 @@ function TraspasosLink({
  *  ├ secciones (sticky) ─ Divisiones▾ · Notas▾ · Entrevistas · …   [⌕ buscar ⌘K] [NEWSLETTER]
  *  └────────────────────────────────────────────────────────────────────────────────┘
  */
-export default function Nav({ ultima }: { ultima?: UltimaNota | null }) {
+export default function Nav({
+  ultima,
+  partido,
+}: {
+  ultima?: UltimaNota | null;
+  partido?: PartidoBarra | null;
+}) {
   const router = useRouter();
   const pathname = usePathname();
 
@@ -89,6 +110,15 @@ export default function Nav({ ultima }: { ultima?: UltimaNota | null }) {
   const notasBtnRef = useRef<HTMLButtonElement>(null);
 
   const fecha = useSyncExternalStore(sinSuscripcion, getFecha, getFechaServidor);
+
+  // El server ya filtró partidos viejos al hornear la página, pero una página
+  // estática puede quedar servida días: el cliente re-chequea la vigencia al
+  // hidratar y, si el partido ya pasó, cae solo al link "Último".
+  const partidoVigente = useSyncExternalStore(
+    sinSuscripcion,
+    () => (partido ? Date.now() < partido.expira : false),
+    () => Boolean(partido),
+  );
 
   // ⌘K / Ctrl+K enfoca el buscador. Escape cierra y DEVUELVE el foco al disparador.
   useEffect(() => {
@@ -180,8 +210,30 @@ export default function Nav({ ultima }: { ultima?: UltimaNota | null }) {
             {fecha ? `${fecha} · ` : ""}Buenos Aires
           </span>
 
-          {/* derecha: la última nota publicada */}
-          {ultima && (
+          {/* derecha: el próximo partido (si hay cargado) o la última nota */}
+          {partido && partidoVigente ? (
+            <Link
+              href={partido.href}
+              className="util-link hidden md:inline-flex items-center gap-2.5 min-w-0"
+            >
+              <span
+                className="shrink-0 inline-flex items-center gap-2"
+                style={{ fontWeight: 700 }}
+              >
+                <span
+                  aria-hidden
+                  style={{ width: "0.45rem", height: "0.45rem", background: "#fff" }}
+                />
+                Próximo
+              </span>
+              <span
+                className="truncate"
+                style={{ color: "rgba(255,255,255,0.85)", maxWidth: "52ch" }}
+              >
+                vs {partido.rival} · {partido.divisionLabel} · {partido.fechaLabel}
+              </span>
+            </Link>
+          ) : ultima ? (
             <Link
               href={`/nota/${ultima.slug}`}
               className="util-link hidden md:inline-flex items-center gap-2.5 min-w-0"
@@ -203,7 +255,7 @@ export default function Nav({ ultima }: { ultima?: UltimaNota | null }) {
                 {ultima.titulo}
               </span>
             </Link>
-          )}
+          ) : null}
         </div>
       </div>
 
