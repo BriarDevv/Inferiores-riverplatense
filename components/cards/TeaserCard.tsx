@@ -28,13 +28,14 @@ export default function TeaserCard({ nota }: Props) {
   return (
     <Link
       href={`/nota/${nota.slug}`}
-      // Sin h-full: la card termina donde termina su contenido (si la fila
-      // la estira, el hueco queda AFUERA del marco, no adentro de la card).
-      className="group brut-hover flex flex-col self-start"
+      // Filas simétricas SIN hueco interno: la card llena la celda (h-full)
+      // y el sobrante lo absorbe la IMAGEN (grow + object-cover recorta),
+      // nunca un vacío blanco entre el título y la firma.
+      className="group brut-hover h-full flex flex-col"
       style={{ background: "var(--color-paper-pure)" }}
     >
       <div
-        className="relative overflow-hidden shrink-0"
+        className="relative overflow-hidden grow"
         style={{
           aspectRatio: "4 / 3",
           background: "var(--color-ink)",
@@ -80,7 +81,7 @@ export default function TeaserCard({ nota }: Props) {
       </div>
 
       <div
-        className="p-6 flex flex-col gap-3.5"
+        className="p-6 flex flex-col gap-3.5 shrink-0"
         style={{ borderTop: "2px solid var(--color-ink)" }}
       >
         <p

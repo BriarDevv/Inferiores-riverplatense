@@ -146,7 +146,7 @@ export default async function DivisionPage({
         </header>
 
         {notas.length > 0 ? (
-          <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8 items-start">
+          <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
             {notas.map((nota) => (
               <TeaserCard key={nota.id} nota={nota} />
             ))}
