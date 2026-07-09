@@ -37,6 +37,7 @@ export default function GraficoBarras({
   const ancho = n * anchoBarra + (n - 1) * gap;
   const base = tono === "oscuro" ? "rgba(255,255,255,0.35)" : "rgba(10,10,10,0.8)";
   const piso = tono === "oscuro" ? "rgba(255,255,255,0.14)" : "rgba(10,10,10,0.14)";
+  const resaltadosSet = new Set(resaltados ?? []);
 
   return (
     <div>
@@ -51,7 +52,7 @@ export default function GraficoBarras({
         {serie.map((p, i) => {
           const h = p.valor === 0 ? 2 : Math.max(3, Math.round((p.valor / max) * (alto - 4)));
           const esPico =
-            (p.valor === max && p.valor > 0) || (resaltados?.includes(i) && p.valor > 0);
+            (p.valor === max && p.valor > 0) || (resaltadosSet.has(i) && p.valor > 0);
           return (
             <rect
               key={i}

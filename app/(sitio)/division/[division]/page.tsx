@@ -53,10 +53,11 @@ export default async function DivisionPage({
 }) {
   const { division } = await params;
   const info = DIVISIONES_LANDING[division];
-  const notas = await getNotas({ division });
-
-  // Jugadores en seguimiento de esta división (mismo patrón que la portada).
-  const slugs = await getSlugsDeJugadores();
+  // Notas y jugadores en seguimiento de la división, en paralelo.
+  const [notas, slugs] = await Promise.all([
+    getNotas({ division }),
+    getSlugsDeJugadores(),
+  ]);
   const jugadores = (
     await Promise.all(
       slugs.map(async (slug) => {

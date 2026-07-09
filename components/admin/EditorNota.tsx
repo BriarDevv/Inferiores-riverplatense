@@ -156,7 +156,7 @@ export default function EditorNota({ nota, autores, sujetos }: EditorNotaProps) 
       ? `https://www.youtube.com/watch?v=${nota.youtube_id}`
       : (nota?.video_url ?? ""),
   );
-  const [tags, setTags] = useState(nota?.tags.join(", ") ?? "");
+  const [tags, setTags] = useState(() => nota?.tags.join(", ") ?? "");
   const [sujetosSel, setSujetosSel] = useState<Set<string>>(
     new Set(nota?.sujetos.map((s) => s.id) ?? []),
   );

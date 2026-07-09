@@ -55,6 +55,27 @@
         // del admin, no un cliente confiando en campos de autorización.
         "files": ["lib/admin/equipo-actions.ts"],
         "rules": ["react-doctor/supabase-client-owned-authz-field"]
+      },
+      {
+        // Fallback del contenido legacy: la lista sale de un split() de un
+        // string fijo y se renderiza estática (server component / preview de
+        // dialog) — nunca se reordena ni filtra en el cliente, el índice en
+        // la key no puede desincronizar nada.
+        "files": ["app/*/nota/*/page.tsx", "components/admin/PreviewNota.tsx"],
+        "rules": ["react-doctor/no-array-index-as-key"]
+      },
+      {
+        // Falso positivo: haystack(n).includes(term) es .includes de STRING
+        // (búsqueda full-text), no una búsqueda lineal en un array.
+        "files": ["lib/notas.ts"],
+        "rules": ["react-doctor/js-set-map-lookups"]
+      },
+      {
+        // Form que se siembra desde el server: el estado inicial copia las
+        // props A PROPÓSITO (el usuario edita sobre esa copia) y la página lo
+        // remonta vía key cuando el registro cambia (patrón React de reset).
+        "files": ["components/admin/FormPartido.tsx"],
+        "rules": ["react-doctor/no-derived-useState"]
       }
     ]
   }
