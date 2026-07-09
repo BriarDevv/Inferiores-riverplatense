@@ -42,6 +42,14 @@ export interface Autor {
   slug?: string;               // para /autor/[slug] (perfil público de la firma)
 }
 
+/** Partido que anuncia la barra roja del nav (singleton, cargado desde el panel). */
+export interface ProximoPartido {
+  rival: string;
+  division: Division;
+  fecha: string;               // ISO (timestamptz)
+  torneo: string | null;
+}
+
 export interface Nota {
   id: string;
   slug: string;

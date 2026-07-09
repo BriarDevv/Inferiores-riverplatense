@@ -39,6 +39,18 @@ const img = (id: string) =>
   `https://images.unsplash.com/${id}?w=1600&h=1200&fit=crop&q=80`;
 
 /* =========================================
+   PRÓXIMO PARTIDO (anuncio de la barra roja)
+   Dato de nr-05: la final del Torneo Proyección, viernes 10/7 12:00
+   en el Florencio Sola. Si ya pasó, la barra no lo muestra (inocuo).
+   ========================================= */
+export const PARTIDO_SEED = {
+  rival: "Racing",
+  division: "reserva",
+  fecha: "2026-07-10T12:00:00-03:00",
+  torneo: "Final · Torneo Proyección",
+};
+
+/* =========================================
    AUTORES (firmas reales del proyecto)
    ========================================= */
 export const AUTORES_SEED: AutorSeed[] = [

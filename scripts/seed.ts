@@ -5,7 +5,7 @@
  */
 import { config } from "dotenv";
 import pg from "pg";
-import { AUTORES_SEED, NOTAS_SEED, SUJETOS_SEED } from "./seed-data";
+import { AUTORES_SEED, NOTAS_SEED, PARTIDO_SEED, SUJETOS_SEED } from "./seed-data";
 
 config({ path: ".env.local" });
 
@@ -115,6 +115,16 @@ async function main() {
       );
     }
   }
+
+  // Próximo partido de la barra roja (singleton). Ojo: pisa lo que se haya
+  // cargado desde el panel — el seed solo se corre para armar la demo.
+  await client.query(
+    `insert into public.proximo_partido (id, rival, division, fecha, torneo)
+     values (true, $1, $2, $3, $4)
+     on conflict (id) do update set
+       rival = $1, division = $2, fecha = $3, torneo = $4, actualizado_en = now()`,
+    [PARTIDO_SEED.rival, PARTIDO_SEED.division, PARTIDO_SEED.fecha, PARTIDO_SEED.torneo],
+  );
 
   const { rows } = await client.query(
     `select
