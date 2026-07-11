@@ -34,16 +34,6 @@ Sigue siendo material de demo para cliente, pero ya **no** está recortado a `/`
 - ⚠️ **Lección**: si tras cambiar contenido aparecen 404 "fantasma" en páginas SSG que existen en la DB → `rm -rf .next` y rebuild (el fetch-cache viejo de `.next/cache` envenena el prerender; el build NO falla, hornea la página como 404).
 - Pendiente inmediato: deploy en Vercel + DNS del dominio (el código ya apunta ahí solo).
 
-### ✅ Animaciones de portada GSAP + Lenis (2026-07-11)
-
-GSAP dejó de estar instalado sin uso: la portada tiene reveals de entrada "editorial sobrio" (spec `docs/superpowers/specs/2026-07-10-animaciones-portada-design.md`). Movimiento **seco y mecánico** acorde al brutalist: cortar / estampar / encajar — sin fades flotantes, blur ni bounce.
-
-- **`components/layout/AnimacionesPortada.tsx`** = director único (client, render null, montado solo en la rama editorial de `page.tsx`): importa GSAP + ScrollTrigger dinámicamente (cero GSAP en el bundle inicial) y anima elementos marcados con `data-anim` — las cards/páginas siguen siendo server components. Contrato: `hero` (timeline al cargar: clip-path de la imagen izq→der + texto que encaja + sombra 8px que se estampa al final), `grupo` (stagger 70ms de los hijos directos: bento, "Más notas", jugadores), `overline` (micro-slide x), `sello` (NewsletterBand/SobreAutorBand: entran y la sombra roja aparece +0.1s). Todo `power3.out`, 0.35–0.55s, `once: true`, trigger `top 85%`.
-- **`lib/lenis.ts`** = registro compartido (`registrarLenis`/`suscribirLenis`, con tests): `LenisProvider` registra la instancia y el director conecta `lenis.on("scroll", ScrollTrigger.update)` — sin ese puente ScrollTrigger mide posiciones desfasadas con el smooth scroll.
-- **Estado oculto SOLO por JS** (`fromTo` con immediateRender post-hidratación): sin JS, con `prefers-reduced-motion` (early return total) o si el import falla, el contenido se ve normal. Cero CLS; el HTML estático de SSG nunca está oculto.
-- ⚠️ **Lección `clearProps`**: las sombras offset del hero/bandas son estilos INLINE del JSX — `clearProps: "boxShadow"` las borra del todo (la sombra desaparecía tras animar). El director guarda `el.style.boxShadow` y lo restaura explícitamente con `.set()`. No "simplificar" a clearProps.
-- El modo filtrado de `/` no monta el director (sin animaciones ahí, a propósito). react-doctor sigue 100/100.
-
 ### ✅ SEO agresivo — 5 fases (2026-07-07)
 
 Pasada completa de SEO técnico + performance. Lighthouse mobile post-fix: portada 84/96/100/100 (perf/a11y/bp/seo), nota 87, **CLS 0.202 → 0.001** en todo el sitio.
