@@ -95,6 +95,7 @@ export default function SobreAutorBand({ autor, stats }: Props) {
                 <p
                   className="font-sports leading-none"
                   style={{ fontSize: "1.9rem", color: "var(--color-river-red-deep)" }}
+                  data-anim="contador"
                 >
                   {s.n}
                 </p>
