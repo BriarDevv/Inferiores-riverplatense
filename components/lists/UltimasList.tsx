@@ -8,7 +8,7 @@ interface Props {
 
 export default function UltimasList({ notas }: Props) {
   return (
-    <ul style={{ borderTop: "2px solid var(--color-ink)" }} data-anim="cascada">
+    <ul style={{ borderTop: "2px solid var(--color-ink)" }}>
       {notas.map((nota, i) => (
         <li
           key={nota.id}
@@ -39,7 +39,7 @@ export default function UltimasList({ notas }: Props) {
             <div className="min-w-0">
               <p
                 className="font-mono text-[0.65rem] uppercase tracking-[0.16em] mb-1.5"
-                style={{ color: "var(--color-river-red-deep)" }}
+                style={{ color: "var(--color-river-red)" }}
               >
                 {labelTipo(nota.tipo)} · {labelDivision(nota.division)}
               </p>

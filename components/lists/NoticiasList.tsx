@@ -2,7 +2,6 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Nota } from "@/lib/types";
 import { formatearFecha, labelDivision } from "@/lib/constants";
-import { hrefTipo } from "@/lib/secciones";
 
 interface Props {
   notas: Nota[];
@@ -53,7 +52,6 @@ export default function NoticiasList({ notas, title = "Noticias" }: Props) {
       <ul
         className="flex-1 overflow-y-auto"
         style={{ minHeight: 0 }}
-        data-anim="cascada"
       >
         {notas.map((nota, i) => (
           <li
@@ -141,7 +139,7 @@ export default function NoticiasList({ notas, title = "Noticias" }: Props) {
         style={{ borderTop: "2px solid var(--color-ink)" }}
       >
         <Link
-          href={hrefTipo("noticia")}
+          href="/?tipo=noticia"
           className="font-mono text-[0.65rem] uppercase tracking-[0.18em] inline-flex items-center gap-2 transition-colors"
           style={{ color: "var(--color-ink)" }}
         >
