@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import Link from "next/link";
 import HeroFeature from "@/components/cards/HeroFeature";
 import NotaCard from "@/components/cards/NotaCard";
 import TeaserCard from "@/components/cards/TeaserCard";
@@ -7,7 +6,6 @@ import WideFeatureCard from "@/components/cards/WideFeatureCard";
 import JugadorCard from "@/components/cards/JugadorCard";
 import NoticiasList from "@/components/lists/NoticiasList";
 import UltimasList from "@/components/lists/UltimasList";
-import AnimacionesPortada from "@/components/layout/AnimacionesPortada";
 import NewsletterBand from "@/components/layout/NewsletterBand";
 import SobreAutorBand from "@/components/layout/SobreAutorBand";
 import {
@@ -18,39 +16,13 @@ import {
   getSujetoPorSlug,
 } from "@/lib/notas";
 import { getAutorPrincipal } from "@/lib/autores";
-import { DIVISIONES, TIPOS_NOTA, labelDivision, labelTipo } from "@/lib/constants";
+import { labelDivision, labelTipo } from "@/lib/constants";
 import type { Division, Nota, Sujeto, TipoNota } from "@/lib/types";
 
 type SearchParams = { [key: string]: string | string[] | undefined };
 
 function first(v: string | string[] | undefined): string | undefined {
   return Array.isArray(v) ? v[0] : v;
-}
-
-/**
- * Valida los params de filtro contra las listas reales: un valor inventado
- * (`/?tipo=xyz`) se ignora en vez de filtrar de más o renderizar texto
- * del query string en el h1/title.
- */
-function filtrosDe(sp: SearchParams): {
-  tipo?: TipoNota;
-  division?: Division;
-  tema?: string;
-  q?: string;
-} {
-  const tipoRaw = first(sp.tipo);
-  const divisionRaw = first(sp.division);
-  const temaRaw = first(sp.tema);
-  return {
-    tipo: TIPOS_NOTA.some((t) => t.value === tipoRaw)
-      ? (tipoRaw as TipoNota)
-      : undefined,
-    division: DIVISIONES.some((d) => d.value === divisionRaw)
-      ? (divisionRaw as Division)
-      : undefined,
-    tema: temaRaw && TEMAS[temaRaw] ? temaRaw : undefined,
-    q: first(sp.q)?.trim() || undefined,
-  };
 }
 
 /**
@@ -88,7 +60,10 @@ export async function generateMetadata({
   searchParams: Promise<SearchParams>;
 }): Promise<Metadata> {
   const sp = await searchParams;
-  const { tipo, division, tema, q } = filtrosDe(sp);
+  const tipo = first(sp.tipo) as TipoNota | undefined;
+  const division = first(sp.division) as Division | undefined;
+  const tema = first(sp.tema);
+  const q = first(sp.q)?.trim();
 
   // Portada sin filtros = la URL canónica del sitio.
   if (!tipo && !division && !tema && !q) {
@@ -118,12 +93,15 @@ export default async function HomePage({
   searchParams: Promise<SearchParams>;
 }) {
   const sp = await searchParams;
-  const { tipo, division, tema, q } = filtrosDe(sp);
+  const tipo = first(sp.tipo) as TipoNota | undefined;
+  const division = first(sp.division) as Division | undefined;
+  const tema = first(sp.tema);
+  const q = first(sp.q)?.trim();
 
   // ===== MODO FILTRADO (búsqueda / sección / división / tema) =====
   const filtering = Boolean(tipo || division || tema || q);
   if (filtering) {
-    const tags = tema ? TEMAS[tema].tags : undefined;
+    const tags = tema && TEMAS[tema] ? TEMAS[tema].tags : undefined;
     const resultados = await getNotas({ tipo, division, tags, q });
 
     const descripcion = labelFiltros(tipo, division, tema, q);
@@ -175,15 +153,7 @@ export default async function HomePage({
                 No hay notas para este filtro.
               </p>
               <p className="mt-2" style={{ color: "var(--color-neutral-500)" }}>
-                Probá con otra búsqueda o{" "}
-                <Link
-                  href="/"
-                  className="underline underline-offset-2"
-                  style={{ color: "var(--color-river-red-deep)" }}
-                >
-                  volvé a la portada
-                </Link>
-                .
+                Probá con otra búsqueda o volvé a la portada.
               </p>
             </div>
           )}
@@ -284,15 +254,15 @@ export default async function HomePage({
       <div className="mx-auto max-w-[1440px] px-6 lg:px-10 py-12 lg:py-16">
         {/* === HERO full-width (nota destacada) === */}
         {destacada && (
-          <section className="mb-12 lg:mb-16" data-anim="hero">
+          <section className="mb-12 lg:mb-16">
             <HeroFeature nota={destacada} />
           </section>
         )}
 
         {/* === BENTO: entrevista + noticias (derecha) + notas + teasers === */}
         {(entrevistaWide || noticias.length > 0 || notaA || notaB || notaC || teasers.length > 0) && (
-          <section className={masNotas.length > 0 ? "mb-6 lg:mb-8" : "mb-20 lg:mb-24"}>
-            <div className="bento" data-anim="grupo">
+          <section className="mb-20 lg:mb-24">
+            <div className="bento">
               {entrevistaWide && (
                 <div className="bento__wide">
                   <WideFeatureCard nota={entrevistaWide} />
@@ -340,10 +310,7 @@ export default async function HomePage({
         {/* === HILERA DE TEASERS típicos (sin título) === */}
         {masNotas.length > 0 && (
           <section className="mb-20 lg:mb-24">
-            <div
-              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8"
-              data-anim="grupo"
-            >
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
               {masNotas.map((nota) => (
                 <TeaserCard key={nota.id} nota={nota} />
               ))}
@@ -357,14 +324,10 @@ export default async function HomePage({
             <p
               className="font-mono text-[0.65rem] uppercase tracking-[0.22em] mb-6"
               style={{ color: "var(--color-river-red-deep)" }}
-              data-anim="overline"
             >
               En la mira · jugadores que seguimos
             </p>
-            <div
-              className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 lg:gap-6"
-              data-anim="grupo"
-            >
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 lg:gap-6">
               {jugadores.map(({ sujeto, notas }) => (
                 <JugadorCard key={sujeto.id} sujeto={sujeto} notas={notas} />
               ))}
@@ -378,7 +341,6 @@ export default async function HomePage({
             <p
               className="font-mono text-[0.65rem] uppercase tracking-[0.22em] mb-2"
               style={{ color: "var(--color-river-red-deep)" }}
-              data-anim="overline"
             >
               Lo último
             </p>
@@ -391,8 +353,6 @@ export default async function HomePage({
 
         {/* === NEWSLETTER === */}
         <NewsletterBand />
-
-        <AnimacionesPortada />
       </div>
     </main>
   );

@@ -21,7 +21,6 @@ export default function SobreAutorBand({ autor, stats }: Props) {
     <section className="mb-20 lg:mb-24">
       <div
         className="p-7 sm:p-9 lg:p-10"
-        data-anim="sello"
         style={{
           background: "var(--color-paper-pure)",
           border: "2px solid var(--color-ink)",

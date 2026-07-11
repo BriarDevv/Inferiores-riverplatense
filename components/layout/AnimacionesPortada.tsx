@@ -54,9 +54,6 @@ export default function AnimacionesPortada() {
           );
           const tl = gsap.timeline({ defaults: { ease: "power3.out" } });
           // La sombra offset arranca ausente y se estampa de golpe al final.
-          // Ojo: viene como estilo inline del JSX, así que hay que guardarla
-          // y restaurarla explícitamente (clearProps la borraría del todo).
-          const sombraHero = marco?.style.boxShadow ?? "";
           if (marco) tl.set(marco, { boxShadow: "none" });
           if (img) {
             tl.fromTo(
@@ -73,7 +70,7 @@ export default function AnimacionesPortada() {
               "-=0.35",
             );
           }
-          if (marco) tl.set(marco, { boxShadow: sombraHero });
+          if (marco) tl.set(marco, { clearProps: "boxShadow" });
         }
 
         // === GRUPOS: stagger seco de los hijos directos ===
@@ -117,8 +114,6 @@ export default function AnimacionesPortada() {
         document
           .querySelectorAll<HTMLElement>('[data-anim="sello"]')
           .forEach((el) => {
-            // La sombra también es inline acá: guardar y restaurar.
-            const sombra = el.style.boxShadow;
             const tl = gsap.timeline({
               scrollTrigger: { trigger: el, start: "top 85%", once: true },
             });
@@ -128,7 +123,7 @@ export default function AnimacionesPortada() {
                 { y: 24, autoAlpha: 0 },
                 { y: 0, autoAlpha: 1, duration: 0.45, ease: "power3.out" },
               )
-              .set(el, { boxShadow: sombra }, "+=0.1");
+              .set(el, { clearProps: "boxShadow" }, "+=0.1");
           });
       });
 

@@ -17,7 +17,6 @@ export default function NewsletterBand() {
     <section
       id="newsletter"
       aria-labelledby="newsletter-title"
-      data-anim="sello"
       style={{
         background: "var(--color-ink)",
         color: "var(--color-paper-pure)",
@@ -98,8 +97,6 @@ export default function NewsletterBand() {
             </>
           ) : (
             <div
-              role="status"
-              aria-live="polite"
               className="font-display italic"
               style={{
                 fontSize: "1.15rem",

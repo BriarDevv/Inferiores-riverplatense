@@ -2,7 +2,6 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Nota } from "@/lib/types";
 import { formatearFecha, labelDivision, labelTipo } from "@/lib/constants";
-import AvatarAutor from "./AvatarAutor";
 
 interface Props {
   nota: Nota;
@@ -18,7 +17,7 @@ export default function HeroFeature({ nota }: Props) {
         background: "var(--color-paper-pure)",
       }}
     >
-      <div className="flex flex-col p-6 sm:p-10 lg:p-12" data-anim-hero-texto>
+      <div className="flex flex-col p-6 sm:p-10 lg:p-12">
         <p
           className="font-mono text-[0.7rem] uppercase tracking-[0.2em] mb-6 flex items-center gap-2"
           style={{ color: "var(--color-river-red-deep)" }}
@@ -64,7 +63,26 @@ export default function HeroFeature({ nota }: Props) {
           className="font-mono text-[0.7rem] uppercase tracking-[0.16em] flex items-center gap-3 flex-wrap mb-7"
           style={{ color: "var(--color-neutral-500)" }}
         >
-          <AvatarAutor autor={nota.autor} size={32} />
+          {nota.autor.avatar_url && (
+            <span
+              className="relative inline-block shrink-0"
+              style={{
+                width: "32px",
+                height: "32px",
+                borderRadius: "9999px",
+                overflow: "hidden",
+                border: "2px solid var(--color-ink)",
+              }}
+            >
+              <Image
+                src={nota.autor.avatar_url}
+                alt=""
+                fill
+                sizes="32px"
+                style={{ objectFit: "cover" }}
+              />
+            </span>
+          )}
           <span>Por</span>
           <span style={{ color: "var(--color-ink)" }}>{nota.autor.nombre}</span>
           <span aria-hidden>·</span>
@@ -100,7 +118,6 @@ export default function HeroFeature({ nota }: Props) {
 
       <Link
         href={`/nota/${nota.slug}`}
-        data-anim-hero-img
         className="relative overflow-hidden group order-first lg:order-none min-h-[300px] lg:min-h-[540px] border-b-2 lg:border-b-0 lg:border-l-2"
         style={{
           borderColor: "var(--color-ink)",
