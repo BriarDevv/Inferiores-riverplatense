@@ -1,3 +1,4 @@
+import AnimacionesSitio from "@/components/layout/AnimacionesSitio";
 import LenisProvider from "@/components/layout/LenisProvider";
 import Nav from "@/components/layout/Nav";
 import Footer from "@/components/layout/Footer";
@@ -5,7 +6,7 @@ import ScrollToTop from "@/components/layout/ScrollToTop";
 import SocialRail from "@/components/layout/SocialRail";
 import type { PartidoBarra } from "@/components/layout/Nav";
 import { labelDivision } from "@/lib/constants";
-import { getTodasLasNotas } from "@/lib/notas";
+import { getUltimaNota } from "@/lib/notas";
 import {
   expiraPartido,
   formatearFechaPartido,
@@ -52,17 +53,21 @@ const JSONLD_SITIO = {
   ],
 };
 
+/**
+ * ISR de red de seguridad: sin cron, una nota PROGRAMADA cuya fecha llega no
+ * tiene ninguna action que revalide — con esto, toda página pública se
+ * rehornea a lo sumo una vez por hora y la nota aparece sola.
+ */
+export const revalidate = 3600;
+
 /** Layout del sitio público: masthead, redes, footer y smooth scroll. */
 export default async function SitioLayout({ children }: { children: React.ReactNode }) {
   // La barra roja del Nav anuncia el próximo partido (si hay uno cargado y
   // vigente) y, si no, la última nota publicada (vienen ordenadas).
-  const [[masReciente], partidoDb] = await Promise.all([
-    getTodasLasNotas(),
+  const [ultima, partidoDb] = await Promise.all([
+    getUltimaNota(),
     getProximoPartido(),
   ]);
-  const ultima = masReciente
-    ? { titulo: masReciente.titulo, slug: masReciente.slug }
-    : null;
   const partido: PartidoBarra | null =
     partidoDb && partidoVigente(partidoDb.fecha)
       ? {
@@ -89,11 +94,16 @@ export default async function SitioLayout({ children }: { children: React.ReactN
           empuje la página al aparecer (CLS). */}
       <Nav ultima={ultima} partido={partido} />
       <SocialRail />
-      <div id="contenido" tabIndex={-1}>
+      {/* overflow-x: clip corta cualquier barra horizontal espuria (p. ej. un
+          overflow subpíxel transitorio durante las animaciones de entrada) sin
+          crear scroll-container ni romper el sticky del nav (mismo patrón que
+          el .admin-shell). El eje Y queda intacto. */}
+      <div id="contenido" tabIndex={-1} className="overflow-x-clip">
         {children}
       </div>
       <Footer />
       <ScrollToTop />
+      <AnimacionesSitio />
     </LenisProvider>
   );
 }

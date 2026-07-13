@@ -90,6 +90,28 @@ export async function getTodasLasNotas(): Promise<Nota[]> {
   return fetchNotasPublicadas();
 }
 
+/**
+ * Solo la última nota publicada — para la barra roja del Nav, que corre en
+ * TODAS las páginas: una fila con dos columnas en vez del listado completo.
+ */
+export const getUltimaNota = cache(
+  async (): Promise<{ titulo: string; slug: string } | null> => {
+    const supabase = createClient(
+      process.env.NEXT_PUBLIC_SUPABASE_URL!,
+      process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
+      { auth: { persistSession: false } },
+    );
+    const { data, error } = await supabase
+      .from("notas")
+      .select("titulo, slug")
+      .order("publicada_en", { ascending: false })
+      .limit(1)
+      .maybeSingle();
+    if (error) throw new Error(`Error leyendo última nota: ${error.message}`);
+    return data;
+  },
+);
+
 export async function getNotasRelacionadas(nota: Nota, limit = 3): Promise<Nota[]> {
   const notas = await fetchNotasPublicadas();
   const sujetoIds = new Set(nota.sujetos.map((s) => s.id));

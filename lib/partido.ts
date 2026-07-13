@@ -30,14 +30,14 @@ export const getProximoPartido = cache(async (): Promise<ProximoPartido | null> 
   return (data as ProximoPartido | null) ?? null;
 });
 
-/** true mientras el anuncio deba mostrarse (partido futuro o recién jugado). */
-export function partidoVigente(fechaIso: string, ahora = Date.now()): boolean {
-  return ahora < Date.parse(fechaIso) + GRACIA_POST_PARTIDO_MS;
-}
-
 /** Epoch ms del momento en que el anuncio deja de mostrarse. */
 export function expiraPartido(fechaIso: string): number {
   return Date.parse(fechaIso) + GRACIA_POST_PARTIDO_MS;
+}
+
+/** true mientras el anuncio deba mostrarse (partido futuro o recién jugado). */
+export function partidoVigente(fechaIso: string, ahora = Date.now()): boolean {
+  return ahora < expiraPartido(fechaIso);
 }
 
 /**

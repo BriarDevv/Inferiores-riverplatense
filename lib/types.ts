@@ -83,5 +83,4 @@ export interface FiltrosNota {
   sujeto_id?: string;
   q?: string;              // búsqueda full-text (titulo/bajada/tags/sujetos/autor)
   tags?: string[];         // matchea si la nota tiene CUALQUIERA de estos tags
-  orden?: "recientes";
 }

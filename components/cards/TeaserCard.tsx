@@ -2,6 +2,7 @@ import Link from "next/link";
 import Image from "next/image";
 import type { Nota } from "@/lib/types";
 import {
+  FORMATO_LABEL,
   formatearDuracion,
   labelDivision,
   labelTipo,
@@ -13,12 +14,6 @@ interface Props {
   nota: Nota;
 }
 
-const FORMATO_LABEL: Record<Nota["formato"], string> = {
-  short: "Short",
-  youtube: "Video",
-  articulo: "Nota",
-};
-
 export default function TeaserCard({ nota }: Props) {
   const thumb =
     nota.formato === "youtube" && nota.youtube_id
@@ -28,14 +23,14 @@ export default function TeaserCard({ nota }: Props) {
   return (
     <Link
       href={`/nota/${nota.slug}`}
-      // Filas simétricas SIN hueco interno: la card llena la celda (h-full)
-      // y el sobrante lo absorbe la IMAGEN (grow + object-cover recorta),
-      // nunca un vacío blanco entre el título y la firma.
+      // Filas simétricas con IMAGEN de proporción fija: la card llena la celda
+      // (h-full) y el sobrante lo absorbe el FOOTER como espacio blanco al pie
+      // (grow), así todas las imágenes de la fila miden exactamente igual.
       className="group brut-hover h-full flex flex-col"
       style={{ background: "var(--color-paper-pure)" }}
     >
       <div
-        className="relative overflow-hidden grow"
+        className="relative overflow-hidden shrink-0"
         style={{
           aspectRatio: "4 / 3",
           background: "var(--color-ink)",
@@ -65,7 +60,7 @@ export default function TeaserCard({ nota }: Props) {
         </div>
 
         {/* Duration pill */}
-        {nota.duracion_seg && (
+        {nota.duracion_seg ? (
           <div
             className="absolute top-0 right-0 px-2 py-1 text-[0.65rem] font-mono tabular-nums"
             style={{
@@ -77,11 +72,11 @@ export default function TeaserCard({ nota }: Props) {
           >
             {formatearDuracion(nota.duracion_seg)}
           </div>
-        )}
+        ) : null}
       </div>
 
       <div
-        className="p-6 flex flex-col gap-3.5 shrink-0"
+        className="p-6 flex flex-col gap-3.5 grow"
         style={{ borderTop: "2px solid var(--color-ink)" }}
       >
         <p
@@ -101,7 +96,9 @@ export default function TeaserCard({ nota }: Props) {
         >
           {nota.titulo}
         </h2>
-        <CardAuthorMeta autor={nota.autor} publicada_en={nota.publicada_en} />
+        <div className="mt-auto">
+          <CardAuthorMeta autor={nota.autor} publicada_en={nota.publicada_en} />
+        </div>
       </div>
     </Link>
   );

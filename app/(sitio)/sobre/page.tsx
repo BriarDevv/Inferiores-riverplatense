@@ -32,7 +32,10 @@ export default async function SobrePage() {
         <BackToHome />
 
         {/* encabezado */}
-        <header className="flex flex-col sm:flex-row items-start gap-7 mb-12">
+        <header
+          className="flex flex-col sm:flex-row items-start gap-7 mb-12"
+          data-anim="cabecera"
+        >
           {autor?.foto_url && (
             <span
               className="relative inline-block shrink-0"
@@ -89,7 +92,11 @@ export default async function SobrePage() {
         </header>
 
         {/* cuerpo */}
-        <div className="article-prose" style={{ margin: 0, maxWidth: "none" }}>
+        <div
+          className="article-prose"
+          style={{ margin: 0, maxWidth: "none" }}
+          data-anim="aparece"
+        >
           <p>
             Inferiores Riverplatense nació de una obsesión simple: contar lo que
             pasa en las formativas de River antes de que sea noticia en todos
@@ -110,7 +117,7 @@ export default async function SobrePage() {
         </div>
 
         {/* stats */}
-        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-12">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mt-12" data-anim="grupo">
           {stats.map((s) => (
             <div
               key={s.label}
@@ -141,7 +148,7 @@ export default async function SobrePage() {
         </div>
 
         {/* CTAs */}
-        <div className="flex flex-wrap gap-4 mt-12">
+        <div className="flex flex-wrap gap-4 mt-12" data-anim="aparece">
           <Link
             href="/contacto"
             className="font-sports inline-flex items-center gap-2 brut-cta-red"

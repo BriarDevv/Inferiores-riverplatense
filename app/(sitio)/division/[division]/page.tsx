@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import Link from "next/link";
 import TeaserCard from "@/components/cards/TeaserCard";
 import JugadorCard from "@/components/cards/JugadorCard";
 import {
@@ -114,7 +115,7 @@ export default async function DivisionPage({
       />
 
       <div className="mx-auto max-w-[1440px] px-6 lg:px-10 py-12 lg:py-16">
-        <header className="mb-8 lg:mb-10">
+        <header className="mb-8 lg:mb-10" data-anim="cabecera">
           <p
             className="font-mono text-[0.65rem] uppercase tracking-[0.22em] mb-2"
             style={{ color: "var(--color-river-red-deep)" }}
@@ -146,7 +147,10 @@ export default async function DivisionPage({
         </header>
 
         {notas.length > 0 ? (
-          <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+          <section
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8"
+            data-anim="grupo"
+          >
             {notas.map((nota) => (
               <TeaserCard key={nota.id} nota={nota} />
             ))}
@@ -163,7 +167,15 @@ export default async function DivisionPage({
               Todavía no hay notas de esta división.
             </p>
             <p className="mt-2" style={{ color: "var(--color-neutral-500)" }}>
-              Mientras tanto, mirá lo último en la portada.
+              Mientras tanto, mirá{" "}
+              <Link
+                href="/"
+                className="underline underline-offset-2"
+                style={{ color: "var(--color-river-red-deep)" }}
+              >
+                lo último en la portada
+              </Link>
+              .
             </p>
           </div>
         )}
@@ -173,10 +185,14 @@ export default async function DivisionPage({
             <p
               className="font-mono text-[0.65rem] uppercase tracking-[0.22em] mb-6"
               style={{ color: "var(--color-river-red-deep)" }}
+              data-anim="aparece"
             >
               En la mira · jugadores que seguimos
             </p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 lg:gap-6">
+            <div
+              className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 lg:gap-6"
+              data-anim="grupo"
+            >
               {jugadores.map(({ sujeto, notas: notasJugador }) => (
                 <JugadorCard key={sujeto.id} sujeto={sujeto} notas={notasJugador} />
               ))}

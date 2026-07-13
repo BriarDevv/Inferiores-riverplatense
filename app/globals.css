@@ -107,15 +107,6 @@ html {
   scrollbar-color: var(--color-ink) var(--color-paper);
 }
 
-/* Scrollers internos (ej: ul noticias) más compactos */
-.scrollbar-thin::-webkit-scrollbar {
-  width: 8px;
-  height: 8px;
-}
-.scrollbar-thin::-webkit-scrollbar-thumb {
-  border-width: 2px;
-}
-
 /* =========================================
    UTILITIES
    ========================================= */
@@ -187,23 +178,11 @@ html {
   color: var(--color-river-red-deep);
 }
 
-.text-hero {
-  font-size: clamp(3.5rem, 2rem + 7vw, 8.5rem);
-}
 .text-title {
   font-size: clamp(2rem, 1.2rem + 3vw, 4rem);
 }
 .text-subtitle {
   font-size: clamp(1.25rem, 1rem + 0.8vw, 1.75rem);
-}
-.text-lead {
-  font-size: clamp(1.125rem, 1rem + 0.3vw, 1.25rem);
-}
-.text-meta {
-  font-size: 0.8125rem;
-}
-.text-micro {
-  font-size: 0.6875rem;
 }
 
 /* Subrayado animado rojo para links de nota */
@@ -259,14 +238,6 @@ html {
   height: 1px;
   background: var(--color-ink-contrast);
   width: 100%;
-}
-
-/* Hover lift */
-.hover-lift {
-  transition: transform 280ms var(--ease-out-expo);
-}
-.hover-lift:hover {
-  transform: translateY(-2px);
 }
 
 /* =========================================
@@ -405,13 +376,9 @@ html {
   transition: color 130ms ease-out, opacity 130ms ease-out;
 }
 .util-link:hover {
-  color: #ffffff;
-}
-.util-link[data-active="true"] {
-  color: #ffffff;
+  opacity: 0.8;
 }
 
-/* Item de sección (Title Case, sans semibold, con divisor) */
 /* Item de sección — sobre barra NEGRA (brutalist) */
 .section-link {
   position: relative;
@@ -466,11 +433,9 @@ html {
   display: none; /* Chrome / Safari */
 }
 
-/* Dropdown de sección */
+/* Dropdown de sección — la posición real la fija el componente
+   (position: fixed + coords inline, para escapar del overflow del scroller) */
 .section-dropdown {
-  position: absolute;
-  top: calc(100% + 0.65rem);
-  left: -0.4rem;
   z-index: 60;
   min-width: 190px;
   background: var(--color-paper-pure);

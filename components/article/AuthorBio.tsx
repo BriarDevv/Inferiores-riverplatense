@@ -1,7 +1,7 @@
-import Image from "next/image";
 import Link from "next/link";
 import type { Autor } from "@/lib/types";
 import { getAutorPorSlug } from "@/lib/autores";
+import AvatarAutor from "@/components/cards/AvatarAutor";
 
 interface Props {
   autor: Autor;
@@ -22,26 +22,7 @@ export default async function AuthorBio({ autor }: Props) {
         boxShadow: "5px 5px 0 var(--color-ink)",
       }}
     >
-      {autor.avatar_url && (
-        <span
-          className="relative inline-block shrink-0"
-          style={{
-            width: 64,
-            height: 64,
-            borderRadius: "9999px",
-            overflow: "hidden",
-            border: "2px solid var(--color-ink)",
-          }}
-        >
-          <Image
-            src={autor.avatar_url}
-            alt=""
-            fill
-            sizes="64px"
-            style={{ objectFit: "cover" }}
-          />
-        </span>
-      )}
+      <AvatarAutor autor={autor} size={64} />
       <div className="min-w-0">
         <p
           className="font-mono text-[0.6rem] uppercase tracking-[0.2em] mb-1"

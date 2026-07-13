@@ -61,21 +61,25 @@ export default async function OpengraphImageNota({
           background: INK,
         }}
       >
-        {/* eslint-disable-next-line @next/next/no-img-element */}
-        <img
-          src={nota.poster_url}
-          alt=""
-          width={1200}
-          height={630}
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            width: "100%",
-            height: "100%",
-            objectFit: "cover",
-          }}
-        />
+        {/* Sin poster (o URL vacía) la placa queda ink sola: un src roto
+            haría tirar a ImageResponse y la red caería a nada. */}
+        {nota.poster_url ? (
+          // eslint-disable-next-line @next/next/no-img-element
+          <img
+            src={nota.poster_url}
+            alt=""
+            width={1200}
+            height={630}
+            style={{
+              position: "absolute",
+              top: 0,
+              left: 0,
+              width: "100%",
+              height: "100%",
+              objectFit: "cover",
+            }}
+          />
+        ) : null}
         <div
           style={{
             position: "absolute",

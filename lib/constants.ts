@@ -21,6 +21,13 @@ export const TIPOS_NOTA: Array<{ value: TipoNota; label: string }> = [
   { value: "noticia", label: "Noticias" },
 ];
 
+/** Etiqueta del tag de formato que llevan las cards sobre la imagen. */
+export const FORMATO_LABEL: Record<"short" | "youtube" | "articulo", string> = {
+  short: "Short",
+  youtube: "Video",
+  articulo: "Nota",
+};
+
 export function labelDivision(d: Division): string {
   return DIVISIONES.find((x) => x.value === d)?.label ?? d;
 }
@@ -29,21 +36,44 @@ export function labelTipo(t: TipoNota): string {
   return TIPOS_NOTA.find((x) => x.value === t)?.label ?? t;
 }
 
+// Formatter hoisted: construir un Intl.DateTimeFormat es caro y esto corre
+// una vez por card renderizada.
+const FORMATO_DIA_BA = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "America/Argentina/Buenos_Aires",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+
+/** Año/mes/día de un instante EN HORA DE BUENOS AIRES (no local del server ni UTC). */
+function partesBA(iso: string): { anio: number; mes: number; dia: number } {
+  const [anio, mes, dia] = FORMATO_DIA_BA.format(new Date(iso))
+    .split("-")
+    .map(Number);
+  return { anio, mes, dia };
+}
+
+const MESES_CORTOS = [
+  "ene", "feb", "mar", "abr", "may", "jun",
+  "jul", "ago", "sep", "oct", "nov", "dic",
+];
+
 export function formatearFecha(iso: string): string {
-  const fecha = new Date(iso);
-  const ahora = new Date();
-  const diffMs = ahora.getTime() - fecha.getTime();
-  const diffDias = Math.floor(diffMs / (1000 * 60 * 60 * 24));
+  const pub = partesBA(iso);
+  const hoy = partesBA(new Date().toISOString());
+  const diffDias = Math.round(
+    (Date.UTC(hoy.anio, hoy.mes - 1, hoy.dia) -
+      Date.UTC(pub.anio, pub.mes - 1, pub.dia)) /
+      86400000,
+  );
 
   if (diffDias === 0) return "hoy";
   if (diffDias === 1) return "ayer";
-  if (diffDias < 7) return `hace ${diffDias}d`;
+  if (diffDias > 1 && diffDias < 7) return `hace ${diffDias}d`;
 
-  const meses = [
-    "ene", "feb", "mar", "abr", "may", "jun",
-    "jul", "ago", "sep", "oct", "nov", "dic",
-  ];
-  return `${fecha.getDate()} ${meses[fecha.getMonth()]}`;
+  // Fechas futuras (nota programada horneada en SSG) o de más de una semana:
+  // fecha absoluta, nunca un "hace -2d".
+  return `${pub.dia} ${MESES_CORTOS[pub.mes - 1]}`;
 }
 
 export function formatearDuracion(seg: number): string {
@@ -59,8 +89,8 @@ const MESES_LARGOS = [
 
 /** Fecha absoluta y determinística (no depende de "ahora") — para el detalle de nota. */
 export function formatearFechaLarga(iso: string): string {
-  const f = new Date(iso);
-  return `${f.getUTCDate()} de ${MESES_LARGOS[f.getUTCMonth()]} de ${f.getUTCFullYear()}`;
+  const { anio, mes, dia } = partesBA(iso);
+  return `${dia} de ${MESES_LARGOS[mes - 1]} de ${anio}`;
 }
 
 /** Normaliza texto para matching sin acentos / mayúsculas. */

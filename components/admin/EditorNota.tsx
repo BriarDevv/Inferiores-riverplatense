@@ -158,7 +158,7 @@ export default function EditorNota({ nota, autores, sujetos }: EditorNotaProps) 
   );
   const [tags, setTags] = useState(() => nota?.tags.join(", ") ?? "");
   const [sujetosSel, setSujetosSel] = useState<Set<string>>(
-    new Set(nota?.sujetos.map((s) => s.id) ?? []),
+    () => new Set(nota?.sujetos.map((s) => s.id) ?? []),
   );
   const [primicia, setPrimicia] = useState(nota?.primicia ?? false);
   const [destacada, setDestacada] = useState(nota?.destacada ?? false);
@@ -200,6 +200,9 @@ export default function EditorNota({ nota, autores, sujetos }: EditorNotaProps) 
     } else {
       setYoutubeId("");
       setVideoUrl("");
+      // Sin link reconocido no hay video: la fuente vuelve al default para
+      // no dejar metadata inconsistente (ej. "youtube" sin youtube_id).
+      setFuente("propio");
     }
     marcar();
   }

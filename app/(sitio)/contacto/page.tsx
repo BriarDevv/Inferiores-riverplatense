@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 };
 
 // Placeholders — reemplazar por los reales al salir de la demo.
-const EMAIL = "hola@inferioresriverplatense.com.ar";
+const EMAIL = "hola@inferioresriverplatense.com";
 const WHATSAPP = "5491100000000";
 
 const METODOS = [
@@ -34,7 +34,7 @@ export default function ContactoPage() {
 
         <div className="grid grid-cols-1 lg:grid-cols-[1fr_1.1fr] gap-12 lg:gap-16">
           {/* izquierda: intro + métodos */}
-          <div>
+          <div data-anim="cabecera">
             <p
               className="font-mono text-[0.7rem] uppercase tracking-[0.2em] mb-3 flex items-center gap-2"
               style={{ color: "var(--color-river-red-deep)" }}
@@ -111,7 +111,7 @@ export default function ContactoPage() {
           </div>
 
           {/* derecha: formulario */}
-          <div>
+          <div data-anim="carga">
             <p
               className="font-mono text-[0.65rem] uppercase tracking-[0.18em] mb-5"
               style={{ color: "var(--color-neutral-500)" }}

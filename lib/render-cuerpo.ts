@@ -36,8 +36,18 @@ function sinLinksPeligrosos(nodo: JSONContent): JSONContent {
     const href = String(m.attrs?.href ?? "");
     return PROTOCOLOS_PERMITIDOS.test(href.trim());
   });
+  // Los nodos con src (image, youtube) también son sinks: un src con
+  // protocolo raro se vacía y el nodo no renderiza nada peligroso.
+  let attrs = nodo.attrs;
+  if ((nodo.type === "image" || nodo.type === "youtube") && attrs?.src) {
+    const src = String(attrs.src);
+    if (!PROTOCOLOS_PERMITIDOS.test(src.trim())) {
+      attrs = { ...attrs, src: "" };
+    }
+  }
   return {
     ...nodo,
+    ...(attrs ? { attrs } : {}),
     ...(marks ? { marks } : {}),
     ...(nodo.content ? { content: nodo.content.map(sinLinksPeligrosos) } : {}),
   };

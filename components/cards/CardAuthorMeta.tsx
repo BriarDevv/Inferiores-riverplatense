@@ -1,6 +1,6 @@
-import Image from "next/image";
 import type { Autor } from "@/lib/types";
 import { formatearFecha } from "@/lib/constants";
+import AvatarAutor from "./AvatarAutor";
 
 interface Props {
   autor: Autor;
@@ -9,52 +9,12 @@ interface Props {
 }
 
 /** Avatar circular + nombre + fecha. Mismo formato para TeaserCard y NotaCard. */
-const FALLBACK_AVATAR_STYLE: React.CSSProperties = {
-  borderRadius: "9999px",
-  background: "var(--color-river-red)",
-  color: "var(--color-paper-pure)",
-  border: "1.5px solid var(--color-ink)",
-  fontSize: "0.6rem",
-  letterSpacing: "0.04em",
-};
-
 export default function CardAuthorMeta({ autor, publicada_en, size = "sm" }: Props) {
   const avatarSize = size === "md" ? 28 : 24;
 
   return (
     <div className="flex items-center gap-2 flex-wrap">
-      {autor.avatar_url ? (
-        <span
-          className="relative inline-block shrink-0"
-          style={{
-            width: avatarSize,
-            height: avatarSize,
-            borderRadius: "9999px",
-            overflow: "hidden",
-            border: "1.5px solid var(--color-ink)",
-          }}
-        >
-          <Image
-            src={autor.avatar_url}
-            alt=""
-            fill
-            sizes={`${avatarSize}px`}
-            style={{ objectFit: "cover" }}
-          />
-        </span>
-      ) : (
-        <span
-          className="inline-flex items-center justify-center font-sports shrink-0"
-          style={{ ...FALLBACK_AVATAR_STYLE, width: avatarSize, height: avatarSize }}
-        >
-          {autor.nombre
-            .split(" ")
-            .map((w) => w[0])
-            .join("")
-            .slice(0, 2)
-            .toUpperCase()}
-        </span>
-      )}
+      <AvatarAutor autor={autor} size={avatarSize} />
       <span
         className="font-mono text-[0.65rem] uppercase tracking-[0.12em]"
         style={{ color: "var(--color-ink)" }}

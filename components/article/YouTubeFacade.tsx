@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import { youtubeEmbedUrl } from "@/lib/video";
 import { DuracionBadge, PlayBadge } from "./MediaBadges";
@@ -24,10 +24,18 @@ export default function YouTubeFacade({
   duracionSeg,
 }: Props) {
   const [activo, setActivo] = useState(false);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
+
+  // Al activar, el botón "Reproducir" se desmonta: sin esto el foco de
+  // teclado/lector caería al body. Lo recibe el iframe.
+  useEffect(() => {
+    if (activo) iframeRef.current?.focus();
+  }, [activo]);
 
   if (activo) {
     return (
       <iframe
+        ref={iframeRef}
         src={`${youtubeEmbedUrl(youtubeId)}?autoplay=1&rel=0`}
         title={titulo}
         allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"

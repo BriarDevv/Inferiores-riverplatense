@@ -139,7 +139,7 @@ export default function Footer() {
             © 2026 · Sitio periodístico independiente · Buenos Aires, Argentina
           </p>
           <Link
-            href="#newsletter"
+            href="/#newsletter"
             className="font-mono text-[0.6rem] uppercase tracking-[0.18em] inline-flex items-center gap-2 transition-colors"
             style={{ color: "var(--color-paper)" }}
           >

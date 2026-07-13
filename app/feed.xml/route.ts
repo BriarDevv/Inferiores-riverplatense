@@ -4,6 +4,9 @@ import { renderCuerpo } from "@/lib/render-cuerpo";
 import { SITE_URL } from "@/lib/site";
 import { escXml } from "@/lib/xml";
 
+// Mismo ISR que el sitio: las notas programadas entran solas al vencer.
+export const revalidate = 3600;
+
 /** Cierra CDATA de forma segura si el HTML llegara a contener "]]>". */
 function cdata(html: string): string {
   return `<![CDATA[${html.replaceAll("]]>", "]]]]><![CDATA[>")}]]>`;
@@ -24,7 +27,7 @@ export async function GET() {
       <link>${link}</link>
       <guid isPermaLink="true">${link}</guid>
       <description>${escXml(n.bajada)}</description>
-      <author>${escXml(n.autor.nombre)}</author>
+      <dc:creator>${escXml(n.autor.nombre)}</dc:creator>
       <pubDate>${new Date(n.publicada_en).toUTCString()}</pubDate>
       <media:content url="${escXml(n.poster_url)}" medium="image" />${contenido}
     </item>`;
@@ -32,7 +35,7 @@ export async function GET() {
     .join("\n");
 
   const xml = `<?xml version="1.0" encoding="UTF-8"?>
-<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:media="http://search.yahoo.com/mrss/">
+<rss version="2.0" xmlns:atom="http://www.w3.org/2005/Atom" xmlns:content="http://purl.org/rss/1.0/modules/content/" xmlns:media="http://search.yahoo.com/mrss/" xmlns:dc="http://purl.org/dc/elements/1.1/">
   <channel>
     <title>Inferiores Riverplatense</title>
     <link>${SITE_URL}</link>

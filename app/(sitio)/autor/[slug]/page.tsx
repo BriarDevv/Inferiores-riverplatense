@@ -1,5 +1,4 @@
 import Image from "next/image";
-import Link from "next/link";
 import { notFound } from "next/navigation";
 import type { Metadata } from "next";
 import TeaserCard from "@/components/cards/TeaserCard";
@@ -24,17 +23,28 @@ export async function generateMetadata({
 }): Promise<Metadata> {
   const { slug } = await params;
   const autor = await getAutorPorSlug(slug);
-  if (!autor) return {};
+  if (!autor) return { title: "Firma no encontrada" };
+  const notas = await getNotasPorAutor(autor.id);
+  const desc =
+    autor.bio ??
+    `Notas, entrevistas y coberturas de ${autor.nombre} en Inferiores Riverplatense.`;
   return {
     title: `${autor.nombre} — ${autor.rol_publico ?? "Redacción"}`,
-    description:
-      autor.bio ??
-      `Notas, entrevistas y coberturas de ${autor.nombre} en Inferiores Riverplatense.`,
+    description: desc,
+    // Firma sin notas publicadas: fuera del índice hasta la primera
+    // (misma regla que landings y hubs vacíos).
+    ...(notas.length === 0 ? { robots: { index: false, follow: true } } : {}),
     alternates: { canonical: `${SITE_URL}/autor/${autor.slug}` },
     openGraph: {
       title: autor.nombre,
       description: autor.bio ?? "Redacción de Inferiores Riverplatense.",
       type: "profile",
+      ...(autor.foto_url ? { images: [autor.foto_url] } : {}),
+    },
+    twitter: {
+      card: "summary",
+      title: `${autor.nombre} — Inferiores Riverplatense`,
+      description: desc,
       ...(autor.foto_url ? { images: [autor.foto_url] } : {}),
     },
   };
@@ -101,12 +111,13 @@ export default async function AutorPage({ params }: { params: Promise<Params> })
         dangerouslySetInnerHTML={{ __html: jsonLdSeguro(jsonLdMigas) }}
       />
 
-      <div className="mx-auto max-w-6xl px-6 lg:px-8 py-10 lg:py-14">
+      <div className="mx-auto max-w-[1440px] px-6 lg:px-10 py-10 lg:py-14">
         <BackToHome />
 
         {/* Ficha del autor */}
         <header
           className="brut-frame-shadow-red bg-[var(--color-paper-pure)] p-7 md:p-10 mb-12 flex flex-col sm:flex-row gap-7 md:gap-10 items-start"
+          data-anim="carga"
         >
           {autor.foto_url ? (
             <Image
@@ -168,21 +179,16 @@ export default async function AutorPage({ params }: { params: Promise<Params> })
 
         {/* Sus notas */}
         <section aria-labelledby="h-cobertura">
-          <div className="flex items-baseline justify-between mb-6">
-            <h2 id="h-cobertura" className="brut-label">
-              Toda su cobertura
-            </h2>
-            <Link
-              href="/"
-              className="font-mono text-xs uppercase tracking-widest text-[var(--color-river-red-deep)] hover:underline"
-            >
-              Volver a la portada
-            </Link>
-          </div>
+          <h2 id="h-cobertura" className="brut-label mb-6" data-anim="aparece">
+            Toda su cobertura
+          </h2>
           {notas.length === 0 ? (
             <p className="font-body text-black/50">Todavía no firmó notas.</p>
           ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div
+              className="grid sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8"
+              data-anim="grupo"
+            >
               {notas.map((n) => (
                 <TeaserCard key={n.id} nota={n} />
               ))}

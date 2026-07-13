@@ -251,9 +251,17 @@ export async function duplicarNota(id: string): Promise<ResultadoAccion> {
   if (errIns) return { ok: false, error: traducirError(errIns.message) };
 
   if (pivote && pivote.length > 0) {
-    await supabase
+    const { error: errPivote } = await supabase
       .from("nota_sujetos")
       .insert(pivote.map((p) => ({ nota_id: nuevoId, sujeto_id: p.sujeto_id })));
+    if (errPivote) {
+      // La copia existe pero sin protagonistas: mejor avisarlo que un ok mudo.
+      revalidatePath("/admin/notas");
+      return {
+        ok: false,
+        error: `La copia se creó pero sin los protagonistas (${traducirError(errPivote.message)})`,
+      };
+    }
   }
 
   revalidatePath("/admin/notas");
@@ -348,6 +356,9 @@ export async function borrarAutor(id: string): Promise<ResultadoAccion> {
   }
   if (!filas || filas.length === 0) return { ok: false, error: SIN_PERMISO };
   revalidatePath("/admin/autores");
+  // El perfil público /autor/[slug] y el sitemap quedan horneados
+  // apuntando a la firma borrada si no se invalida el árbol público.
+  revalidarPublico();
   return { ok: true };
 }
 
@@ -373,30 +384,14 @@ function traducirError(msg: string): string {
 }
 
 function revalidarPublico(slug?: string): void {
-  revalidatePath("/");
+  // Una nota alimenta TODO el árbol horneado: portada, landings, hubs,
+  // /sobre (stats), /contacto y la barra roja "Último" que vive en el
+  // layout de cada página. Se invalida el layout completo (igual que
+  // partido-actions) en vez de enumerar familias que pueden desactualizarse.
+  revalidatePath("/", "layout");
   revalidatePath("/admin/notas");
   revalidatePath("/admin");
   if (slug) revalidatePath(`/nota/${slug}`);
-  // Una nota alimenta más páginas horneadas que su propio detalle: el
-  // timeline del jugador, el perfil de la firma, el slug viejo si se
-  // renombró, y las acciones de la tabla (publicar/despublicar/borrar)
-  // ni siquiera traen slug. Se invalida cada familia SSG completa; se
-  // prueban ambas formas del path porque revalidatePath matchea contra
-  // la estructura de archivos (con route group) según la versión.
-  for (const patron of [
-    "/nota/[slug]",
-    "/(sitio)/nota/[slug]",
-    "/jugador/[slug]",
-    "/(sitio)/jugador/[slug]",
-    "/autor/[slug]",
-    "/(sitio)/autor/[slug]",
-    "/division/[division]",
-    "/(sitio)/division/[division]",
-    "/seccion/[slug]",
-    "/(sitio)/seccion/[slug]",
-  ]) {
-    revalidatePath(patron, "page");
-  }
   revalidatePath("/sitemap.xml");
   revalidatePath("/news-sitemap.xml");
   revalidatePath("/feed.xml");

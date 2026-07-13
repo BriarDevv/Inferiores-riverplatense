@@ -54,9 +54,11 @@ const ESTILO_DEMO_NEWSLETTER: React.CSSProperties = {
 };
 
 export default function UiPage() {
-  const notaShort = NOTAS_DEMO.find((n) => n.formato === "short")!;
-  const notaYoutube = NOTAS_DEMO.find((n) => n.formato === "youtube")!;
-  const notaArticulo = NOTAS_DEMO.find((n) => n.formato === "articulo")!;
+  // Fallback al primer fixture: si _fixtures.ts pierde un formato, la página
+  // muestra algo en vez de crashear en build.
+  const notaShort = NOTAS_DEMO.find((n) => n.formato === "short") ?? NOTAS_DEMO[0];
+  const notaYoutube = NOTAS_DEMO.find((n) => n.formato === "youtube") ?? NOTAS_DEMO[0];
+  const notaArticulo = NOTAS_DEMO.find((n) => n.formato === "articulo") ?? NOTAS_DEMO[0];
   const destacada = NOTAS_DEMO.find((n) => n.destacada) ?? NOTAS_DEMO[0];
   const entrevistaArticulo =
     NOTAS_DEMO.find(

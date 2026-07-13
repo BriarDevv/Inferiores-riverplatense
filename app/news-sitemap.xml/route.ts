@@ -9,6 +9,9 @@ import { escXml } from "@/lib/xml";
  */
 const VENTANA_NEWS_MS = 48 * 60 * 60 * 1000;
 
+// Mismo ISR que el sitio: la ventana de 48h se mueve sola.
+export const revalidate = 3600;
+
 export async function GET() {
   const todas = await getTodasLasNotas();
   const ahora = Date.now();

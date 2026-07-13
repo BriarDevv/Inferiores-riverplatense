@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useId, useRef, useState } from "react";
 
 export interface DropdownOption {
   value: string | null;
@@ -24,6 +24,8 @@ export default function Dropdown({
 }: Props) {
   const [open, setOpen] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
+  const triggerRef = useRef<HTMLButtonElement>(null);
+  const listboxId = useId();
   const activa = options.find((o) => o.value === value);
   const display = activa?.label ?? placeholder;
 
@@ -33,7 +35,11 @@ export default function Dropdown({
       if (ref.current && !ref.current.contains(e.target as Node)) setOpen(false);
     };
     const onEsc = (e: KeyboardEvent) => {
-      if (e.key === "Escape") setOpen(false);
+      if (e.key === "Escape") {
+        setOpen(false);
+        // Devuelve el foco al disparador (si estaba en una opción, quedaría en el body).
+        triggerRef.current?.focus();
+      }
     };
     document.addEventListener("mousedown", onDoc);
     document.addEventListener("keydown", onEsc);
@@ -48,6 +54,7 @@ export default function Dropdown({
   return (
     <div ref={ref} className="relative">
       <button
+        ref={triggerRef}
         type="button"
         onClick={() => setOpen((o) => !o)}
         className="flex items-center gap-2.5 px-4 py-2.5 text-sm font-medium transition-colors"
@@ -59,6 +66,7 @@ export default function Dropdown({
         }}
         aria-haspopup="listbox"
         aria-expanded={open}
+        aria-controls={open ? listboxId : undefined}
       >
         <span
           className="font-mono text-[0.6rem] uppercase tracking-[0.14em] shrink-0"
@@ -89,6 +97,7 @@ export default function Dropdown({
       {open && (
         <div
           role="listbox"
+          id={listboxId}
           className="absolute left-0 top-[calc(100%+6px)] z-50 min-w-full max-h-[320px] overflow-y-auto"
           style={{
             background: "var(--color-paper-pure)",
@@ -117,6 +126,15 @@ export default function Dropdown({
                   (e.currentTarget.style.background = "var(--color-neutral-100)")
                 }
                 onMouseLeave={(e) =>
+                  (e.currentTarget.style.background = selected
+                    ? "var(--color-neutral-100)"
+                    : "transparent")
+                }
+                // El foco de teclado (Tab) muestra el mismo highlight que el hover.
+                onFocus={(e) =>
+                  (e.currentTarget.style.background = "var(--color-neutral-100)")
+                }
+                onBlur={(e) =>
                   (e.currentTarget.style.background = selected
                     ? "var(--color-neutral-100)"
                     : "transparent")

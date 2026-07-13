@@ -309,7 +309,7 @@ export default function Nav({
       </header>
 
       {/* ============================================================
-          NIVEL 3 — barra de secciones (FIXED para toda la página)
+          NIVEL 3 — barra de secciones (sticky, se pega arriba al scrollear)
           ============================================================ */}
       <div
         className="sticky top-0 z-50 w-full"
@@ -461,18 +461,22 @@ export default function Nav({
           </form>
 
           {/* newsletter */}
-          <a
-            href="#newsletter"
+          <Link
+            href="/#newsletter"
             onClick={() => setMobileOpen(false)}
             className="newsletter-btn shrink-0 ml-auto lg:ml-0"
           >
             Newsletter
-          </a>
+          </Link>
         </div>
 
         {/* ── Panel mobile (hamburguesa) ── */}
         {mobileOpen && (
-          <div className="nav-mobile-panel flex flex-col md:hidden" id="nav-mobile-panel">
+          <nav
+            className="nav-mobile-panel flex flex-col md:hidden"
+            id="nav-mobile-panel"
+            aria-label="Secciones"
+          >
             {/* buscador */}
             <form onSubmit={submitSearch} role="search" className="nav-mobile-search">
               <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="2.4" className="shrink-0">
@@ -554,10 +558,10 @@ export default function Nav({
               </div>
             </div>
 
-            <a href="#newsletter" className="newsletter-btn nav-mobile-newsletter" onClick={() => setMobileOpen(false)}>
+            <Link href="/#newsletter" className="newsletter-btn nav-mobile-newsletter" onClick={() => setMobileOpen(false)}>
               Newsletter
-            </a>
-          </div>
+            </Link>
+          </nav>
         )}
       </div>
 

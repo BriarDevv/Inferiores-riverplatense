@@ -21,7 +21,7 @@ import { duracionISO, youtubeEmbedUrl } from "@/lib/video";
 
 import { SITE_URL } from "@/lib/site";
 import { jsonLdSeguro } from "@/lib/json-ld";
-import { hrefTipo } from "@/lib/secciones";
+import { hrefDivision, hrefTipo } from "@/lib/secciones";
 
 type Params = { slug: string };
 
@@ -169,7 +169,7 @@ export default async function NotaPage({
         <BackToHome />
 
         {/* overline + primicia */}
-        <div className="flex items-center gap-3 flex-wrap mb-5">
+        <div className="flex items-center gap-3 flex-wrap mb-5" data-anim="carga">
           <p
             className="font-mono text-[0.7rem] uppercase tracking-[0.2em] flex items-center gap-2"
             style={{ color: "var(--color-river-red-deep)" }}
@@ -183,7 +183,19 @@ export default async function NotaPage({
                 background: "var(--color-river-red)",
               }}
             />
-            {labelTipo(nota.tipo)} · {labelDivision(nota.division)}
+            <Link
+              href={hrefTipo(nota.tipo)}
+              className="hover:underline underline-offset-2"
+            >
+              {labelTipo(nota.tipo)}
+            </Link>
+            {" · "}
+            <Link
+              href={hrefDivision(nota.division)}
+              className="hover:underline underline-offset-2"
+            >
+              {labelDivision(nota.division)}
+            </Link>
           </p>
           {nota.primicia && (
             <span className="primicia-badge">Lo contamos primero</span>
@@ -193,6 +205,7 @@ export default async function NotaPage({
         {/* título */}
         <h1
           className="font-display leading-[0.98] mb-5"
+          data-anim="carga"
           style={{
             fontSize: "clamp(2rem, 5vw, 3.4rem)",
             letterSpacing: "-0.025em",
@@ -206,6 +219,7 @@ export default async function NotaPage({
         <p
           className="text-lg lg:text-xl leading-relaxed mb-7"
           style={{ color: "var(--color-neutral-700)" }}
+          data-anim="carga"
         >
           {nota.bajada}
         </p>
@@ -214,6 +228,7 @@ export default async function NotaPage({
         <div
           className="flex items-center justify-between gap-4 flex-wrap pb-6 mb-8"
           style={{ borderBottom: "2px solid var(--color-ink)" }}
+          data-anim="carga"
         >
           <div className="flex items-center gap-3">
             {nota.autor.avatar_url && (
@@ -265,16 +280,19 @@ export default async function NotaPage({
         </div>
 
         {/* media: player según youtube_id / fuente (ver MediaNota) */}
-        <MediaNota nota={nota} />
+        <div data-anim="aparece">
+          <MediaNota nota={nota} />
+        </div>
 
         {/* cuerpo: primero el del editor visual (Tiptap), después el legacy del mock */}
         {cuerpoHtml ? (
           <div
             className="article-prose"
+            data-anim="aparece"
             dangerouslySetInnerHTML={{ __html: cuerpoHtml }}
           />
         ) : parrafos.length > 0 ? (
-          <div className="article-prose">
+          <div className="article-prose" data-anim="aparece">
             {parrafos.map((p, i) => (
               <p key={`${i}:${p.slice(0, 32)}`}>{p}</p>
             ))}
@@ -311,7 +329,7 @@ export default async function NotaPage({
         )}
 
         {/* autor */}
-        <div className="mt-10">
+        <div className="mt-10" data-anim="aparece">
           <AuthorBio autor={nota.autor} />
         </div>
 
@@ -330,7 +348,10 @@ export default async function NotaPage({
               Seguí leyendo
             </p>
           </header>
-          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+          <div
+            className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8"
+            data-anim="grupo"
+          >
             {relacionadas.map((n) => (
               <TeaserCard key={n.id} nota={n} />
             ))}

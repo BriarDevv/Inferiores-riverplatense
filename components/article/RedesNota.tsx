@@ -1,4 +1,3 @@
-import Link from "next/link";
 import { REDES } from "@/components/layout/SocialRail";
 
 /**
@@ -19,7 +18,7 @@ export default function RedesNota() {
         Seguí la cobertura
       </span>
       {REDES.map((r) => (
-        <Link
+        <a
           key={r.label}
           href={r.href}
           target="_blank"
@@ -28,7 +27,7 @@ export default function RedesNota() {
           className="share-btn"
         >
           {r.icon}
-        </Link>
+        </a>
       ))}
     </div>
   );

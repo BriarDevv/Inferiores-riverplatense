@@ -4,7 +4,7 @@ export default function NotFound() {
   return (
     <main
       className="flex items-center justify-center px-6 py-24 lg:py-32"
-      style={{ background: "var(--color-paper)", minHeight: "100vh" }}
+      style={{ background: "var(--color-paper)", minHeight: "70vh" }}
     >
       <div
         className="w-full max-w-xl p-10 lg:p-14 text-center"

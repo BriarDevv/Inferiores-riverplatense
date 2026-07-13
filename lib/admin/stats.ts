@@ -52,6 +52,16 @@ export interface DiaVisitas {
   visitas: number;
 }
 
+// Las claves de la serie se generan en el MISMO huso que la vista SQL
+// (Buenos Aires): con toISOString (UTC), entre las 21:00 y las 00:00 hora BA
+// el "hoy" del server iba un día adelante y el último día real mostraba 0.
+const FMT_DIA_BA = new Intl.DateTimeFormat("en-CA", {
+  timeZone: "America/Argentina/Buenos_Aires",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+});
+
 /** Serie diaria de los últimos N días, con los días sin visitas en 0. */
 export async function getSerieDiaria(dias = 14): Promise<DiaVisitas[]> {
   const supabase = await createSupabaseServer();
@@ -60,11 +70,9 @@ export async function getSerieDiaria(dias = 14): Promise<DiaVisitas[]> {
   const porDia = new Map((data as DiaVisitas[]).map((d) => [d.dia, d.visitas]));
 
   const serie: DiaVisitas[] = [];
-  const hoy = new Date();
+  const ahora = Date.now();
   for (let i = dias - 1; i >= 0; i--) {
-    const d = new Date(hoy);
-    d.setDate(hoy.getDate() - i);
-    const clave = d.toISOString().slice(0, 10);
+    const clave = FMT_DIA_BA.format(new Date(ahora - i * 86_400_000));
     serie.push({ dia: clave, visitas: porDia.get(clave) ?? 0 });
   }
   return serie;

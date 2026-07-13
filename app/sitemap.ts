@@ -6,6 +6,9 @@ import type { Division, TipoNota } from "@/lib/types";
 
 import { SITE_URL } from "@/lib/site";
 
+// Mismo ISR que el sitio: las notas programadas entran solas al vencer.
+export const revalidate = 3600;
+
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
   const todas = await getTodasLasNotas();
   const notas: MetadataRoute.Sitemap = todas.map((n) => ({
@@ -50,7 +53,14 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
     priority: 0.6,
   }));
 
-  const slugsAutores = await getSlugsDeAutores();
+  // Solo firmas con cobertura publicada: un perfil sin notas no entra al
+  // sitemap (misma regla que las landings vacías).
+  const slugsConNotas = new Set(
+    todas.flatMap((n) => (n.autor.slug ? [n.autor.slug] : [])),
+  );
+  const slugsAutores = (await getSlugsDeAutores()).filter((slug) =>
+    slugsConNotas.has(slug),
+  );
   const autores: MetadataRoute.Sitemap = slugsAutores.map((slug) => ({
     url: `${SITE_URL}/autor/${slug}`,
     changeFrequency: "weekly",

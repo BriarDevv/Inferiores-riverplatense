@@ -14,7 +14,12 @@ export default function ContactForm() {
 
   const onSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    if (!e.currentTarget.checkValidity()) return;
+    if (!e.currentTarget.checkValidity()) {
+      // noValidate desactiva los mensajes nativos automáticos;
+      // reportValidity los muestra a demanda sobre el campo inválido.
+      e.currentTarget.reportValidity();
+      return;
+    }
     setSent(true);
   };
 

@@ -83,7 +83,9 @@ export default function MediaNota({ nota }: { nota: Nota }) {
             fill
             priority
             fetchPriority="high"
-            sizes="(max-width: 768px) 100vw, 380px"
+            // Un short se muestra a 380px, pero un 16:9 de TikTok/IG ocupa
+            // el ancho completo de la columna de lectura.
+            sizes={esVertical ? "(max-width: 768px) 100vw, 380px" : "(max-width: 768px) 100vw, 760px"}
             style={{ objectFit: "cover" }}
           />
           <PlayBadge />

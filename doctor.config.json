@@ -71,6 +71,14 @@
         "rules": ["react-doctor/js-set-map-lookups"]
       },
       {
+        // REDES (los handles del medio) se exporta A PROPÓSITO desde el rail:
+        // RedesNota (pie de cada nota) reusa la misma lista; un archivo
+        // aparte para 5 objetos es indirección sin ganancia (server components,
+        // Fast Refresh no aplica).
+        "files": ["components/layout/SocialRail.tsx"],
+        "rules": ["react-doctor/only-export-components"]
+      },
+      {
         // Form que se siembra desde el server: el estado inicial copia las
         // props A PROPÓSITO (el usuario edita sobre esa copia) y la página lo
         // remonta vía key cuando el registro cambia (patrón React de reset).

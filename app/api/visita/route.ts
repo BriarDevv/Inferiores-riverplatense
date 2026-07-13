@@ -48,10 +48,18 @@ export async function POST(request: Request) {
   const supabase = admin();
   const { data: nota } = await supabase
     .from("notas")
-    .select("id, estado")
+    .select("id, estado, publicada_en")
     .eq("slug", slug)
     .maybeSingle();
-  if (!nota || nota.estado !== "publicada") {
+  // Misma regla que la RLS pública: publicada Y con fecha ya vencida.
+  // Sin el chequeo de fecha, este endpoint era un oráculo de notas
+  // programadas (slug adivinable → 200 antes de salir).
+  if (
+    !nota ||
+    nota.estado !== "publicada" ||
+    !nota.publicada_en ||
+    Date.parse(nota.publicada_en) > Date.now()
+  ) {
     return NextResponse.json({ ok: false }, { status: 404 });
   }
 

@@ -8,6 +8,7 @@ import {
 } from "@/lib/notas";
 import { formatearFechaLarga, labelDivision, labelTipo } from "@/lib/constants";
 import BackToHome from "@/components/layout/BackToHome";
+import { hrefDivision } from "@/lib/secciones";
 
 import { SITE_URL } from "@/lib/site";
 import { jsonLdSeguro } from "@/lib/json-ld";
@@ -38,6 +39,9 @@ export async function generateMetadata({
   return {
     title: sujeto.nombre,
     description: desc,
+    // Hub sin cobertura publicada: fuera del índice hasta la primera nota
+    // (misma regla que las landings vacías).
+    ...(notas.length === 0 ? { robots: { index: false, follow: true } } : {}),
     alternates: { canonical: `${SITE_URL}/jugador/${slug}` },
     openGraph: {
       title: `${sujeto.nombre} — Inferiores Riverplatense`,
@@ -113,6 +117,7 @@ export default async function JugadorPage({
         <header
           className="mb-12 pb-8"
           style={{ borderBottom: "2px solid var(--color-ink)" }}
+          data-anim="cabecera"
         >
           <p
             className="font-mono text-[0.7rem] uppercase tracking-[0.2em] mb-3 flex items-center gap-2"
@@ -127,7 +132,17 @@ export default async function JugadorPage({
                 background: "var(--color-river-red)",
               }}
             />
-            Seguimiento · {sujeto.division ? labelDivision(sujeto.division) : "Jugador"}
+            Seguimiento ·{" "}
+            {sujeto.division ? (
+              <Link
+                href={hrefDivision(sujeto.division)}
+                className="hover:underline underline-offset-2"
+              >
+                {labelDivision(sujeto.division)}
+              </Link>
+            ) : (
+              "Jugador"
+            )}
           </p>
           <h1
             className="font-display leading-[0.95] mb-4"
@@ -172,9 +187,36 @@ export default async function JugadorPage({
         </header>
 
         {/* línea de tiempo */}
+        {notas.length === 0 && (
+          <div
+            className="brut-frame p-10 text-center"
+            style={{ background: "var(--color-paper-pure)" }}
+          >
+            <p
+              className="font-display"
+              style={{ fontSize: "1.5rem", color: "var(--color-ink)" }}
+            >
+              Todavía no hay notas sobre {sujeto.nombre}.
+            </p>
+            <p className="mt-2" style={{ color: "var(--color-neutral-500)" }}>
+              Mientras tanto, mirá{" "}
+              <Link
+                href="/"
+                className="underline underline-offset-2"
+                style={{ color: "var(--color-river-red-deep)" }}
+              >
+                lo último en la portada
+              </Link>
+              .
+            </p>
+          </div>
+        )}
+        {notas.length > 0 && (
+          <>
         <p
           className="font-mono text-[0.65rem] uppercase tracking-[0.22em] mb-7"
           style={{ color: "var(--color-river-red-deep)" }}
+          data-anim="aparece"
         >
           La cobertura, en orden
         </p>
@@ -182,6 +224,7 @@ export default async function JugadorPage({
         <ol
           className="relative"
           style={{ borderLeft: "2px solid var(--color-ink)" }}
+          data-anim="cronologia"
         >
           {[...notas].reverse().map((n) => (
             <li key={n.id} className="relative pl-7 pb-9 last:pb-0">
@@ -245,6 +288,8 @@ export default async function JugadorPage({
             </li>
           ))}
         </ol>
+          </>
+        )}
       </div>
     </main>
   );

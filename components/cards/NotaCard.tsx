@@ -1,7 +1,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import type { Nota } from "@/lib/types";
-import { formatearDuracion, labelDivision, labelTipo, youtubeThumb } from "@/lib/constants";
+import { FORMATO_LABEL, formatearDuracion, labelDivision, labelTipo, youtubeThumb } from "@/lib/constants";
 import CardAuthorMeta from "./CardAuthorMeta";
 
 interface Props {
@@ -57,7 +57,7 @@ function FormatoTag({ label }: { label: string }) {
   );
 }
 
-function CardFooter({ nota }: { nota: Nota }) {
+function CardFooter({ nota, size = "md" }: { nota: Nota; size?: "sm" | "md" | "lg" }) {
   return (
     <div
       className="p-5 flex flex-col gap-3"
@@ -70,11 +70,10 @@ function CardFooter({ nota }: { nota: Nota }) {
         {labelTipo(nota.tipo)} · {labelDivision(nota.division)}
       </p>
       <h2
-        className="font-display leading-[1.1]"
+        className={`font-display leading-[1.1] ${size === "lg" ? "text-3xl" : "text-xl"}`}
         style={{
-          fontSize: "1.2rem",
           color: "var(--color-neutral-900)",
-          letterSpacing: "-0.01em",
+          letterSpacing: "-0.015em",
         }}
       >
         {nota.titulo}
@@ -109,8 +108,8 @@ function ShortCard({ nota }: { nota: Nota }) {
           sizes="(max-width: 768px) 50vw, 25vw"
           className={`object-cover ${MEDIA_TRANSITION} ${MEDIA_HOVER_SCALE}`}
         />
-        <FormatoTag label="Short" />
-        {nota.duracion_seg && <DurationPill seconds={nota.duracion_seg} />}
+        <FormatoTag label={FORMATO_LABEL.short} />
+        {nota.duracion_seg ? <DurationPill seconds={nota.duracion_seg} /> : null}
       </div>
       <CardFooter nota={nota} />
     </Link>
@@ -144,30 +143,10 @@ function YouTubeCard({ nota, size }: { nota: Nota; size: "sm" | "md" | "lg" }) {
           sizes="(max-width: 768px) 100vw, 50vw"
           className={`object-cover ${MEDIA_TRANSITION} ${MEDIA_HOVER_SCALE}`}
         />
-        <FormatoTag label="Video" />
-        {nota.duracion_seg && <DurationPill seconds={nota.duracion_seg} />}
+        <FormatoTag label={FORMATO_LABEL.youtube} />
+        {nota.duracion_seg ? <DurationPill seconds={nota.duracion_seg} /> : null}
       </div>
-      <div
-        className="p-5 flex flex-col gap-3"
-        style={{ borderTop: "2px solid var(--color-ink)" }}
-      >
-        <p
-          className="text-[0.65rem] font-mono uppercase tracking-[0.14em]"
-          style={{ color: "var(--color-river-red-deep)" }}
-        >
-          {labelTipo(nota.tipo)} · {labelDivision(nota.division)}
-        </p>
-        <h2
-          className={`font-display leading-[1.1] ${size === "lg" ? "text-3xl" : "text-xl"}`}
-          style={{
-            color: "var(--color-neutral-900)",
-            letterSpacing: "-0.015em",
-          }}
-        >
-          {nota.titulo}
-        </h2>
-        <CardAuthorMeta autor={nota.autor} publicada_en={nota.publicada_en} />
-      </div>
+      <CardFooter nota={nota} size={size} />
     </Link>
   );
 }
@@ -179,17 +158,17 @@ function ArticleCard({ nota, size }: { nota: Nota; size: "sm" | "md" | "lg" }) {
   return (
     <Link
       href={`/nota/${nota.slug}`}
-      // Filas simétricas SIN hueco interno: la card llena la celda (h-full)
-      // y el sobrante lo absorbe la IMAGEN (grow + object-cover recorta),
-      // nunca un vacío blanco entre el título y la firma.
+      // Filas simétricas con IMAGEN de proporción fija: la card llena la celda
+      // (h-full) y el sobrante lo absorbe el FOOTER como espacio blanco al pie
+      // (grow), así todas las imágenes de la fila miden exactamente igual.
       className="group brut-hover h-full flex flex-col"
       style={{ background: "var(--color-paper-pure)" }}
     >
       <div
-        className="relative overflow-hidden grow"
+        className="relative overflow-hidden shrink-0"
         style={{
           aspectRatio: "4 / 5",
-          background: "var(--color-neutral-200)",
+          background: "var(--color-ink)",
           borderBottom: "2px solid var(--color-ink)",
         }}
       >
@@ -200,10 +179,10 @@ function ArticleCard({ nota, size }: { nota: Nota; size: "sm" | "md" | "lg" }) {
           sizes="(max-width: 768px) 100vw, 33vw"
           className={`object-cover ${MEDIA_TRANSITION} ${MEDIA_HOVER_SCALE}`}
         />
-        <FormatoTag label="Nota" />
+        <FormatoTag label={FORMATO_LABEL.articulo} />
       </div>
       <div
-        className="p-5 flex flex-col gap-3 shrink-0"
+        className="p-5 flex flex-col gap-3 grow"
         style={{ borderTop: "2px solid var(--color-ink)" }}
       >
         <p
@@ -222,7 +201,7 @@ function ArticleCard({ nota, size }: { nota: Nota; size: "sm" | "md" | "lg" }) {
           {nota.titulo}
         </h2>
         <p
-          className="text-sm leading-snug line-clamp-2"
+          className="text-sm leading-snug line-clamp-2 mt-auto"
           style={{ color: "var(--color-neutral-700)" }}
         >
           {nota.bajada}

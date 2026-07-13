@@ -109,7 +109,7 @@ export default async function HomePage({
     return (
       <main style={{ background: "var(--color-paper)" }}>
         <div className="mx-auto max-w-[1440px] px-6 lg:px-10 py-12 lg:py-16">
-          <header className="mb-8 lg:mb-10">
+          <header className="mb-8 lg:mb-10" data-anim="cabecera">
             <p
               className="font-mono text-[0.65rem] uppercase tracking-[0.22em] mb-2"
               style={{ color: "var(--color-river-red-deep)" }}
@@ -136,7 +136,10 @@ export default async function HomePage({
           </header>
 
           {resultados.length > 0 ? (
-            <section className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+            <section
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8"
+              data-anim="grupo"
+            >
               {resultados.map((nota) => (
                 <TeaserCard key={nota.id} nota={nota} />
               ))}
@@ -254,7 +257,7 @@ export default async function HomePage({
       <div className="mx-auto max-w-[1440px] px-6 lg:px-10 py-12 lg:py-16">
         {/* === HERO full-width (nota destacada) === */}
         {destacada && (
-          <section className="mb-12 lg:mb-16">
+          <section className="mb-12 lg:mb-16" data-anim="hero">
             <HeroFeature nota={destacada} />
           </section>
         )}
@@ -262,7 +265,7 @@ export default async function HomePage({
         {/* === BENTO: entrevista + noticias (derecha) + notas + teasers === */}
         {(entrevistaWide || noticias.length > 0 || notaA || notaB || notaC || teasers.length > 0) && (
           <section className="mb-20 lg:mb-24">
-            <div className="bento">
+            <div className="bento" data-anim="grupo">
               {entrevistaWide && (
                 <div className="bento__wide">
                   <WideFeatureCard nota={entrevistaWide} />
@@ -310,7 +313,10 @@ export default async function HomePage({
         {/* === HILERA DE TEASERS típicos (sin título) === */}
         {masNotas.length > 0 && (
           <section className="mb-20 lg:mb-24">
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8">
+            <div
+              className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6 lg:gap-8"
+              data-anim="grupo"
+            >
               {masNotas.map((nota) => (
                 <TeaserCard key={nota.id} nota={nota} />
               ))}
@@ -324,10 +330,14 @@ export default async function HomePage({
             <p
               className="font-mono text-[0.65rem] uppercase tracking-[0.22em] mb-6"
               style={{ color: "var(--color-river-red-deep)" }}
+              data-anim="overline"
             >
               En la mira · jugadores que seguimos
             </p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 lg:gap-6">
+            <div
+              className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4 lg:gap-6"
+              data-anim="grupo"
+            >
               {jugadores.map(({ sujeto, notas }) => (
                 <JugadorCard key={sujeto.id} sujeto={sujeto} notas={notas} />
               ))}
@@ -341,18 +351,27 @@ export default async function HomePage({
             <p
               className="font-mono text-[0.65rem] uppercase tracking-[0.22em] mb-2"
               style={{ color: "var(--color-river-red-deep)" }}
+              data-anim="overline"
             >
               Lo último
             </p>
-            <UltimasList notas={ultimas} />
+            <div data-anim="aparece">
+              <UltimasList notas={ultimas} />
+            </div>
           </section>
         )}
 
         {/* === SOBRE EL PERIODISTA === */}
-        {autorPrincipal && <SobreAutorBand autor={autorPrincipal} stats={stats} />}
+        {autorPrincipal && (
+          <div data-anim="aparece">
+            <SobreAutorBand autor={autorPrincipal} stats={stats} />
+          </div>
+        )}
 
         {/* === NEWSLETTER === */}
-        <NewsletterBand />
+        <div data-anim="aparece">
+          <NewsletterBand />
+        </div>
       </div>
     </main>
   );
