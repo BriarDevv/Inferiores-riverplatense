@@ -42,23 +42,13 @@ export default function LoginForm() {
             height={44}
             className="rounded-full shrink-0"
           />
-          <div>
-            <p className="font-sports uppercase tracking-[0.2em] text-[11px] text-white/70">
-              Acreditación · Redacción
-            </p>
-            <p className="font-display text-xl font-bold leading-tight">
-              Inferiores <em className="text-[var(--color-river-red)]">Riverplatense</em>
-            </p>
-          </div>
+          <p className="font-display text-xl font-bold leading-tight">
+            Inferiores <em className="text-[var(--color-river-red)]">Riverplatense</em>
+          </p>
         </div>
       </header>
 
       <form onSubmit={enviar} className="px-6 py-7">
-        <h1 className="font-display text-2xl font-bold mb-1">Ingresar al panel</h1>
-        <p className="font-body text-sm text-black/60 mb-6">
-          Sin contraseñas: te mandamos un link de acceso a tu correo.
-        </p>
-
         {errorParam && (
           <p
             role="alert"
@@ -106,15 +96,6 @@ export default function LoginForm() {
           </>
         )}
       </form>
-
-      <footer className="px-6 py-3 border-t-2 border-[var(--color-ink)] flex items-center justify-between">
-        <span className="font-mono text-[11px] tracking-widest uppercase text-black/50">
-          Solo personal invitado
-        </span>
-        <span className="font-mono text-[11px] tracking-widest text-[var(--color-river-red-deep)]">
-          Nº 001
-        </span>
-      </footer>
     </div>
   );
 }
